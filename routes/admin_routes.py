@@ -7,6 +7,50 @@ from services.email_service import send_job_alert
 
 admin = Blueprint("admin", __name__)
 
+def check_and_notify_user(user_id, conn=None):
+    """
+    Automatically check if a user matches any existing company jobs
+    and send an email if a match is found.
+    """
+    should_close = False
+    if conn is None:
+        conn = get_connection()
+        should_close = True
+        
+    user = conn.execute("SELECT * FROM user WHERE id = ?", (user_id,)).fetchone()
+    if not user or not user["email"] or not user["applied_job"]:
+        if should_close: conn.close()
+        return
+        
+    interested_roles = [role.strip().lower() for role in user["applied_job"].split(',')]
+    companies = conn.execute("SELECT * FROM company WHERE job_role IS NOT NULL").fetchall()
+    
+    for comp in companies:
+        job_role_lower = comp["job_role"].lower()
+        match_found = False
+        for role in interested_roles:
+            if role in job_role_lower or job_role_lower in role:
+                match_found = True
+                break
+                
+        if match_found:
+            # Check if already notified
+            check = conn.execute(
+                "SELECT id FROM notifications WHERE user_id = ? AND company_id = ?",
+                (user["id"], comp["id"])
+            ).fetchone()
+            
+            if not check:
+                if send_job_alert(user["email"], user["username"], comp["company_name"], comp["job_role"], comp["official_page_link"]):
+                    conn.execute(
+                        "INSERT INTO notifications (user_id, company_id) VALUES (?, ?)",
+                        (user["id"], comp["id"])
+                    )
+                    conn.commit()
+                    
+    if should_close:
+        conn.close()
+
 def get_grouped_companies():
     conn = get_connection()
     # Fetch all job roles and group them by company
@@ -31,24 +75,13 @@ def get_grouped_companies():
                 "job_role": row["job_role"],
                 "start_date": row["start_date"],
                 "end_date": row["end_date"],
-                "location": row["location"]
+                "location": row["location"],
+                "job_level": row["job_level"],
+                "experience_required": row["experience_required"],
+                "is_active": row["is_active"]
             })
     
     return list(companies_dict.values())
-
-def get_all_user_roles():
-    conn = get_connection()
-    users = conn.execute("SELECT applied_job FROM user WHERE applied_job IS NOT NULL AND applied_job != ''").fetchall()
-    conn.close()
-    
-    roles = set(["software engineer", "software developer", "python developer"]) # Start with defaults
-    for user in users:
-        # Split by comma and add to set
-        parts = [p.strip().lower() for p in user["applied_job"].split(',')]
-        for p in parts:
-            if p:
-                roles.add(p)
-    return list(roles)
 
 @admin.route("/admin")
 def dashboard():
@@ -81,10 +114,9 @@ def add_company():
         flash("Company name and official link are required", "error")
         return redirect(url_for("admin.dashboard"))
 
-    # Fetch jobs from API automatically using all roles users are interested in
+    # Fetch jobs from API automatically using all roles users are interested in (new default)
     try:
-        user_roles = get_all_user_roles()
-        jobs = fetch_jobs(company_name, roles=user_roles)
+        jobs = fetch_jobs(company_name)
     except Exception as e:
         print(f"Error fetching jobs: {e}")
         jobs = []
@@ -92,6 +124,25 @@ def add_company():
     conn = get_connection()
     
     if jobs:
+        # Get current roles from API
+        api_job_roles = {job["role"] for job in jobs}
+        
+        # Remove notifications for jobs that are about to be deleted
+        conn.execute(
+            "DELETE FROM notifications WHERE company_id IN (SELECT id FROM company WHERE company_name = ? AND job_role IS NOT NULL AND job_role NOT IN ({}))".format(
+                ','.join(['?'] * len(api_job_roles))
+            ),
+            (company_name, *api_job_roles)
+        )
+        
+        # Remove jobs from DB that are no longer in API results
+        conn.execute(
+            "DELETE FROM company WHERE company_name = ? AND job_role IS NOT NULL AND job_role NOT IN ({})".format(
+                ','.join(['?'] * len(api_job_roles))
+            ),
+            (company_name, *api_job_roles)
+        )
+        
         new_jobs_count = 0
         for job in jobs:
             # Check if job already exists to avoid duplicates
@@ -102,28 +153,46 @@ def add_company():
             
             if not existing:
                 conn.execute(
-                    "INSERT INTO company (company_name, official_page_link, job_role, start_date, end_date, location) VALUES (?, ?, ?, ?, ?, ?)",
-                    (company_name, official_page_link, job["role"], "Active", "TBD", job.get("location", "Remote"))
+                    "INSERT INTO company (company_name, official_page_link, job_role, start_date, end_date, location, job_level, experience_required, apply_link, is_active) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                    (company_name, official_page_link, job["role"], "Active", "TBD", job.get("location", "Remote"), job.get("level"), job.get("experience"), job.get("link"), 1 if job.get("active") else 0)
                 )
                 new_jobs_count += 1
+            else:
+                # Update existing job details
+                conn.execute(
+                    "UPDATE company SET job_level = ?, experience_required = ?, is_active = ?, location = ?, apply_link = ? WHERE id = ?",
+                    (job.get("level"), job.get("experience"), 1 if job.get("active") else 0, job.get("location"), job.get("link"), existing["id"])
+                )
         
         if new_jobs_count > 0:
             flash(f"Company added and {new_jobs_count} job roles synced!", "success")
         else:
-            flash("Company added (no new job roles found)", "info")
+            flash("Company updated and job roles synchronized", "info")
     else:
-        # If no jobs found, at least create a company entry if it doesn't exist
+        # Remove notifications for all roles of this company
+        conn.execute("DELETE FROM notifications WHERE company_id IN (SELECT id FROM company WHERE company_name = ? AND job_role IS NOT NULL)", (company_name,))
+        
+        # If no jobs found, remove any existing job roles for this company (as they are no longer active)
+        conn.execute("DELETE FROM company WHERE company_name = ? AND job_role IS NOT NULL", (company_name,))
+        
+        # At least ensure the company existence entry (with no roles) remains or is created
         existing_comp = conn.execute("SELECT id FROM company WHERE company_name = ?", (company_name,)).fetchone()
         if not existing_comp:
             conn.execute(
                 "INSERT INTO company (company_name, official_page_link) VALUES (?, ?)",
                 (company_name, official_page_link)
             )
-            flash("Company added but no jobs found on API", "warning")
+            flash("Company added but no active jobs found", "warning")
         else:
-            flash("Company already exists and no new jobs found", "info")
+            flash("Company updated: all previous job roles removed as they are no longer active", "info")
         
     conn.commit()
+    
+    # Trigger notifications for all users for this specific company
+    users = conn.execute("SELECT id FROM user WHERE role = 'user' AND email IS NOT NULL AND applied_job IS NOT NULL").fetchall()
+    for u in users:
+        check_and_notify_user(u["id"], conn)
+
     conn.close()
     
     return redirect(url_for("admin.dashboard"))
@@ -173,18 +242,37 @@ def sync_all_jobs():
     # Fetch data and close connection immediately to avoid locking during network calls
     companies = conn.execute("SELECT DISTINCT company_name, official_page_link, image_filename FROM company").fetchall()
     conn.close()
-    
     sync_count = 0
-    all_roles = get_all_user_roles()
     
     for comp in companies:
         try:
             # Perform slow network request WITHOUT an open DB connection
-            # Now searching for all roles users have added to their profiles
-            jobs = fetch_jobs(comp["company_name"], roles=all_roles)
+            # Now searching for all roles dynamically from database
+            jobs = fetch_jobs(comp["company_name"])
             
             # Open a new connection for the updates
             conn = get_connection()
+            
+            # 1. Get current roles from API
+            api_job_roles = {job["role"] for job in jobs}
+            
+            # 2. Get roles currently in DB for this company
+            db_jobs = conn.execute(
+                "SELECT id, job_role FROM company WHERE company_name = ? AND job_role IS NOT NULL",
+                (comp["company_name"],)
+            ).fetchall()
+            
+            # 3. Remove jobs from DB that are no longer in API results
+            deleted_count = 0
+            for db_job in db_jobs:
+                if db_job["job_role"] not in api_job_roles:
+                    # Remove notifications first
+                    conn.execute("DELETE FROM notifications WHERE company_id = ?", (db_job["id"],))
+                    # Remove the job
+                    conn.execute("DELETE FROM company WHERE id = ?", (db_job["id"],))
+                    deleted_count += 1
+            
+            # 4. Add new jobs or update existing ones
             for job in jobs:
                 # Check if job already exists
                 existing = conn.execute(
@@ -194,83 +282,31 @@ def sync_all_jobs():
                 
                 if not existing:
                     conn.execute(
-                        "INSERT INTO company (company_name, official_page_link, image_filename, job_role, start_date, end_date, location) VALUES (?, ?, ?, ?, ?, ?, ?)",
-                        (comp["company_name"], comp["official_page_link"] or job.get("link", ""), comp["image_filename"], job["role"], "Active", "TBD", job.get("location", "Remote"))
+                        "INSERT INTO company (company_name, official_page_link, image_filename, job_role, start_date, end_date, location, job_level, experience_required, apply_link, is_active) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                        (comp["company_name"], comp["official_page_link"], comp["image_filename"], job["role"], "Active", "TBD", job.get("location", "Remote"), job.get("level"), job.get("experience"), job.get("link"), 1 if job.get("active") else 0)
                     )
                     sync_count += 1
+                else:
+                    # Update existing job details
+                    conn.execute(
+                        "UPDATE company SET job_level = ?, experience_required = ?, is_active = ?, location = ?, apply_link = ? WHERE id = ?",
+                        (job.get("level"), job.get("experience"), 1 if job.get("active") else 0, job.get("location"), job.get("link"), existing["id"])
+                    )
+            
             conn.commit()
+            
+            if deleted_count > 0:
+                print(f"Removed {deleted_count} stale jobs for {comp['company_name']}")
+            
+            # Trigger notifications for all users
+            users = conn.execute("SELECT id FROM user WHERE role = 'user' AND email IS NOT NULL AND applied_job IS NOT NULL").fetchall()
+            for u in users:
+                check_and_notify_user(u["id"], conn)
+                
             conn.close()
         except Exception as e:
             print(f"Error syncing {comp['company_name']}: {e}")
             continue
 
-    flash(f"Synced {sync_count} new job roles!", "success")
-    return redirect(url_for("admin.dashboard"))
-
-@admin.route("/notify-users", methods=["POST"])
-def notify_users():
-    if session.get("role") != "admin":
-        return redirect(url_for("auth.login"))
-        
-    conn = get_connection()
-    users = conn.execute("SELECT * FROM user WHERE role = 'user'").fetchall()
-    companies = conn.execute("SELECT * FROM company WHERE job_role IS NOT NULL").fetchall()
-    
-    notified_users = []
-    from datetime import datetime
-    current_date = datetime.now().strftime("%Y-%m-%d %H:%M")
-
-    for user in users:
-        if not user["email"] or not user["applied_job"]:
-            continue
-            
-        interested_roles = [role.strip().lower() for role in user["applied_job"].split(',')]
-        
-        for comp in companies:
-            job_role_lower = comp["job_role"].lower()
-            
-            match_found = False
-            for role in interested_roles:
-                if role in job_role_lower or job_role_lower in role:
-                    match_found = True
-                    break
-            
-            if match_found:
-                # NEW: Check if this user has already been notified about THIS specific job role
-                check = conn.execute(
-                    "SELECT id FROM notifications WHERE user_id = ? AND company_id = ?",
-                    (user["id"], comp["id"])
-                ).fetchone()
-                
-                if check:
-                    continue # Skip if already notified
-                    
-                # Send email
-                if send_job_alert(user["email"], user["username"], comp["company_name"], comp["job_role"], comp["official_page_link"]):
-                    # NEW: Record that we notified them to prevent duplicates next time
-                    conn.execute(
-                        "INSERT INTO notifications (user_id, company_id) VALUES (?, ?)",
-                        (user["id"], comp["id"])
-                    )
-                    conn.commit()
-                    
-                    notified_users.append({
-                        "username": user["username"],
-                        "email": user["email"],
-                        "company": comp["company_name"],
-                        "role": comp["job_role"],
-                        "date": current_date
-                    })
-                    # break # Commenting out break to allow notifying about DIFFERENT matching roles if any
-                    
-    conn.close()
-    
-    if notified_users:
-        import json
-        # Store the list in session temporarily to show on dashboard
-        session['last_notification_report'] = notified_users
-        flash(f"Successfully sent notifications to {len(notified_users)} users!", "success")
-    else:
-        flash("No matching users found to notify.", "info")
-        
+    flash(f"Synced {sync_count} new job roles and sent notifications!", "success")
     return redirect(url_for("admin.dashboard"))

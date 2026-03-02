@@ -3,8 +3,26 @@ from database import get_connection
 import os
 from werkzeug.utils import secure_filename
 from services.chatbot_service import job_chatbot
+from routes.admin_routes import check_and_notify_user
 
 user = Blueprint("user", __name__)
+
+
+@user.route("/profile")
+def profile():
+    if session.get("role") != "user":
+        return redirect(url_for("auth.login"))
+
+    conn = get_connection()
+    user_row = conn.execute("SELECT * FROM user WHERE id=?", (session["user_id"],)).fetchone()
+    resume_row = conn.execute("SELECT * FROM resume_data WHERE user_id=?", (session["user_id"],)).fetchone()
+    conn.close()
+
+    if not user_row:
+        flash("User not found!", "error")
+        return redirect(url_for("auth.login"))
+
+    return render_template("user/profile.html", user=user_row, resume_data=resume_row)
 
 
 @user.route("/user")
@@ -33,7 +51,11 @@ def dashboard():
                 "job_role": row["job_role"],
                 "start_date": row["start_date"],
                 "end_date": row["end_date"],
-                "location": row["location"]
+                "location": row["location"],
+                "level": row["job_level"],
+                "experience": row["experience_required"],
+                "active": row["is_active"],
+                "apply_link": row["apply_link"] or row["official_page_link"] or "#"
             })
 
     return render_template("user/dashboard.html", 
@@ -75,6 +97,9 @@ def user_details():
         conn.commit()
         conn.close()
 
+        # Trigger automatic notification check for this user
+        check_and_notify_user(session["user_id"])
+
         flash("Profile updated successfully!", "success")
         return redirect(url_for("user.dashboard"))
 
@@ -83,6 +108,29 @@ def user_details():
     conn.close()
 
     return render_template("user/details.html", username=session.get("username"), email=user_data["email"])
+
+
+@user.route("/settings", methods=["GET", "POST"])
+def settings():
+    if session.get("role") != "user":
+        return redirect(url_for("auth.login"))
+
+    if request.method == "POST":
+        current_password = request.form.get("current_password")
+        new_password = request.form.get("new_password")
+
+        conn = get_connection()
+        user_row = conn.execute("SELECT password FROM user WHERE id=?", (session["user_id"],)).fetchone()
+
+        if user_row and user_row["password"] == current_password:
+            conn.execute("UPDATE user SET password=? WHERE id=?", (new_password, session["user_id"]))
+            conn.commit()
+            flash("Password updated successfully!", "success")
+        else:
+            flash("Incorrect current password.", "error")
+        conn.close()
+
+    return render_template("user/settings.html", username=session.get("username"))
 
 
 @user.route("/chat", methods=["POST"])

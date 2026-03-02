@@ -13,10 +13,26 @@
 <body>
     <div class="dashboard-container admin-theme">
         <header class="top-nav">
-            <div class="logo">Admin Console</div>
-            <div class="user-menu">
-                <span>Welcome, {{ username }}</span>
-                <a href="{{ url_for('auth.logout') }}" class="btn-logout">Logout</a>
+            <div class="profile-container">
+                <div class="profile-trigger" id="profileTrigger">
+                    <span class="profile-initials">{{ (username or 'Admin')[0] | upper }}</span>
+                </div>
+
+                <div class="dropdown-menu" id="profileDropdown">
+                    <div class="dropdown-header">
+                        <span class="username">{{ username }}</span>
+                        <span class="user-role">Admin Console</span>
+                    </div>
+                    <a href="#" class="dropdown-item">
+                        <span>👤</span> Profile
+                    </a>
+                    <a href="#" class="dropdown-item">
+                        <span>⚙️</span> Settings
+                    </a>
+                    <a href="{{ url_for('auth.logout') }}" class="dropdown-item logout">
+                        <span>👋</span> Logout
+                    </a>
+                </div>
             </div>
         </header>
 
@@ -169,14 +185,18 @@
                                         <div>
                                             <div style="font-weight: 600; color: #0f172a; margin-bottom: 0.5rem;">{{
                                                 job['job_role'] }}</div>
-                                            <div style="display: flex; gap: 1.5rem; font-size: 0.8rem;">
+                                            <div
+                                                style="display: flex; gap: 1.5rem; font-size: 0.8rem; flex-wrap: wrap;">
                                                 <span><strong style="color: #64748b;">Start:</strong> {{
                                                     job['start_date'] }}</span>
                                                 <span><strong style="color: #64748b;">End:</strong> {{ job['end_date']
                                                     }}</span>
                                                 <span><strong style="color: #64748b;">Location:</strong> {{
-                                                    job['location']
-                                                    }}</span>
+                                                    job['location'] }}</span>
+                                                <span><strong style="color: #64748b;">Level:</strong> {{
+                                                    job['job_level'] }}</span>
+                                                <span><strong style="color: #64748b;">Exp:</strong> {{
+                                                    job['experience_required'] }}</span>
                                             </div>
                                         </div>
                                         <form action="{{ url_for('admin.delete_company', company_id=job['id']) }}"
@@ -211,11 +231,6 @@
                     </div>
                 </div>
                 <div style="margin-top: 2rem; display: flex; justify-content: center; gap: 1rem;">
-                    <form action="{{ url_for('admin.notify_users') }}" method="POST">
-                        <button type="submit" class="btn-primary" style="padding: 1rem 2rem; background: #4f46e5;">
-                            📢 Notify Matching Users
-                        </button>
-                    </form>
                     <form action="{{ url_for('admin.sync_all_jobs') }}" method="POST">
                         <button type="submit" class="btn-primary" style="padding: 1rem 2rem; background: #0ea5e9;">
                             🔄 Force Sync All Jobs
@@ -262,6 +277,24 @@
         </main>
     </div>
     <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const profileTrigger = document.getElementById('profileTrigger');
+            const profileDropdown = document.getElementById('profileDropdown');
+
+            if (profileTrigger) {
+                profileTrigger.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    profileDropdown.classList.toggle('active');
+                });
+
+                document.addEventListener('click', (e) => {
+                    if (!profileDropdown.contains(e.target) && !profileTrigger.contains(e.target)) {
+                        profileDropdown.classList.remove('active');
+                    }
+                });
+            }
+        });
+
         function toggleRoles(id) {
             const element = document.getElementById(id);
             if (element.style.display === "none") {

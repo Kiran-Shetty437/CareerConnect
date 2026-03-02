@@ -44,7 +44,11 @@ def init_db():
         job_role TEXT,
         start_date TEXT,
         end_date TEXT,
-        location TEXT
+        location TEXT,
+        job_level TEXT,
+        experience_required TEXT,
+        apply_link TEXT,
+        is_active INTEGER DEFAULT 1
     )''')
 
     c.execute('''CREATE TABLE IF NOT EXISTS notifications (

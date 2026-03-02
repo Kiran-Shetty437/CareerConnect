@@ -12,10 +12,26 @@
 <body>
     <div class="dashboard-container user-theme">
         <header class="top-nav">
-            <div class="logo">User Portal</div>
-            <div class="user-menu">
-                <span>Hello, {{ username }}</span>
-                <a href="{{ url_for('auth.logout') }}" class="btn-logout">Logout</a>
+            <div class="profile-container">
+                <div class="profile-trigger" id="profileTrigger">
+                    <span class="profile-initials">{{ (username or 'User')[0] | upper }}</span>
+                </div>
+
+                <div class="dropdown-menu" id="profileDropdown">
+                    <div class="dropdown-header">
+                        <span class="username">{{ username }}</span>
+                        <span class="user-role">User Portal</span>
+                    </div>
+                    <a href="{{ url_for('user.profile') }}" class="dropdown-item">
+                        <span>👤</span> Profile
+                    </a>
+                    <a href="{{ url_for('user.settings') }}" class="dropdown-item">
+                        <span>⚙️</span> Settings
+                    </a>
+                    <a href="{{ url_for('auth.logout') }}" class="dropdown-item logout">
+                        <span>👋</span> Logout
+                    </a>
+                </div>
             </div>
         </header>
 
@@ -70,7 +86,7 @@
                                 </h3>
 
                                 <div class="jobs-container"
-                                    style="display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1.5rem;">
+                                    style="display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1.5rem; max-height: 160px; overflow-y: auto; padding-right: 0.25rem;">
                                     {% for job in company['jobs'] %}
                                     <div class="job-scraped-info" style="
                                         background: #f8fafc; 
@@ -82,7 +98,12 @@
                                         <div
                                             style="margin-bottom: 0.25rem; display: flex; align-items: center; gap: 0.5rem;">
                                             <span style="font-size: 1rem;">🎯</span>
-                                            <div style="color: #1e293b; font-weight: 700;">{{ job['job_role'] }}</div>
+                                            <a href="{{ job['apply_link'] }}" target="_blank"
+                                                style="color: #1e293b; font-weight: 700; text-decoration: none; transition: all 0.2s; cursor: pointer;"
+                                                onmouseover="this.style.color='#2563eb'; this.style.textDecoration='underline';"
+                                                onmouseout="this.style.color='#1e293b'; this.style.textDecoration='none';">
+                                                {{ job['job_role'] }}
+                                            </a>
                                         </div>
                                         <div
                                             style="display: flex; align-items: center; gap: 0.5rem; color: #64748b; font-size: 0.75rem; padding-left: 1.5rem; margin-top: 0.25rem;">
@@ -91,6 +112,17 @@
                                         <div
                                             style="display: flex; align-items: center; gap: 0.5rem; color: #64748b; font-size: 0.75rem; padding-left: 1.5rem; margin-top: 0.25rem;">
                                             <span>📍 {{ job['location'] }}</span>
+                                        </div>
+                                        <div
+                                            style="display: flex; gap: 0.4rem; margin-top: 0.5rem; padding-left: 1.5rem;">
+                                            <span
+                                                style="background: #eef2ff; color: #4338ca; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 600;">
+                                                {{ job['level'] }}
+                                            </span>
+                                            <span
+                                                style="background: #ecfdf5; color: #059669; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 600;">
+                                                Exp: {{ job['experience'] }}
+                                            </span>
                                         </div>
                                     </div>
                                     {% endfor %}
@@ -127,10 +159,10 @@
             </div>
 
             <div class="grid-container">
-                <div class="card interactive">
+                <div class="card interactive" onclick="window.location.href='{{ url_for('user.profile') }}';">
                     <h3>My Profile</h3>
                     <p>Edit your personal details and avatar.</p>
-                    <button class="btn-secondary">Edit Profile</button>
+                    <button class="btn-secondary">View Profile</button>
                 </div>
 
                 <div class="card interactive">
@@ -139,7 +171,7 @@
                     <button class="btn-secondary">View Messages</button>
                 </div>
 
-                <div class="card interactive">
+                <div class="card interactive" onclick="window.location.href='{{ url_for('user.settings') }}';">
                     <h3>Settings</h3>
                     <p>Manage your account preferences.</p>
                     <button class="btn-secondary">Manage</button>
@@ -179,6 +211,22 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            const profileTrigger = document.getElementById('profileTrigger');
+            const profileDropdown = document.getElementById('profileDropdown');
+
+            if (profileTrigger) {
+                profileTrigger.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    profileDropdown.classList.toggle('active');
+                });
+
+                document.addEventListener('click', (e) => {
+                    if (!profileDropdown.contains(e.target) && !profileTrigger.contains(e.target)) {
+                        profileDropdown.classList.remove('active');
+                    }
+                });
+            }
+
             const chatToggle = document.getElementById('chatToggle');
             const chatClose = document.getElementById('chatClose');
             const chatWindow = document.getElementById('chatWindow');

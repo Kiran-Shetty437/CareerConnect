@@ -171,27 +171,20 @@ input[type="email"]:focus {
     /* Since body has bg */
 }
 
-/* User Theme */
-.user-theme .top-nav {
-    background-color: #10b981;
-    /* Green for users */
-}
-
-/* Admin Theme */
+/* Themes - Backdrops removed for clean look */
+.user-theme .top-nav,
 .admin-theme .top-nav {
-    background-color: #1e3a8a;
-    /* Deep blue for admin */
+    background-color: transparent;
+    box-shadow: none;
+    padding-left: 0;
 }
 
 .top-nav {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-end;
     align-items: center;
-    padding: 1.5rem;
-    border-radius: 1rem;
-    color: white;
+    padding: 1rem 0;
     margin-bottom: 2rem;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
 .logo {
@@ -513,4 +506,155 @@ h3 {
     40% {
         transform: scale(1.0);
     }
+}
+
+/* Profile Dropdown Styles */
+.profile-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.profile-trigger {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border: 1px solid var(--border-color);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+    padding: 0;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.profile-trigger:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    border-color: var(--primary-color);
+}
+
+.profile-trigger img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.profile-initials {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--primary-color);
+}
+
+.admin-theme .profile-initials {
+    color: #1e3a8a;
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: calc(100% + 15px);
+    right: 0;
+    width: 220px;
+    background: white;
+    border-radius: 1rem;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    display: none;
+    flex-direction: column;
+    padding: 0.5rem 0;
+    z-index: 1001;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.dropdown-menu.active {
+    display: flex;
+    animation: dropdownFadeIn 0.2s ease-out;
+}
+
+@keyframes dropdownFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.dropdown-header {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid #f1f5f9;
+    margin-bottom: 0.5rem;
+}
+
+.dropdown-header .username {
+    display: block;
+    font-weight: 700;
+    color: #1e293b;
+    font-size: 1rem;
+}
+
+.dropdown-header .user-role {
+    display: block;
+    font-size: 0.75rem;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-top: 0.25rem;
+}
+
+.dropdown-item {
+    padding: 0.75rem 1.25rem;
+    color: #475569;
+    text-decoration: none;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    transition: all 0.2s;
+}
+
+.dropdown-item:hover {
+    background: #f8fafc;
+    color: #10b981;
+    padding-left: 1.5rem;
+}
+
+.admin-theme .dropdown-item:hover {
+    color: #1e3a8a;
+}
+
+.dropdown-item.logout {
+    color: #ef4444;
+    border-top: 1px solid #f1f5f9;
+    margin-top: 0.5rem;
+}
+
+.dropdown-item.logout:hover {
+    background: #fef2f2;
+    color: #dc2626;
+}
+
+/* Custom Scrollbar for Jobs Container */
+.jobs-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.jobs-container::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 10px;
+}
+
+.jobs-container::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+}
+
+.jobs-container::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
 }
