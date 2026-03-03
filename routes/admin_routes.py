@@ -84,6 +84,7 @@ def get_grouped_companies():
     return list(companies_dict.values())
 
 @admin.route("/admin")
+@admin.route("/admin/dashboard")
 def dashboard():
     if session.get("role") != "admin":
         return redirect(url_for("auth.login"))

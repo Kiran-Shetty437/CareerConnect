@@ -26,6 +26,7 @@ def profile():
 
 
 @user.route("/user")
+@user.route("/user/dashboard")
 def dashboard():
     if session.get("role") != "user":
         return redirect(url_for("auth.login"))
