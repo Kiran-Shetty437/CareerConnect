@@ -159,7 +159,7 @@
             </div>
 
             <div class="grid-container">
-                <div class="card interactive" onclick="window.location.href='{{ url_for('user.profile') }}';">
+                <div class="card interactive" onclick="window.location.href='{{ url_for(\'user.profile\') }}';">
                     <h3>My Profile</h3>
                     <p>Edit your personal details and avatar.</p>
                     <button class="btn-secondary">View Profile</button>
@@ -171,7 +171,7 @@
                     <button class="btn-secondary">View Messages</button>
                 </div>
 
-                <div class="card interactive" onclick="window.location.href='{{ url_for('user.settings') }}';">
+                <div class="card interactive" onclick="window.location.href='{{ url_for(\'user.settings\') }}';">
                     <h3>Settings</h3>
                     <p>Manage your account preferences.</p>
                     <button class="btn-secondary">Manage</button>
