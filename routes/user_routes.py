@@ -4,6 +4,7 @@ import os
 from werkzeug.utils import secure_filename
 from services.chatbot_service import job_chatbot
 from routes.admin_routes import check_and_notify_user
+from services.resume_service import analyze_resume, extract_pdf_text, extract_docx_text
 
 user = Blueprint("user", __name__)
 
@@ -147,3 +148,27 @@ def chat():
 
     reply = job_chatbot(user_input)
     return jsonify({"reply": reply})
+
+
+@user.route("/analyze_resume", methods=["POST"])
+def analyze():
+    if session.get("role") != "user":
+        return jsonify({"result": "Unauthorized access."}), 403
+    
+    file = request.files.get("resume")
+
+    if not file or file.filename == "":
+        return jsonify({"result": "⚠️ Please upload your resume (PDF or Word file) to analyze."}), 400
+
+    if file.filename.endswith(".pdf"):
+        text = extract_pdf_text(file)
+    elif file.filename.endswith(".docx"):
+        text = extract_docx_text(file)
+    else:
+        return jsonify({"result": "⚠️ Only PDF or Word (.docx) files are supported."}), 400
+
+    if not text.strip():
+        return jsonify({"result": "⚠️ Could not extract text from the file."}), 400
+
+    result = analyze_resume(text)
+    return jsonify({"result": result})
