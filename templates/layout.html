@@ -23,6 +23,15 @@
     {% block content %}{% endblock %}
 
     {% block chatbot %}{% endblock %}
+    <script>
+        // Initialize theme on load for all pages using layout
+        document.addEventListener('DOMContentLoaded', function () {
+            const savedTheme = localStorage.getItem('user-theme');
+            if (savedTheme === 'dark') {
+                document.body.classList.add('dark-mode');
+            }
+        });
+    </script>
 </body>
 
 </html>

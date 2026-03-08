@@ -21,19 +21,30 @@
             --primary-dark: #059669;
             --secondary: #64748b;
             --bg-body: #f8fafc;
+            --bg-card: #ffffff;
+            --text-main: #1e293b;
             --font-body: 'Inter', sans-serif;
             --font-heading: 'Outfit', sans-serif;
+            --border-color: #e2e8f0;
+        }
+
+        body.dark-mode {
+            --bg-body: #0f172a;
+            --bg-card: #1e293b;
+            --text-main: #f8fafc;
+            --border-color: #334155;
+            --secondary: #94a3b8;
         }
 
         body {
             background-color: var(--bg-body);
             margin: 0;
             font-family: var(--font-body);
-            color: #1e293b;
+            color: var(--text-main);
         }
 
         .resume-builder-page-header {
-            background: white;
+            background: var(--bg-card);
             padding: 1rem 2rem;
             display: flex;
             align-items: center;
@@ -42,6 +53,7 @@
             position: sticky;
             top: 0;
             z-index: 100;
+            border-bottom: 1px solid var(--border-color);
         }
 
         .logo-area {
@@ -77,13 +89,14 @@
         }
 
         #resume-builder-app {
-            background: white;
+            background: var(--bg-card);
             border-radius: 1.5rem;
             box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
             overflow: hidden;
             min-height: 80vh;
             display: flex;
             flex-direction: column;
+            border: 1px solid var(--border-color);
         }
 
         .resume-builder-window {
@@ -195,8 +208,11 @@
     <script>
         // Ensure the app starts in template selection mode
         document.addEventListener('DOMContentLoaded', () => {
-            // Since this is a new page, we might need to initialize the state
-            // The resume_builder.js already does this.
+            // Apply dark mode if set
+            const savedTheme = localStorage.getItem('user-theme');
+            if (savedTheme === 'dark') {
+                document.body.classList.add('dark-mode');
+            }
         });
     </script>
 </body>

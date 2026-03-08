@@ -17,30 +17,44 @@
                     style="width: 35px; height: 35px; background: var(--primary-color); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; font-size: 1.2rem;">
                     C
                 </div>
-                <span style="font-size: 1.25rem; font-weight: 700; color: #1e293b;">CareerConnect</span>
+                <span style="font-size: 1.25rem; font-weight: 700; color: var(--text-color);">CareerConnect</span>
             </div>
-            <div class="profile-container">
-                <div class="profile-trigger" id="profileTrigger">
-                    <span class="profile-initials">{{ (username or 'User')[0] | upper }}</span>
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <!-- Theme Toggle -->
+                <div class="theme-toggle"
+                    style="display: flex; background: rgba(0,0,0,0.05); border-radius: 10px; padding: 4px;">
+                    <button class="btn-toggle active" id="mode-light" onclick="setTheme('light')"
+                        style="padding: 6px 10px; border: none; background: var(--white); border-radius: 6px; cursor: pointer; color: var(--text-color); font-weight: 500; font-family: var(--font-body);">
+                        ☀️ Light
+                    </button>
+                    <button class="btn-toggle" id="mode-dark" onclick="setTheme('dark')"
+                        style="padding: 6px 10px; border: none; background: transparent; border-radius: 6px; cursor: pointer; color: #64748b; font-weight: 500; font-family: var(--font-body);">
+                        🌙 Dark
+                    </button>
                 </div>
 
-                <div class="dropdown-menu" id="profileDropdown">
-                    <div class="dropdown-header">
-                        <span class="username">{{ username }}</span>
-                        <span class="user-role">User Portal</span>
+                <div class="profile-container">
+                    <div class="profile-trigger" id="profileTrigger">
+                        <span class="profile-initials">{{ (username or 'User')[0] | upper }}</span>
                     </div>
 
-                    <a href="{{ url_for('user.profile') }}" class="dropdown-item">
-                        <span>👤</span> Profile
-                    </a>
-                    <a href="{{ url_for('user.settings') }}" class="dropdown-item">
-                        <span>⚙️</span> Settings
-                    </a>
-                    <a href="{{ url_for('auth.logout') }}" class="dropdown-item logout">
-                        <span>👋</span> Logout
-                    </a>
+                    <div class="dropdown-menu" id="profileDropdown">
+                        <div class="dropdown-header">
+                            <span class="username">{{ username }}</span>
+                            <span class="user-role">User Portal</span>
+                        </div>
+
+                        <a href="{{ url_for('user.profile') }}" class="dropdown-item">
+                            <span>👤</span> Profile
+                        </a>
+                        <a href="{{ url_for('user.settings') }}" class="dropdown-item">
+                            <span>⚙️</span> Settings
+                        </a>
+                        <a href="{{ url_for('auth.logout') }}" class="dropdown-item logout">
+                            <span>👋</span> Logout
+                        </a>
+                    </div>
                 </div>
-            </div>
         </header>
 
         <main class="content">
@@ -58,12 +72,12 @@
                 <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem;">
                     {% for company in companies %}
                     <div class="company-card" style="
-                        background: white; 
+                        background: var(--white); 
                         border-radius: 1.25rem; 
                         overflow: hidden; 
                         box-shadow: 0 4px 20px rgba(0,0,0,0.08); 
                         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                        border: 1px solid rgba(0,0,0,0.05);
+                        border: 1px solid var(--border-color);
                         position: relative;
                         display: flex;
                         flex-direction: column;
@@ -89,7 +103,7 @@
                             style="padding: 1.5rem; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between;">
                             <div>
                                 <h3
-                                    style="margin: 0 0 1rem 0; font-size: 1.25rem; color: #1e293b; border-bottom: 2px solid #f1f5f9; padding-bottom: 0.5rem;">
+                                    style="margin: 0 0 1rem 0; font-size: 1.25rem; color: var(--text-color); border-bottom: 2px solid var(--border-color); padding-bottom: 0.5rem;">
                                     {{ company['company_name'] }}
                                 </h3>
 
@@ -97,28 +111,28 @@
                                     style="display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1.5rem; max-height: 160px; overflow-y: auto; padding-right: 0.25rem;">
                                     {% for job in company['jobs'] %}
                                     <div class="job-scraped-info" style="
-                                        background: #f8fafc; 
+                                        background: var(--bg-color); 
                                         padding: 0.75rem; 
                                         border-radius: 0.75rem; 
                                         font-size: 0.85rem;
-                                        border: 1px solid #e2e8f0;
+                                        border: 1px solid var(--border-color);
                                     ">
                                         <div
                                             style="margin-bottom: 0.25rem; display: flex; align-items: center; gap: 0.5rem;">
                                             <span style="font-size: 1rem;">🎯</span>
                                             <a href="{{ job['apply_link'] }}" target="_blank"
-                                                style="color: #1e293b; font-weight: 700; text-decoration: none; transition: all 0.2s; cursor: pointer;"
-                                                onmouseover="this.style.color='#2563eb'; this.style.textDecoration='underline';"
-                                                onmouseout="this.style.color='#1e293b'; this.style.textDecoration='none';">
+                                                style="color: var(--text-color); font-weight: 700; text-decoration: none; transition: all 0.2s; cursor: pointer;"
+                                                onmouseover="this.style.color='var(--primary-color)'; this.style.textDecoration='underline';"
+                                                onmouseout="this.style.color='var(--text-color)'; this.style.textDecoration='none';">
                                                 {{ job['job_role'] }}
                                             </a>
                                         </div>
                                         <div
-                                            style="display: flex; align-items: center; gap: 0.5rem; color: #64748b; font-size: 0.75rem; padding-left: 1.5rem; margin-top: 0.25rem;">
+                                            style="display: flex; align-items: center; gap: 0.5rem; color: var(--text-color); opacity: 0.65; font-size: 0.75rem; padding-left: 1.5rem; margin-top: 0.25rem;">
                                             <span>📅 {{ job['start_date'] }} — {{ job['end_date'] }}</span>
                                         </div>
                                         <div
-                                            style="display: flex; align-items: center; gap: 0.5rem; color: #64748b; font-size: 0.75rem; padding-left: 1.5rem; margin-top: 0.25rem;">
+                                            style="display: flex; align-items: center; gap: 0.5rem; color: var(--text-color); opacity: 0.65; font-size: 0.75rem; padding-left: 1.5rem; margin-top: 0.25rem;">
                                             <span>📍 {{ job['location'] }}</span>
                                         </div>
                                         <div
@@ -159,8 +173,9 @@
                 </div>
                 {% else %}
                 <div
-                    style="background: white; padding: 3rem; border-radius: 1rem; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
-                    <p style="font-size: 1.1rem; color: #64748b;">No companies available at the moment. Check back soon!
+                    style="background: var(--white); padding: 3rem; border-radius: 1rem; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+                    <p style="font-size: 1.1rem; color: var(--text-color); opacity: 0.8;">No companies available at the
+                        moment. Check back soon!
                     </p>
                 </div>
                 {% endif %}
@@ -278,6 +293,45 @@
 
 
     <script>
+        // Theme toggle logic
+        function setTheme(theme) {
+            const body = document.body;
+            const btnLight = document.getElementById('mode-light');
+            const btnDark = document.getElementById('mode-dark');
+            const themeToggleContainer = document.querySelector('.theme-toggle');
+
+            if (theme === 'dark') {
+                body.classList.add('dark-mode');
+                btnDark.classList.add('active');
+                btnDark.style.background = 'var(--white)';
+                btnDark.style.color = 'var(--text-color)';
+                btnLight.classList.remove('active');
+                btnLight.style.background = 'transparent';
+                btnLight.style.color = '#64748b';
+                if (themeToggleContainer) themeToggleContainer.style.background = 'rgba(255,255,255,0.1)';
+            } else {
+                body.classList.remove('dark-mode');
+                btnLight.classList.add('active');
+                btnLight.style.background = 'var(--white)';
+                btnLight.style.color = 'var(--text-color)';
+                btnDark.classList.remove('active');
+                btnDark.style.background = 'transparent';
+                btnDark.style.color = '#64748b';
+                if (themeToggleContainer) themeToggleContainer.style.background = 'rgba(0,0,0,0.05)';
+            }
+
+            // Persistence
+            localStorage.setItem('user-theme', theme);
+        }
+
+        // Initialize theme on load
+        document.addEventListener('DOMContentLoaded', function () {
+            const savedTheme = localStorage.getItem('user-theme');
+            if (savedTheme) {
+                setTheme(savedTheme);
+            }
+        });
+
         document.addEventListener('DOMContentLoaded', () => {
             const profileTrigger = document.getElementById('profileTrigger');
             const profileDropdown = document.getElementById('profileDropdown');

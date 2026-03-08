@@ -9,7 +9,8 @@
             <div
                 style="width: 35px; height: 35px; background: var(--primary-color); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; font-size: 1.2rem;">
                 C</div>
-            <span style="font-size: 1.25rem; font-weight: 700; color: #1e293b; margin-left: 10px;">CareerConnect</span>
+            <span
+                style="font-size: 1.25rem; font-weight: 700; color: var(--text-color); margin-left: 10px;">CareerConnect</span>
         </div>
         <div class="profile-container">
             <a href="{{ url_for('user.dashboard') }}"
@@ -29,9 +30,9 @@
             <!-- Profile Info Card -->
             <div class="card" style="padding: 2.5rem; margin-bottom: 2rem;">
                 <div
-                    style="display: flex; align-items: center; gap: 2rem; margin-bottom: 2.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid #f1f5f9;">
+                    style="display: flex; align-items: center; gap: 2rem; margin-bottom: 2.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border-color);">
                     <div
-                        style="width: 100px; height: 100px; background: #f1f5f9; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 3rem; color: var(--primary-color); border: 4px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+                        style="width: 100px; height: 100px; background: var(--bg-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 3rem; color: var(--primary-color); border: 4px solid var(--white); box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
                         {{ (user['username'] or 'U')[0] | upper }}
                     </div>
                     <div>
@@ -44,16 +45,18 @@
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
                     <div>
                         <h4
-                            style="color: #64748b; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">
+                            style="color: var(--text-color); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; opacity: 0.8;">
                             Email Address</h4>
-                        <p style="font-size: 1.1rem; font-weight: 600; color: #1e293b;">{{ user['email'] or 'Not
+                        <p style="font-size: 1.1rem; font-weight: 600; color: var(--text-color);">{{ user['email'] or
+                            'Not
                             provided' }}</p>
                     </div>
                     <div>
                         <h4
-                            style="color: #64748b; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">
+                            style="color: var(--text-color); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; opacity: 0.8;">
                             Member Since</h4>
-                        <p style="font-size: 1.1rem; font-weight: 600; color: #1e293b;">{{ user['created_at'] or
+                        <p style="font-size: 1.1rem; font-weight: 600; color: var(--text-color);">{{ user['created_at']
+                            or
                             'Recent' }}</p>
                     </div>
                 </div>
@@ -66,27 +69,28 @@
                 </h3>
 
                 <div
-                    style="background: #f8fafc; border-radius: 1rem; padding: 1.5rem; margin-bottom: 1.5rem; border: 1px solid #f1f5f9;">
-                    <h4 style="margin-bottom: 1rem; color: #475569;">Target Job Roles</h4>
+                    style="background: var(--bg-color); border-radius: 1rem; padding: 1.5rem; margin-bottom: 1.5rem; border: 1px solid var(--border-color);">
+                    <h4 style="margin-bottom: 1rem; color: var(--text-color); opacity: 0.8;">Target Job Roles</h4>
                     <div style="display: flex; flex-wrap: wrap; gap: 0.75rem;">
                         {% if user['applied_job'] %}
                         {% for job in user['applied_job'].split(',') %}
                         <span
-                            style="background: white; border: 1px solid #e2e8f0; padding: 0.5rem 1rem; border-radius: 0.75rem; font-size: 0.9rem; font-weight: 600; color: #1e293b; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                            style="background: var(--white); border: 1px solid var(--border-color); padding: 0.5rem 1rem; border-radius: 0.75rem; font-size: 0.9rem; font-weight: 600; color: var(--text-color); box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
                             {{ job.strip() }}
                         </span>
                         {% endfor %}
                         {% else %}
-                        <p style="color: #94a3b8; font-style: italic;">No job roles specified yet.</p>
+                        <p style="color: var(--text-color); font-style: italic; opacity: 0.6;">No job roles specified
+                            yet.</p>
                         {% endif %}
                     </div>
                 </div>
 
                 <div
-                    style="background: #f8fafc; border-radius: 1rem; padding: 1.5rem; border: 1px solid #f1f5f9; display: flex; align-items: center; justify-content: space-between;">
+                    style="background: var(--bg-color); border-radius: 1rem; padding: 1.5rem; border: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
                     <div>
-                        <h4 style="margin-bottom: 0.25rem; color: #475569;">Resume File</h4>
-                        <p style="font-size: 0.9rem; color: #64748b;">
+                        <h4 style="margin-bottom: 0.25rem; color: var(--text-color); opacity: 0.8;">Resume File</h4>
+                        <p style="font-size: 0.9rem; color: var(--text-color); opacity: 0.7;">
                             {{ user['resume_filename'] or 'No resume uploaded' }}
                         </p>
                     </div>
@@ -98,6 +102,149 @@
                     {% endif %}
                 </div>
             </div>
+
+            <!-- Resume Builder Data Card -->
+            {% if resume_data %}
+            <div class="card" style="padding: 2.5rem; margin-top: 2rem;">
+                <h3 style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.5rem;">🧾</span> Resume Builder Data
+                </h3>
+
+                <!-- Professional Summary -->
+                {% if resume_data['summary'] %}
+                <div
+                    style="background: var(--bg-color); border-radius: 1rem; padding: 1.5rem; margin-bottom: 1.5rem; border: 1px solid var(--border-color); border-left: 4px solid var(--primary-color);">
+                    <h4
+                        style="margin: 0 0 0.75rem 0; color: var(--primary-color); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.08em;">
+                        💡 Professional Summary
+                    </h4>
+                    <p style="margin: 0; color: var(--text-color); font-size: 0.97rem; line-height: 1.7;">
+                        {{ resume_data['summary'] }}
+                    </p>
+                </div>
+                {% endif %}
+
+                <!-- Contact Info Row -->
+                <div
+                    style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+                    {% if resume_data['full_name'] %}
+                    <div
+                        style="background: var(--bg-color); border-radius: 0.75rem; padding: 1rem; border: 1px solid var(--border-color);">
+                        <div
+                            style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-color); opacity: 0.6; margin-bottom: 0.3rem;">
+                            Full Name</div>
+                        <div style="font-weight: 600; color: var(--text-color);">{{ resume_data['full_name'] }}</div>
+                    </div>
+                    {% endif %}
+                    {% if resume_data['phone'] %}
+                    <div
+                        style="background: var(--bg-color); border-radius: 0.75rem; padding: 1rem; border: 1px solid var(--border-color);">
+                        <div
+                            style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-color); opacity: 0.6; margin-bottom: 0.3rem;">
+                            Phone</div>
+                        <div style="font-weight: 600; color: var(--text-color);">{{ resume_data['phone'] }}</div>
+                    </div>
+                    {% endif %}
+                    {% if resume_data['location'] %}
+                    <div
+                        style="background: var(--bg-color); border-radius: 0.75rem; padding: 1rem; border: 1px solid var(--border-color);">
+                        <div
+                            style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-color); opacity: 0.6; margin-bottom: 0.3rem;">
+                            Location</div>
+                        <div style="font-weight: 600; color: var(--text-color);">{{ resume_data['location'] }}</div>
+                    </div>
+                    {% endif %}
+                    {% if resume_data['linkedin'] %}
+                    <div
+                        style="background: var(--bg-color); border-radius: 0.75rem; padding: 1rem; border: 1px solid var(--border-color);">
+                        <div
+                            style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-color); opacity: 0.6; margin-bottom: 0.3rem;">
+                            LinkedIn</div>
+                        <div style="font-weight: 600; color: var(--text-color);">{{ resume_data['linkedin'] }}</div>
+                    </div>
+                    {% endif %}
+                    {% if resume_data['github'] %}
+                    <div
+                        style="background: var(--bg-color); border-radius: 0.75rem; padding: 1rem; border: 1px solid var(--border-color);">
+                        <div
+                            style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-color); opacity: 0.6; margin-bottom: 0.3rem;">
+                            GitHub</div>
+                        <div style="font-weight: 600; color: var(--text-color);">{{ resume_data['github'] }}</div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Skills -->
+                {% if resume_data['skills'] %}
+                <div
+                    style="background: var(--bg-color); border-radius: 1rem; padding: 1.5rem; margin-bottom: 1.5rem; border: 1px solid var(--border-color);">
+                    <h4
+                        style="margin: 0 0 1rem 0; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-color); opacity: 0.8;">
+                        🛠 Skills</h4>
+                    <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                        {% set skills_list = resume_data['skills'].split(',') if ',' in resume_data['skills'] else
+                        [resume_data['skills']] %}
+                        {% for skill in skills_list %}
+                        <span
+                            style="background: rgba(37, 99, 235, 0.08); border: 1px solid rgba(37, 99, 235, 0.2); color: var(--primary-color); padding: 0.35rem 0.85rem; border-radius: 2rem; font-size: 0.85rem; font-weight: 600;">
+                            {{ skill.strip() }}
+                        </span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Experience -->
+                {% if resume_data['experience'] %}
+                <div
+                    style="background: var(--bg-color); border-radius: 1rem; padding: 1.5rem; margin-bottom: 1.5rem; border: 1px solid var(--border-color);">
+                    <h4
+                        style="margin: 0 0 1rem 0; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-color); opacity: 0.8;">
+                        💼 Experience</h4>
+                    <p
+                        style="margin: 0; color: var(--text-color); font-size: 0.95rem; line-height: 1.7; white-space: pre-line;">
+                        {{ resume_data['experience'] }}</p>
+                </div>
+                {% endif %}
+
+                <!-- Education -->
+                {% if resume_data['education'] %}
+                <div
+                    style="background: var(--bg-color); border-radius: 1rem; padding: 1.5rem; margin-bottom: 1.5rem; border: 1px solid var(--border-color);">
+                    <h4
+                        style="margin: 0 0 1rem 0; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-color); opacity: 0.8;">
+                        🎓 Education</h4>
+                    <p
+                        style="margin: 0; color: var(--text-color); font-size: 0.95rem; line-height: 1.7; white-space: pre-line;">
+                        {{ resume_data['education'] }}</p>
+                </div>
+                {% endif %}
+
+                <!-- Projects -->
+                {% if resume_data['projects'] %}
+                <div
+                    style="background: var(--bg-color); border-radius: 1rem; padding: 1.5rem; border: 1px solid var(--border-color);">
+                    <h4
+                        style="margin: 0 0 1rem 0; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-color); opacity: 0.8;">
+                        🚀 Projects</h4>
+                    <p
+                        style="margin: 0; color: var(--text-color); font-size: 0.95rem; line-height: 1.7; white-space: pre-line;">
+                        {{ resume_data['projects'] }}</p>
+                </div>
+                {% endif %}
+
+            </div>
+            {% else %}
+            <div class="card"
+                style="padding: 2rem; margin-top: 2rem; text-align: center; border: 2px dashed var(--border-color);">
+                <p style="color: var(--text-color); opacity: 0.6; margin: 0;">No resume builder data saved yet. Use the
+                    <a href="{{ url_for('user.resume_builder') }}"
+                        style="color: var(--primary-color); font-weight: 600;">Resume Builder</a>
+                    to create your resume!
+                </p>
+            </div>
+            {% endif %}
+
         </div>
     </main>
 </div>

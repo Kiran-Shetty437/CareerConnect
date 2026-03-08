@@ -9,7 +9,8 @@
             <div
                 style="width: 35px; height: 35px; background: var(--primary-color); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; font-size: 1.2rem;">
                 C</div>
-            <span style="font-size: 1.25rem; font-weight: 700; color: #1e293b; margin-left: 10px;">CareerConnect</span>
+            <span
+                style="font-size: 1.25rem; font-weight: 700; color: var(--text-color); margin-left: 10px;">CareerConnect</span>
         </div>
         <div class="profile-container">
             <a href="{{ url_for('user.dashboard') }}"
@@ -34,24 +35,27 @@
             <form action="{{ url_for('user.settings') }}" method="POST"
                 style="display: flex; flex-direction: column; gap: 1.5rem;">
                 <div class="input-group" style="margin-bottom: 0;">
-                    <label style="font-size: 0.95rem; font-weight: 700; color: #475569; margin-bottom: 0.5rem;">Current
+                    <label
+                        style="font-size: 0.95rem; font-weight: 700; color: var(--text-color); margin-bottom: 0.5rem; opacity: 0.8;">Current
                         Password</label>
                     <input type="password" name="current_password" class="premium-field" required placeholder="••••••••"
-                        style="padding: 0.9rem 1.25rem; width: 100%; box-sizing: border-box;">
+                        style="padding: 0.9rem 1.25rem; width: 100%; box-sizing: border-box; background: var(--white); color: var(--text-color); border-color: var(--border-color);">
                 </div>
 
                 <div class="input-group" style="margin-bottom: 0;">
-                    <label style="font-size: 0.95rem; font-weight: 700; color: #475569; margin-bottom: 0.5rem;">New
+                    <label
+                        style="font-size: 0.95rem; font-weight: 700; color: var(--text-color); margin-bottom: 0.5rem; opacity: 0.8;">New
                         Password</label>
                     <input type="password" name="new_password" class="premium-field" required placeholder="••••••••"
-                        style="padding: 0.9rem 1.25rem; width: 100%; box-sizing: border-box;">
+                        style="padding: 0.9rem 1.25rem; width: 100%; box-sizing: border-box; background: var(--white); color: var(--text-color); border-color: var(--border-color);">
                 </div>
 
                 <div class="input-group" style="margin-bottom: 0;">
-                    <label style="font-size: 0.95rem; font-weight: 700; color: #475569; margin-bottom: 0.5rem;">Confirm
+                    <label
+                        style="font-size: 0.95rem; font-weight: 700; color: var(--text-color); margin-bottom: 0.5rem; opacity: 0.8;">Confirm
                         New Password</label>
                     <input type="password" name="confirm_password" class="premium-field" required placeholder="••••••••"
-                        style="padding: 0.9rem 1.25rem; width: 100%; box-sizing: border-box;">
+                        style="padding: 0.9rem 1.25rem; width: 100%; box-sizing: border-box; background: var(--white); color: var(--text-color); border-color: var(--border-color);">
                 </div>
 
                 <button type="submit" class="premium-btn"
@@ -61,9 +65,10 @@
             </form>
         </div>
 
-        <div style="margin-top: 3rem; text-align: center; border-top: 1px solid #e2e8f0; padding-top: 2rem;">
-            <p style="color: #64748b; font-size: 0.95rem;">Need to delete your account? Please contact <a
-                    href="mailto:support@careerconnect.com"
+        <div
+            style="margin-top: 3rem; text-align: center; border-top: 1px solid var(--border-color); padding-top: 2rem;">
+            <p style="color: var(--text-color); font-size: 0.95rem; opacity: 0.8;">Need to delete your account? Please
+                contact <a href="mailto:support@careerconnect.com"
                     style="color: #ef4444; font-weight: 600; text-decoration: none;">support</a>.</p>
         </div>
     </main>

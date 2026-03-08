@@ -13,6 +13,120 @@
     --font-body: 'Outfit', sans-serif;
 }
 
+body.dark-mode {
+    --bg-color: #0f172a;
+    --text-color: #f1f5f9;
+    --white: #1e293b;
+    --border-color: #334155;
+    --text-muted: #94a3b8;
+}
+
+/* ── Dark mode: global text overrides ── */
+body.dark-mode p {
+    color: #cbd5e1;
+}
+
+body.dark-mode h1,
+body.dark-mode h2,
+body.dark-mode h3,
+body.dark-mode h4,
+body.dark-mode h5,
+body.dark-mode h6 {
+    color: var(--text-color);
+}
+
+body.dark-mode label {
+    color: #cbd5e1;
+}
+
+body.dark-mode .dropdown-header .username {
+    color: var(--text-color);
+}
+
+body.dark-mode .dropdown-header .user-role {
+    color: #94a3b8;
+}
+
+/* ── Dark mode: company cards ── */
+body.dark-mode .company-image-container {
+    background: var(--white) !important;
+}
+
+body.dark-mode .job-scraped-info {
+    background: #0f172a !important;
+    border-color: var(--border-color) !important;
+}
+
+body.dark-mode .job-scraped-info a {
+    color: var(--text-color) !important;
+}
+
+body.dark-mode .job-scraped-info span {
+    color: #94a3b8 !important;
+}
+
+body.dark-mode .company-card h3 {
+    color: var(--text-color) !important;
+    border-bottom-color: var(--border-color) !important;
+}
+
+/* ── Dark mode: welcome box ── */
+body.dark-mode .welcome-box h1 {
+    color: var(--text-color);
+}
+
+body.dark-mode .welcome-box p {
+    color: #94a3b8;
+}
+
+/* ── Dark mode: sidebar ── */
+body.dark-mode .sidebar {
+    background: var(--white);
+    border-color: var(--border-color);
+}
+
+/* ── Dark mode: top-nav ── */
+body.dark-mode .top-nav {
+    border-bottom: 1px solid var(--border-color);
+}
+
+/* ── Dark mode: badges ── */
+body.dark-mode .badge.success {
+    background-color: rgba(16, 185, 129, 0.15);
+    color: #34d399;
+}
+
+/* ── Dark mode: profile trigger ring ── */
+body.dark-mode .profile-trigger {
+    background: var(--white);
+    border-color: var(--border-color);
+}
+
+/* ── Dark mode: company explore heading ── */
+body.dark-mode .company-grid h2 {
+    color: var(--text-color);
+}
+
+/* ── Dark mode: chat window text ── */
+body.dark-mode .chat-header h4,
+body.dark-mode .resume-header h4 {
+    color: #fff;
+}
+
+/* ── Dark mode: analysis report ── */
+body.dark-mode .analysis-report {
+    background: var(--white) !important;
+    color: var(--text-color) !important;
+    border-color: var(--border-color) !important;
+}
+
+/* ── Dark mode: reset btn ── */
+body.dark-mode .reset-btn {
+    background: transparent;
+    color: #cbd5e1;
+    border-color: var(--border-color);
+}
+
 body {
     font-family: var(--font-body);
     background-color: var(--bg-color);
@@ -61,8 +175,9 @@ h1 {
 }
 
 p {
-    color: #6b7280;
+    color: var(--text-color);
     font-size: 1rem;
+    opacity: 0.75;
 }
 
 /* Tab Switcher */
@@ -97,7 +212,8 @@ label {
     display: block;
     margin-bottom: 0.5rem;
     font-weight: 500;
-    color: #374151;
+    color: var(--text-color);
+    opacity: 0.85;
 }
 
 input[type="text"],
@@ -220,7 +336,7 @@ input[type="email"]:focus {
 }
 
 .card {
-    background: white;
+    background: var(--white);
     padding: 1.5rem;
     border-radius: 1rem;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
@@ -238,7 +354,7 @@ input[type="email"]:focus {
 
 .stat-box {
     text-align: center;
-    background: #f9fafb;
+    background: var(--bg-color);
     padding: 1rem;
     border-radius: 0.5rem;
 }
@@ -252,7 +368,7 @@ input[type="email"]:focus {
 h2,
 h3 {
     margin-top: 0;
-    color: #111827;
+    color: var(--text-color);
 }
 
 .role-options {
@@ -349,7 +465,7 @@ h3 {
     right: 0;
     width: 350px;
     height: 500px;
-    background: rgba(255, 255, 255, 0.85);
+    background: var(--white);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border-radius: 1.5rem;
@@ -422,8 +538,8 @@ h3 {
 
 .message.bot {
     align-self: flex-start;
-    background: white;
-    color: #1e293b;
+    background: var(--bg-color);
+    color: var(--text-color);
     border-bottom-left-radius: 0.25rem;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
 }
@@ -438,8 +554,8 @@ h3 {
 
 .chat-input-area {
     padding: 1rem;
-    background: white;
-    border-top: 1px solid rgba(0, 0, 0, 0.05);
+    background: var(--white);
+    border-top: 1px solid var(--border-color);
     display: flex;
     gap: 0.5rem;
 }
@@ -447,11 +563,13 @@ h3 {
 .chat-input-area input {
     flex-grow: 1;
     padding: 0.75rem 1.25rem;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--border-color);
     border-radius: 2rem;
     outline: none;
     font-size: 0.9rem;
     transition: all 0.3s;
+    background: var(--bg-color);
+    color: var(--text-color);
 }
 
 .chat-input-area input:focus {
@@ -547,7 +665,7 @@ h3 {
     right: -2rem;
     width: 450px;
     height: 600px;
-    background: rgba(255, 255, 255, 0.85);
+    background: var(--white);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border-radius: 1.5rem;
@@ -622,7 +740,7 @@ h3 {
     align-items: center;
     gap: 0.5rem;
     padding: 2rem;
-    border: 2px dashed #cbd5e1;
+    border: 2px dashed var(--border-color);
     border-radius: 1rem;
     cursor: pointer;
     transition: all 0.3s;
@@ -681,13 +799,13 @@ h3 {
 }
 
 .analysis-report {
-    background: white;
+    background: var(--bg-color);
     padding: 1.25rem;
     border-radius: 1rem;
     font-size: 0.9rem;
     line-height: 1.6;
-    color: #1e293b;
-    border: 1px solid #f1f5f9;
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
     margin-bottom: 1.5rem;
 }
 
@@ -776,14 +894,14 @@ h3 {
     top: calc(100% + 15px);
     right: 0;
     width: 220px;
-    background: white;
+    background: var(--white);
     border-radius: 1rem;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
     display: none;
     flex-direction: column;
     padding: 0.5rem 0;
     z-index: 1001;
-    border: 1px solid rgba(0, 0, 0, 0.05);
+    border: 1px solid var(--border-color);
 }
 
 .dropdown-menu.active {
@@ -827,19 +945,21 @@ h3 {
 
 .dropdown-item {
     padding: 0.75rem 1.25rem;
-    color: #475569;
+    color: var(--text-color);
     text-decoration: none;
     font-size: 0.95rem;
     display: flex;
     align-items: center;
     gap: 0.75rem;
     transition: all 0.2s;
+    opacity: 0.8;
 }
 
 .dropdown-item:hover {
-    background: #f8fafc;
-    color: #10b981;
+    background: var(--bg-color);
+    color: var(--primary-color);
     padding-left: 1.5rem;
+    opacity: 1;
 }
 
 .admin-theme .dropdown-item:hover {
@@ -848,12 +968,13 @@ h3 {
 
 .dropdown-item.logout {
     color: #ef4444;
-    border-top: 1px solid #f1f5f9;
+    border-top: 1px solid var(--border-color);
     margin-top: 0.5rem;
+    opacity: 1;
 }
 
 .dropdown-item.logout:hover {
-    background: #fef2f2;
+    background: rgba(239, 68, 68, 0.05);
     color: #dc2626;
 }
 
