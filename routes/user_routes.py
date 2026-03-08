@@ -180,3 +180,31 @@ def analyze():
 
     result = analyze_resume(text)
     return jsonify({"result": result})
+import json
+
+@user.route("/resume_builder")
+def resume_builder():
+    if session.get("role") != "user":
+        return redirect(url_for("auth.login"))
+    
+    conn = get_connection()
+    templates_rows = conn.execute("SELECT * FROM resume_templates WHERE is_active = 1").fetchall()
+    conn.close()
+    
+    templates = []
+    for row in templates_rows:
+        try:
+            demo_data = json.loads(row["demo_data"])
+            templates.append({
+                "id": row["id"],
+                "name": row["template_name"],
+                "templateId": row["template_id"],
+                "baseLayout": row["base_layout"],
+                "demo": demo_data
+            })
+        except:
+            continue
+
+    return render_template("user/resume_builder.html", 
+                           username=session.get("username"),
+                           dynamic_templates=templates)

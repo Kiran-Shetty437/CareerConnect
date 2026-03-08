@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume Templates - CareerConnect Admin</title>
+    <!-- Modern Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='admin_dashboard.css') }}">
+    <style>
+        .template-form-container {
+            max-width: 800px;
+            margin: 1rem 0;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            color: white;
+            font-family: inherit;
+        }
+
+        textarea.form-control {
+            height: 150px;
+            resize: vertical;
+        }
+
+        .hidden-fields {
+            display: none;
+        }
+
+        .status-badge.status-inactive {
+            background: rgba(255, 118, 117, 0.1);
+            color: #ff7675;
+        }
+
+        /* Helper for the analysis button */
+        .btn-analyze {
+            background: #7b61ff;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .btn-analyze:hover {
+            background: #6449e6;
+        }
+
+        .loading-spinner {
+            display: none;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="flash-messages">
+        {% for category, message in messages %}
+        <div class="alert {{ category }}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">
+                <div class="logo-icon"
+                    style="background: var(--primary-blue); border-radius: 8px; font-weight: 800; font-size: 1.2rem;">C
+                </div>
+                <span>CareerConnect</span>
+            </div>
+
+            <nav class="nav-links">
+                <li class="nav-item">
+                    <a href="{{ url_for('admin.dashboard') }}" class="nav-link">
+                        <i class="fas fa-chart-pie"></i> General Stats
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('admin.dashboard', view='users') }}" class="nav-link">
+                        <i class="fas fa-users"></i> Users
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('admin.dashboard', view='company') }}" class="nav-link">
+                        <i class="fas fa-building"></i> Company
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('admin.resume_templates') }}" class="nav-link active">
+                        <i class="fas fa-file-invoice"></i> Resume Templates
+                    </a>
+                </li>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="theme-toggle">
+                    <button class="btn-toggle" id="mode-light" onclick="setTheme('light')">
+                        <i class="fas fa-sun"></i> Light
+                    </button>
+                    <button class="btn-toggle active" id="mode-dark" onclick="setTheme('dark')">
+                        <i class="fas fa-moon"></i> Dark
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="top-bar">
+                <div class="page-title">Resume Builder Management</div>
+
+                <div class="user-profile">
+                    <div class="user-details" style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                        <span style="font-size: 0.9rem; font-weight: 500;">{{ username or 'Super Admin' }}</span>
+                        <div class="avatar">{{ (username or 'A')[0].upper() }}</div>
+                    </div>
+                </div>
+            </header>
+
+            <div class="breadcrumb" style="color: var(--text-secondary); margin-bottom: 2rem; font-size: 0.9rem;">
+                Admin <i class="fas fa-chevron-right" style="font-size: 0.7rem; margin: 0 10px;"></i>
+                <b>Resume Templates</b>
+            </div>
+
+            <div class="glass-card" style="margin-top: 2rem;">
+                <div class="activity-header">
+                    <div style="font-weight: 600; font-size: 1.1rem;">Template Inventory</div>
+                </div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>ID</th>
+                                <th>Base Layout</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for template in templates %}
+                            <tr>
+                                <td>{{ template['template_name'] }}</td>
+                                <td><code>{{ template['template_id'] }}</code></td>
+                                <td>{{ template['base_layout'] | capitalize }}</td>
+                                <td>
+                                    <span
+                                        class="status-badge {{ 'status-active' if template['is_active'] else 'status-inactive' }}">
+                                        {{ 'Active' if template['is_active'] else 'Inactive' }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <form action="{{ url_for('admin.toggle_template', template_id=template['id']) }}"
+                                        method="POST" style="display: inline;">
+                                        <button type="submit" class="btn-icon"
+                                            title="{{ 'Deactivate' if template['is_active'] else 'Activate' }}">
+                                            {% if template['is_active'] %}
+                                            <i class="fas fa-times" style="color: #ff7675;"></i>
+                                            {% else %}
+                                            <i class="fas fa-check" style="color: #55efc4;"></i>
+                                            {% endif %}
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                            {% if not templates %}
+                            <tr>
+                                <td colspan="5" style="text-align: center; color: var(--text-secondary);">No templates
+                                    added yet.</td>
+                            </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="glass-card" style="margin-top: 2rem;">
+                <div class="activity-header">
+                    <div style="font-weight: 600; font-size: 1.1rem;">Create New Template (AI Automated)</div>
+                </div>
+
+                <div class="template-form-container">
+                    <form action="{{ url_for('admin.add_resume_template') }}" method="POST"
+                        enctype="multipart/form-data" id="addTemplateForm">
+
+                        <div class="form-group">
+                            <label>Template Display Name (e.g. Modern Executive)</label>
+                            <input type="text" name="template_name" class="form-control"
+                                placeholder="Enter a name for this template..." required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Base Layout Engine (Visually defines the structure)</label>
+                            <select name="base_layout" class="form-control" required
+                                style="background: #1e293b; color: white;">
+                                <option value="dynamic" selected>✨ Auto-Detect Layout (AI Inferred)</option>
+                                <option value="marjorie">Classic (Marjorie)</option>
+                                <option value="john">Technical (John)</option>
+                                <option value="juliana">Creative (Juliana)</option>
+                                <option value="amanda">Academic (Amanda)</option>
+                            </select>
+                            <small style="color: #aaa; margin-top: 5px; display: block;">Choose "Auto-Detect" to have
+                                the AI copy the structure and colors of your image!</small>
+                        </div>
+
+                        <div
+                            style="background: rgba(123, 97, 255, 0.05); padding: 1.5rem; border-radius: 12px; border: 1px dashed var(--primary-blue); margin-bottom: 2rem;">
+                            <label
+                                style="font-weight: 600; color: var(--primary-blue); margin-bottom: 1rem; display: block;">
+                                <i class="fas fa-magic"></i> AI Content Extraction
+                            </label>
+                            <div class="form-group">
+                                <label>Upload Resume Image (JPG/PNG)</label>
+                                <input type="file" name="resume_image" id="resume_image_input" accept="image/*"
+                                    class="form-control" required>
+                                <p style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 10px;">
+                                    AI will automatically extract the name, skills, and experience from this image to
+                                    create the user's demo content.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div id="loadingOverlay"
+                            style="display: none; text-align: center; margin-bottom: 1rem; color: var(--primary-blue);">
+                            <div class="loading-spinner" style="display: inline-block; margin-right: 10px;"></div>
+                            Analyzing image with AI and creating template... Please wait.
+                        </div>
+
+                        <button type="submit" class="btn-primary" id="submitBtn">Create Dynamic Template</button>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Theme toggle logic
+        function setTheme(theme) {
+            const body = document.body;
+            const btnLight = document.getElementById('mode-light');
+            const btnDark = document.getElementById('mode-dark');
+
+            if (theme === 'light') {
+                body.classList.add('light-mode');
+                btnLight.classList.add('active');
+                btnDark.classList.remove('active');
+            } else {
+                body.classList.remove('light-mode');
+                btnDark.classList.add('active');
+                btnLight.classList.remove('active');
+            }
+            localStorage.setItem('admin-theme', theme);
+        }
+
+        // Initialize theme on load
+        document.addEventListener('DOMContentLoaded', function () {
+            const savedTheme = localStorage.getItem('admin-theme');
+            if (savedTheme) setTheme(savedTheme);
+        });
+
+        // Flash message auto-hide
+        setTimeout(() => {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                alert.style.opacity = '0';
+                alert.style.transition = 'opacity 0.5s ease';
+                setTimeout(() => alert.remove(), 500);
+            });
+        }, 5000);
+
+        // Form Handling
+        const form = document.getElementById('addTemplateForm');
+        const loading = document.getElementById('loadingOverlay');
+        const submitBtn = document.getElementById('submitBtn');
+
+        if (form) {
+            form.addEventListener('submit', () => {
+                loading.style.display = 'block';
+                submitBtn.disabled = true;
+                submitBtn.innerText = 'Extracting data...';
+            });
+        }
+    </script>
+</body>
+
+</html>

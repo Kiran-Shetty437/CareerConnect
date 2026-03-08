@@ -55,6 +55,11 @@
                         <i class="fas fa-building"></i> Company
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('admin.resume_templates') }}" class="nav-link" id="btn-templates">
+                        <i class="fas fa-file-invoice"></i> Resume Templates
+                    </a>
+                </li>
             </nav>
 
             <div class="sidebar-footer">
@@ -469,11 +474,22 @@
             localStorage.setItem('admin-theme', theme);
         }
 
-        // Initialize theme on load
+        // Initialize theme and view on load
         document.addEventListener('DOMContentLoaded', function () {
             const savedTheme = localStorage.getItem('admin-theme');
             if (savedTheme) {
                 setTheme(savedTheme);
+            }
+
+            // Support direct view linking (?view=users)
+            const urlParams = new URLSearchParams(window.location.search);
+            const view = urlParams.get('view');
+            if (view) {
+                const btnId = 'btn-' + view;
+                const btn = document.getElementById(btnId);
+                if (btn) {
+                    switchView(view, btn);
+                }
             }
         });
 

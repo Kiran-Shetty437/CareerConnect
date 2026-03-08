@@ -237,6 +237,46 @@
         </div>
     </div>
 
+    <!-- Resume Builder Link -->
+    <div class="rb-widget">
+        <a href="{{ url_for('user.resume_builder') }}" class="rb-toggle-btn" title="Open Resume Builder">
+            <span>🛠️</span>
+        </a>
+    </div>
+
+    <style>
+        /* Resume Builder Button */
+        .rb-widget {
+            position: fixed;
+            bottom: 2rem;
+            right: 12rem;
+            z-index: 1000;
+        }
+
+        .rb-toggle-btn {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.4);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none;
+        }
+
+        .rb-toggle-btn:hover {
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 15px 30px rgba(16, 185, 129, 0.5);
+            color: white;
+        }
+    </style>
+
+
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const profileTrigger = document.getElementById('profileTrigger');

@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume Builder | CareerConnect</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='resume_builder.css') }}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <style>
+        :root {
+            --primary: #10b981;
+            --primary-dark: #059669;
+            --secondary: #64748b;
+            --bg-body: #f8fafc;
+            --font-body: 'Inter', sans-serif;
+            --font-heading: 'Outfit', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-body);
+            margin: 0;
+            font-family: var(--font-body);
+            color: #1e293b;
+        }
+
+        .resume-builder-page-header {
+            background: white;
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+            color: var(--primary-dark);
+            font-weight: 700;
+            font-size: 1.5rem;
+            font-family: var(--font-heading);
+        }
+
+        .back-link {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            color: var(--secondary);
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .back-link:hover {
+            color: var(--primary);
+        }
+
+        /* Container for the app to fill the page */
+        .page-content {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        #resume-builder-app {
+            background: white;
+            border-radius: 1.5rem;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            min-height: 80vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .resume-builder-window {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        main#rb-main-content {
+            padding: 2rem;
+        }
+    </style>
+</head>
+
+<body class="resume-builder-scope">
+    <header class="resume-builder-page-header">
+        <a href="{{ url_for('user.dashboard') }}" class="logo-area">
+            <span>🚀</span> CareerConnect
+        </a>
+        <a href="{{ url_for('user.dashboard') }}" class="back-link">
+            <span>←</span> Back to Dashboard
+        </a>
+    </header>
+
+    <div class="page-content">
+        <div id="resume-builder-app">
+            <div class="resume-builder-window">
+                <!-- Navigation / Header inside widget (now full page) -->
+                <header class="main-header">
+                    <div class="stepper">
+                        <div class="step active" id="rb-step1-indicator">
+                            <span class="step-num">1</span>
+                            <span class="step-label">Template</span>
+                        </div>
+                        <div class="step" id="rb-step2-indicator">
+                            <span class="step-num">2</span>
+                            <span class="step-label">Content</span>
+                        </div>
+                        <div class="step" id="rb-step3-indicator">
+                            <span class="step-num">3</span>
+                            <span class="step-label">Download</span>
+                        </div>
+                    </div>
+                </header>
+
+                <main id="rb-main-content">
+                    <!-- Screen 1: Template Selection -->
+                    <section id="rb-template-selection" class="screen active">
+                        <div class="screen-header">
+                            <h1>Choose a Professional Template</h1>
+                            <p>Select a layout that best represents your career path.</p>
+                        </div>
+
+                        <div class="template-grid">
+                            <!-- All Templates (Default + Admin Added) managed dynamically -->
+                            {% for dt in dynamic_templates %}
+                            <div class="template-card rb-template-card" data-template="{{ dt.templateId }}">
+                                <div class="template-mini-preview" id="rb-preview-{{ dt.templateId }}"></div>
+                                <div class="template-info">
+                                    <h3>{{ dt.name }}</h3>
+                                    <button class="btn btn-primary">Select Template</button>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </section>
+
+                    <!-- Screen 2: Content Input -->
+                    <section id="rb-content-input" class="screen">
+                        <div class="editor-container">
+                            <div class="editor-sidebar">
+                                <form id="rb-resume-form" onsubmit="return false;">
+                                    <!-- Dynamic fields injected here -->
+                                </form>
+                                <div class="editor-actions">
+                                    <button class="btn btn-secondary" id="rb-back-to-templates">Back</button>
+                                    <button class="btn btn-primary" id="rb-go-to-preview">Preview & Generate</button>
+                                </div>
+                            </div>
+                            <div class="editor-preview-sticky">
+                                <div class="preview-mini-header">Live Preview</div>
+                                <div id="rb-live-preview-container"></div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Screen 3: Final Preview / Download -->
+                    <section id="rb-final-preview" class="screen">
+                        <div class="final-container">
+                            <div class="final-actions">
+                                <button class="btn btn-secondary" id="rb-back-to-editor">Edit Content</button>
+                                <button class="btn btn-primary" id="rb-download-pdf">Download PDF</button>
+                            </div>
+                            <div id="rb-final-resume-container" class="resume-wrapper"></div>
+                        </div>
+                    </section>
+                </main>
+            </div>
+        </div>
+    </div>
+
+    <script type="application/json" id="dynamic-templates-data">
+        {{ dynamic_templates | tojson | safe }}
+    </script>
+    <script>
+        window.dynamicTemplatesData = JSON.parse(document.getElementById('dynamic-templates-data').textContent);
+    </script>
+    <script src="{{ url_for('static', filename='resume_builder.js') }}"></script>
+    <script>
+        // Ensure the app starts in template selection mode
+        document.addEventListener('DOMContentLoaded', () => {
+            // Since this is a new page, we might need to initialize the state
+            // The resume_builder.js already does this.
+        });
+    </script>
+</body>
+
+</html>

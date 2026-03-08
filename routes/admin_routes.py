@@ -1,4 +1,5 @@
-from flask import Blueprint, render_template, session, redirect, url_for, request, flash, current_app
+from flask import Blueprint, render_template, session, redirect, url_for, request, flash, current_app, jsonify
+from services.resume_service import analyze_resume_image
 from database import get_connection
 import os
 from werkzeug.utils import secure_filename
@@ -358,3 +359,83 @@ def sync_all_jobs():
 
     flash(f"Synced {sync_count} new job roles and sent notifications!", "success")
     return redirect(url_for("admin.dashboard"))
+import json
+
+@admin.route("/admin/resume-templates")
+def resume_templates():
+    if session.get("role") != "admin":
+        return redirect(url_for("auth.login"))
+    
+    conn = get_connection()
+    templates = conn.execute("SELECT * FROM resume_templates").fetchall()
+    conn.close()
+    
+    return render_template("admin/resume_templates.html", 
+                           username=session.get("username"),
+                           templates=templates)
+
+@admin.route("/admin/add-resume-template", methods=["POST"])
+def add_resume_template():
+    if session.get("role") != "admin":
+        return redirect(url_for("auth.login"))
+    
+    template_name = request.form.get("template_name")
+    base_layout = request.form.get("base_layout", "marjorie")
+    
+    # Auto-generate a unique ID from the name
+    template_id = template_name.lower().replace(" ", "_") + "_" + str(os.urandom(2).hex())
+    
+    image_file = request.files.get("resume_image")
+    demo_data_str = request.form.get("demo_data", "").strip()
+    
+    try:
+        if image_file and image_file.filename != '':
+            # Analyze image to get JSON
+            extracted_data = analyze_resume_image(image_file)
+            if "error" in extracted_data:
+                flash(f"Image analysis failed: {extracted_data['error']}", "error")
+                return redirect(url_for("admin.resume_templates"))
+            demo_data_str = json.dumps(extracted_data)
+        elif not demo_data_str:
+            flash("Either an image or manual JSON demo data is required.", "error")
+            return redirect(url_for("admin.resume_templates"))
+        
+        # Validate final JSON
+        json.loads(demo_data_str)
+        
+        conn = get_connection()
+        conn.execute("INSERT INTO resume_templates (template_name, template_id, demo_data, base_layout) VALUES (?, ?, ?, ?)",
+                     (template_name, template_id, demo_data_str, base_layout))
+        conn.commit()
+        conn.close()
+        flash("Resume template added successfully with AI analysis!", "success")
+    except Exception as e:
+        flash(f"Error adding template: {e}", "error")
+        
+    return redirect(url_for("admin.resume_templates"))
+
+@admin.route("/admin/toggle-template/<int:template_id>", methods=["POST"])
+def toggle_template(template_id):
+    if session.get("role") != "admin":
+        return redirect(url_for("auth.login"))
+        
+    conn = get_connection()
+    conn.execute("UPDATE resume_templates SET is_active = NOT is_active WHERE id = ?", (template_id,))
+    conn.commit()
+    conn.close()
+    flash("Template status updated!", "success")
+    return redirect(url_for("admin.resume_templates"))
+@admin.route("/admin/analyze-resume-image", methods=["POST"])
+def analyze_resume_image_route():
+    if session.get("role") != "admin":
+        return jsonify({"error": "Unauthorized"}), 403
+    
+    if 'image' not in request.files:
+        return jsonify({"error": "No image uploaded"}), 400
+        
+    image_file = request.files['image']
+    if image_file.filename == '':
+        return jsonify({"error": "No selected file"}), 400
+        
+    result = analyze_resume_image(image_file)
+    return jsonify({"demo_data": result})

@@ -81,5 +81,67 @@ def init_db():
         UNIQUE(user_id, company_id)
     )''')
 
+    c.execute('''CREATE TABLE IF NOT EXISTS resume_templates (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        template_name TEXT,
+        template_id TEXT UNIQUE,
+        demo_data TEXT,
+        base_layout TEXT DEFAULT 'marjorie',
+        is_active INTEGER DEFAULT 1
+    )''')
+
+    # Default Templates Initialization
+    default_templates = [
+        {
+            "name": "Classic (Marjorie)",
+            "id": "marjorie",
+            "layout": "marjorie",
+            "data": {
+                "personal": {"fullName": "Marjorie D. McGahey", "email": "marjorie@jourrapide.com", "phone": "718-564-6972", "location": "Brooklyn, NY", "professionalTitle": "Sales Executive", "summary": "Sales professional with experience in the tyre market."},
+                "experience": [{"company": "UHE TRADING", "role": "Sales Executive", "duration": "2011 - Now", "desc": "Manage retail shop operations."}],
+                "education": [{"school": "FTU", "degree": "Economics", "year": "2005 - 2015"}],
+                "skills": ["Sales", "Communication"]
+            }
+        },
+        {
+            "name": "Technical (John)",
+            "id": "john",
+            "layout": "john",
+            "data": {
+                "personal": {"fullName": "John Smith", "email": "j.smith@email.com", "phone": "774-987-4009", "professionalTitle": "IT Project Manager", "summary": "Senior IT professional with 10+ years experience."},
+                "experience": [{"company": "Seton Hospital", "role": "Senior Project Manager", "duration": "2006 - Now", "desc": "Oversaw major IT projects."}],
+                "education": [{"school": "UMD", "degree": "Computer Science", "year": "1996 - 2001"}],
+                "skills": ["Project Management", "Agile", "Scrum"]
+            }
+        },
+        {
+            "name": "Creative (Juliana)",
+            "id": "juliana",
+            "layout": "juliana",
+            "data": {
+                "personal": {"fullName": "Juliana Silva", "email": "hello@site.com", "phone": "+123-456-7890", "professionalTitle": "Art Director", "summary": "Creative director specialized in digital marketing."},
+                "experience": [{"company": "Creative Inc", "role": "Marketing Manager", "duration": "2022 - Present", "desc": "Led design teams."}],
+                "education": [{"school": "Wardiere University", "degree": "Bachelor of Design", "year": "2006 - 2008"}],
+                "skills": ["Graphic Design", "Branding"]
+            }
+        },
+        {
+            "name": "Academic (Amanda)",
+            "id": "amanda",
+            "layout": "amanda",
+            "data": {
+                "personal": {"fullName": "Amanda Baker", "email": "email@example.com", "phone": "(123) 456-7890", "professionalTitle": "Biology Professor", "summary": "Ph.D. in Molecular Biology with teaching experience."},
+                "experience": [{"company": "University of Utah", "role": "Professor", "duration": "2019 - Now", "desc": "Taught biology courses."}],
+                "education": [{"school": "Boston University", "degree": "Ph.D. Molecular Biology", "year": "2010 - 2015"}],
+                "skills": ["Research", "Laboratory Management"]
+            }
+        }
+    ]
+
+    import json
+    for t in default_templates:
+        c.execute("INSERT OR IGNORE INTO resume_templates (template_name, template_id, demo_data, base_layout) VALUES (?, ?, ?, ?)",
+                  (t["name"], t["id"], json.dumps(t["data"]), t["layout"]))
+
     conn.commit()
     conn.close()
