@@ -41,7 +41,7 @@ Apply here:
 
 def send_otp_email(user_email, otp):
     msg = MIMEMultipart()
-    msg["From"] = SENDER_EMAIL
+    msg["From"] = f"CareerConnect <{SENDER_EMAIL}>"
     msg["To"] = user_email
     msg["Subject"] = "Password Reset OTP"
 
