@@ -260,62 +260,7 @@
                 </div>
             </div>
 
-            <div class="glass-card" style="margin-top: 2rem;">
-                <div class="activity-header">
-                    <div style="font-weight: 600; font-size: 1.1rem;">Create New Template (AI Automated)</div>
-                </div>
 
-                <div class="template-form-container">
-                    <form action="{{ url_for('admin.add_resume_template') }}" method="POST"
-                        enctype="multipart/form-data" id="addTemplateForm">
-
-                        <div class="form-group">
-                            <label>Template Display Name (e.g. Modern Executive)</label>
-                            <input type="text" name="template_name" class="form-control"
-                                placeholder="Enter a name for this template..." required>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Base Layout Engine (Visually defines the structure)</label>
-                            <select name="base_layout" class="form-control" required
-                                style="background: #1e293b; color: white;">
-                                <option value="dynamic" selected>✨ Auto-Detect Layout (AI Inferred)</option>
-                                <option value="marjorie">Classic (Marjorie)</option>
-                                <option value="john">Technical (John)</option>
-                                <option value="juliana">Creative (Juliana)</option>
-                                <option value="amanda">Academic (Amanda)</option>
-                            </select>
-                            <small style="color: #aaa; margin-top: 5px; display: block;">Choose "Auto-Detect" to have
-                                the AI copy the structure and colors of your image!</small>
-                        </div>
-
-                        <div
-                            style="background: rgba(123, 97, 255, 0.05); padding: 1.5rem; border-radius: 12px; border: 1px dashed var(--primary-blue); margin-bottom: 2rem;">
-                            <label
-                                style="font-weight: 600; color: var(--primary-blue); margin-bottom: 1rem; display: block;">
-                                <i class="fas fa-magic"></i> AI Content Extraction
-                            </label>
-                            <div class="form-group">
-                                <label>Upload Resume Image (JPG/PNG)</label>
-                                <input type="file" name="resume_image" id="resume_image_input" accept="image/*"
-                                    class="form-control" required>
-                                <p style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 10px;">
-                                    AI will automatically extract the name, skills, and experience from this image to
-                                    create the user's demo content.
-                                </p>
-                            </div>
-                        </div>
-
-                        <div id="loadingOverlay"
-                            style="display: none; text-align: center; margin-bottom: 1rem; color: var(--primary-blue);">
-                            <div class="loading-spinner" style="display: inline-block; margin-right: 10px;"></div>
-                            Analyzing image with AI and creating template... Please wait.
-                        </div>
-
-                        <button type="submit" class="btn-primary" id="submitBtn">Create Dynamic Template</button>
-                    </form>
-                </div>
-            </div>
         </main>
     </div>
 
@@ -354,18 +299,7 @@
             });
         }, 5000);
 
-        // Form Handling
-        const form = document.getElementById('addTemplateForm');
-        const loading = document.getElementById('loadingOverlay');
-        const submitBtn = document.getElementById('submitBtn');
 
-        if (form) {
-            form.addEventListener('submit', () => {
-                loading.style.display = 'block';
-                submitBtn.disabled = true;
-                submitBtn.innerText = 'Extracting data...';
-            });
-        }
 
         // Confirm before deleting a template
         function confirmDeleteTemplate(formEl) {

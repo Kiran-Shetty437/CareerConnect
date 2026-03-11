@@ -4,217 +4,240 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Resume Builder | CareerConnect</title>
+    <meta name="description"
+        content="A premium resume builder with multiple elegant templates to choose from. Build your professional presence in minutes.">
+    <title>Resumify | CareerConnect</title>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700&display=swap"
         rel="stylesheet">
-
+    <!-- Main Style -->
     <link rel="stylesheet" href="{{ url_for('static', filename='resume_builder.css') }}">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-
-    <style>
-        :root {
-            --primary: #10b981;
-            --primary-dark: #059669;
-            --secondary: #64748b;
-            --bg-body: #f8fafc;
-            --bg-card: #ffffff;
-            --text-main: #1e293b;
-            --font-body: 'Inter', sans-serif;
-            --font-heading: 'Outfit', sans-serif;
-            --border-color: #e2e8f0;
-        }
-
-        body.dark-mode {
-            --bg-body: #0f172a;
-            --bg-card: #1e293b;
-            --text-main: #f8fafc;
-            --border-color: #334155;
-            --secondary: #94a3b8;
-        }
-
-        body {
-            background-color: var(--bg-body);
-            margin: 0;
-            font-family: var(--font-body);
-            color: var(--text-main);
-        }
-
-        .resume-builder-page-header {
-            background: var(--bg-card);
-            padding: 1rem 2rem;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .logo-area {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            text-decoration: none;
-            color: var(--primary-dark);
-            font-weight: 700;
-            font-size: 1.5rem;
-            font-family: var(--font-heading);
-        }
-
-        .back-link {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            text-decoration: none;
-            color: var(--secondary);
-            font-weight: 500;
-            transition: color 0.3s;
-        }
-
-        .back-link:hover {
-            color: var(--primary);
-        }
-
-        /* Container for the app to fill the page */
-        .page-content {
-            max-width: 1400px;
-            margin: 2rem auto;
-            padding: 0 2rem;
-        }
-
-        #resume-builder-app {
-            background: var(--bg-card);
-            border-radius: 1.5rem;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-            min-height: 80vh;
-            display: flex;
-            flex-direction: column;
-            border: 1px solid var(--border-color);
-        }
-
-        .resume-builder-window {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-        }
-
-        main#rb-main-content {
-            padding: 2rem;
-        }
-    </style>
 </head>
 
-<body class="resume-builder-scope">
-    <header class="resume-builder-page-header">
-        <a href="{{ url_for('user.dashboard') }}" class="logo-area">
-            <span>🚀</span> CareerConnect
-        </a>
-        <a href="{{ url_for('user.dashboard') }}" class="back-link">
-            <span>←</span> Back to Dashboard
-        </a>
-    </header>
+<body>
+    <div id="app">
+        <!-- Navigation / Header -->
+        <header class="main-header">
+            <div class="logo">
+                <a href="{{ url_for('user.dashboard') }}"
+                    style="text-decoration: none; display: flex; align-items: center; gap: 10px;">
+                    <span class="logo-text">Resumify</span>
+                </a>
+            </div>
+            <div class="stepper">
+                <div class="step active" id="step1-indicator">
+                    <span class="step-num">1</span>
+                    <span class="step-label">Template</span>
+                </div>
+                <div class="step" id="step2-indicator">
+                    <span class="step-num">2</span>
+                    <span class="step-label">Content</span>
+                </div>
+                <div class="step" id="step3-indicator">
+                    <span class="step-num">3</span>
+                    <span class="step-label">Download</span>
+                </div>
+            </div>
+            <div class="nav-right">
+                <a href="{{ url_for('user.dashboard') }}"
+                    style="text-decoration: none; color: var(--secondary); font-weight: 600; font-size: 0.9rem;">
+                    Back to Dashboard
+                </a>
+            </div>
+        </header>
 
-    <div class="page-content">
-        <div id="resume-builder-app">
-            <div class="resume-builder-window">
-                <!-- Navigation / Header inside widget (now full page) -->
-                <header class="main-header">
-                    <div class="stepper">
-                        <div class="step active" id="rb-step1-indicator">
-                            <span class="step-num">1</span>
-                            <span class="step-label">Template</span>
-                        </div>
-                        <div class="step" id="rb-step2-indicator">
-                            <span class="step-num">2</span>
-                            <span class="step-label">Content</span>
-                        </div>
-                        <div class="step" id="rb-step3-indicator">
-                            <span class="step-num">3</span>
-                            <span class="step-label">Download</span>
+        <main id="main-content">
+            <!-- Screen 1: Template Selection -->
+            <section id="template-selection" class="screen active">
+                <div class="screen-header">
+                    <h1>Choose Your Professional Palette</h1>
+                    <p>Select from 6 premium, industry-tested templates designed to get you hired.</p>
+                </div>
+
+                <div class="template-grid">
+                    <div class="template-card" data-template="marjorie">
+                        <div class="template-mini-preview" id="preview-marjorie"></div>
+                        <div class="template-info">
+                            <h3>Classic Professional (Marjorie)</h3>
+                            <p>Traditional layout with Objective, Activities, and References.</p>
+                            <button class="btn btn-primary select-template">Select Classic</button>
                         </div>
                     </div>
-                </header>
 
-                <main id="rb-main-content">
-                    <!-- Screen 1: Template Selection -->
-                    <section id="rb-template-selection" class="screen active">
-                        <div class="screen-header">
-                            <h1>Choose a Professional Template</h1>
-                            <p>Select a layout that best represents your career path.</p>
+                    <div class="template-card" data-template="john">
+                        <div class="template-mini-preview" id="preview-john"></div>
+                        <div class="template-info">
+                            <h3>IT & Technical (John Smith)</h3>
+                            <p>Modern dark accents with Twitter, Software Ratings, and Certifications.</p>
+                            <button class="btn btn-primary select-template">Select Technical</button>
                         </div>
+                    </div>
 
-                        <div class="template-grid">
-                            <!-- All Templates (Default + Admin Added) managed dynamically -->
-                            {% for dt in dynamic_templates %}
-                            <div class="template-card rb-template-card" data-template="{{ dt.templateId }}">
-                                <div class="template-mini-preview" id="rb-preview-{{ dt.templateId }}"></div>
-                                <div class="template-info">
-                                    <h3>{{ dt.name }}</h3>
-                                    <button class="btn btn-primary">Select Template</button>
+                    <div class="template-card" data-template="juliana">
+                        <div class="template-mini-preview" id="preview-juliana"></div>
+                        <div class="template-info">
+                            <h3>Creative Sidebar (Juliana)</h3>
+                            <p>Two-column layout with About Me, Expertise, and Languages.</p>
+                            <button class="btn btn-primary select-template">Select Creative</button>
+                        </div>
+                    </div>
+
+                    <div class="template-card" data-template="amanda">
+                        <div class="template-mini-preview" id="preview-amanda"></div>
+                        <div class="template-info">
+                            <h3>Academic & Awards (Amanda)</h3>
+                            <p>Centered layout focusing on Profile, Key Skills, and Professional Awards.</p>
+                            <button class="btn btn-primary select-template">Select Academic</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Screen 2: Content Input -->
+            <section id="content-input" class="screen">
+                <div class="editor-container">
+                    <div class="editor-sidebar">
+                        <h2>Personal Details</h2>
+                        <form id="resume-form" onsubmit="return false;">
+                            <div class="form-section active" data-section="personal">
+                                <div class="input-group">
+                                    <label for="fullName">Full Name</label>
+                                    <input type="text" id="fullName" placeholder="John Doe" required>
+                                </div>
+                                <div class="input-row">
+                                    <div class="input-group">
+                                        <label for="email">Email</label>
+                                        <input type="email" id="email" placeholder="john@example.com">
+                                    </div>
+                                    <div class="input-group">
+                                        <label for="phone">Phone</label>
+                                        <input type="tel" id="phone" placeholder="+1 234 567 890">
+                                    </div>
+                                </div>
+                                <div class="input-row">
+                                    <div class="input-group">
+                                        <label for="linkedin">LinkedIn URL</label>
+                                        <input type="url" id="linkedin" placeholder="linkedin.com/in/johndoe">
+                                    </div>
+                                    <div class="input-group">
+                                        <label for="github">GitHub URL</label>
+                                        <input type="url" id="github" placeholder="github.com/johndoe">
+                                    </div>
+                                </div>
+                                <div class="input-group">
+                                    <label for="location">Location</label>
+                                    <input type="text" id="location" placeholder="New York, NY">
+                                </div>
+                                <div class="input-group">
+                                    <label for="professionalTitle">Professional Title</label>
+                                    <input type="text" id="professionalTitle" placeholder="Senior Product Designer">
+                                </div>
+                                <div class="input-group">
+                                    <label for="summary">Career Objective / Summary</label>
+                                    <textarea id="summary"
+                                        placeholder="Briefly describe your career goals and key achievements..."></textarea>
                                 </div>
                             </div>
-                            {% endfor %}
-                        </div>
-                    </section>
 
-                    <!-- Screen 2: Content Input -->
-                    <section id="rb-content-input" class="screen">
-                        <div class="editor-container">
-                            <div class="editor-sidebar">
-                                <form id="rb-resume-form" onsubmit="return false;">
-                                    <!-- Dynamic fields injected here -->
-                                </form>
-                                <div class="editor-actions">
-                                    <button class="btn btn-secondary" id="rb-back-to-templates">Back</button>
-                                    <button class="btn btn-primary" id="rb-go-to-preview">Preview & Generate</button>
+                            <div class="form-section" data-section="experience">
+                                <h2>Experience / Internship</h2>
+                                <div id="experience-list">
+                                    <!-- Dynamic list of experiences -->
+                                </div>
+                                <button type="button" class="btn btn-outline" id="add-experience">+ Add
+                                    Experience/Internship</button>
+                            </div>
+
+                            <div class="form-section" data-section="projects">
+                                <h2>Projects</h2>
+                                <div id="projects-list">
+                                    <!-- Dynamic list of projects -->
+                                </div>
+                                <button type="button" class="btn btn-outline" id="add-project">+ Add Project</button>
+                            </div>
+
+                            <div class="form-section" data-section="education">
+                                <h2>Education</h2>
+                                <div id="education-list">
+                                    <!-- Dynamic list of education -->
+                                </div>
+                                <button type="button" class="btn btn-outline" id="add-education">+ Add
+                                    Education</button>
+                            </div>
+
+                            <div class="form-section" data-section="skills">
+                                <h2>Skills</h2>
+                                <div class="input-group">
+                                    <label for="tech-skills-input">Technical Skills (comma separated)</label>
+                                    <input type="text" id="tech-skills-input" placeholder="React, Python, SQL...">
+                                </div>
+                                <div class="input-group">
+                                    <label for="soft-skills-input">Soft Skills (comma separated)</label>
+                                    <input type="text" id="soft-skills-input"
+                                        placeholder="Leadership, Communication, Problem Solving...">
                                 </div>
                             </div>
-                            <div class="editor-preview-sticky">
-                                <div class="preview-mini-header">Live Preview</div>
-                                <div id="rb-live-preview-container"></div>
-                            </div>
-                        </div>
-                    </section>
 
-                    <!-- Screen 3: Final Preview / Download -->
-                    <section id="rb-final-preview" class="screen">
-                        <div class="final-container">
-                            <div class="final-actions">
-                                <button class="btn btn-secondary" id="rb-back-to-editor">Edit Content</button>
-                                <button class="btn btn-primary" id="rb-download-pdf">Download PDF</button>
+                            <div class="form-section" data-section="additional">
+                                <h2>Additional Sections</h2>
+                                <div class="input-group">
+                                    <label for="certifications-input">Certifications (comma separated)</label>
+                                    <input type="text" id="certifications-input"
+                                        placeholder="AWS Certified, Google Data Analytics...">
+                                </div>
+                                <div class="input-group">
+                                    <label for="achievements-input">Achievements (comma separated)</label>
+                                    <input type="text" id="achievements-input"
+                                        placeholder="Won Hackathon 2025, Top 1% in University...">
+                                </div>
+                                <div class="input-group">
+                                    <label for="languages-input">Languages (comma separated)</label>
+                                    <input type="text" id="languages-input"
+                                        placeholder="English (Native), Spanish (Fluent)...">
+                                </div>
+                                <div class="input-group">
+                                    <label for="hobbies-input">Hobbies (comma separated)</label>
+                                    <input type="text" id="hobbies-input"
+                                        placeholder="Photography, Chess, Traveling...">
+                                </div>
                             </div>
-                            <div id="rb-final-resume-container" class="resume-wrapper"></div>
+                        </form>
+                        <div class="editor-actions">
+                            <button class="btn btn-secondary" id="back-to-templates">Back</button>
+                            <button class="btn btn-primary" id="go-to-preview">Generate Preview</button>
                         </div>
-                    </section>
-                </main>
-            </div>
-        </div>
+                    </div>
+                    <div class="editor-preview-sticky">
+                        <div class="preview-mini-header">Live Preview</div>
+                        <div id="live-preview-container">
+                            <!-- Live rendered resume -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Screen 3: Final Preview / Download -->
+            <section id="final-preview" class="screen">
+                <div class="final-container">
+                    <div class="final-actions">
+                        <button class="btn btn-secondary" id="back-to-editor">Edit Content</button>
+                        <button class="btn btn-primary" id="download-pdf">Download PDF</button>
+                    </div>
+                    <div id="final-resume-container" class="resume-wrapper">
+                        <!-- Final Resume goes here -->
+                    </div>
+                </div>
+            </section>
+        </main>
     </div>
 
-    <script type="application/json" id="dynamic-templates-data">
-        {{ dynamic_templates | tojson | safe }}
-    </script>
-    <script>
-        window.dynamicTemplatesData = JSON.parse(document.getElementById('dynamic-templates-data').textContent);
-    </script>
+    <!-- Script Section -->
     <script src="{{ url_for('static', filename='resume_builder.js') }}"></script>
-    <script>
-        // Ensure the app starts in template selection mode
-        document.addEventListener('DOMContentLoaded', () => {
-            // Apply dark mode if set
-            const savedTheme = localStorage.getItem('user-theme');
-            if (savedTheme === 'dark') {
-                document.body.classList.add('dark-mode');
-            }
-        });
-    </script>
+    <!-- Use html2pdf for downloading -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </body>
 
 </html>
