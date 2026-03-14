@@ -3,249 +3,543 @@
 {% block title %}CareerConnect - User Profile{% endblock %}
 
 {% block content %}
-<div class="dashboard-container">
-    <header class="top-nav">
-        <div class="logo">
-            <div
-                style="width: 35px; height: 35px; background: var(--primary-color); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; font-size: 1.2rem;">
-                C</div>
-            <span
-                style="font-size: 1.25rem; font-weight: 700; color: var(--text-color); margin-left: 10px;">CareerConnect</span>
-        </div>
-        <div class="profile-container">
-            <a href="{{ url_for('user.dashboard') }}"
-                style="text-decoration: none; color: var(--primary-color); font-weight: 600; display: flex; align-items: center; gap: 5px;">
-                <span>←</span> Back to Dashboard
+<style>
+    /* Premium Profile CSS */
+    .profile-page-wrapper {
+        min-height: 100vh;
+        padding: 2rem;
+        font-family: 'Outfit', sans-serif;
+        background: var(--bg-color);
+    }
+
+    .profile-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2.5rem;
+    }
+
+    .profile-title {
+        font-size: 2.2rem;
+        font-weight: 800;
+        color: var(--text-color);
+        margin: 0;
+        letter-spacing: -0.5px;
+    }
+
+    .profile-subtitle {
+        color: var(--text-secondary, #64748b);
+        font-size: 1rem;
+        margin-top: 5px;
+    }
+
+    .profile-grid {
+        display: grid;
+        grid-template-columns: 350px 1fr;
+        gap: 2rem;
+        align-items: start;
+    }
+
+    @media (max-width: 900px) {
+        .profile-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .profile-card {
+        background: var(--white, #ffffff);
+        border-radius: 20px;
+        padding: 2.5rem;
+        box-shadow: 0 10px 40px -10px rgba(0,0,0,0.08);
+        border: 1px solid rgba(0,0,0,0.03);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    body.dark-mode .profile-card {
+        background: #1e293b;
+        border-color: rgba(255,255,255,0.05);
+        box-shadow: 0 10px 40px -10px rgba(0,0,0,0.4);
+    }
+
+    .avatar-wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding-bottom: 2rem;
+        border-bottom: 1px solid var(--border-color, #e2e8f0);
+        margin-bottom: 2rem;
+    }
+
+    body.dark-mode .avatar-wrapper {
+        border-color: #334155;
+    }
+
+    .avatar-circle {
+        width: 120px;
+        height: 120px;
+        background: linear-gradient(135deg, var(--primary-color, #3b82f6) 0%, #8b5cf6 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3.5rem;
+        color: white;
+        font-weight: 800;
+        box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.4);
+        margin-bottom: 1.5rem;
+        border: 4px solid var(--white, #fff);
+    }
+    
+    body.dark-mode .avatar-circle {
+        border-color: #0f172a;
+    }
+
+    .user-name {
+        font-size: 1.6rem;
+        font-weight: 700;
+        margin: 0 0 8px 0;
+        color: var(--text-color);
+    }
+
+    .status-badge {
+        background: rgba(16, 185, 129, 0.1);
+        color: #10b981;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .status-badge::before {
+        content: '';
+        width: 8px;
+        height: 8px;
+        background: #10b981;
+        border-radius: 50%;
+        display: block;
+    }
+
+    .info-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+    }
+
+    .info-item {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .info-label {
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--text-secondary, #64748b);
+        font-weight: 700;
+        margin-bottom: 4px;
+    }
+
+    .info-val {
+        font-size: 1.05rem;
+        color: var(--text-color);
+        font-weight: 500;
+        word-break: break-all;
+    }
+
+    .section-title {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: var(--text-color);
+        margin: 0 0 1.5rem 0;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--border-color, #e2e8f0);
+    }
+
+    body.dark-mode .section-title {
+        border-color: #334155;
+    }
+
+    .setting-group {
+        margin-bottom: 1.25rem;
+    }
+
+    .setting-group label {
+        display: block;
+        font-size: 0.9rem;
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: var(--text-color);
+    }
+
+    .setting-input {
+        width: 100%;
+        padding: 14px 16px;
+        background: var(--bg-color, #f8fafc);
+        border: 1px solid var(--border-color, #e2e8f0);
+        border-radius: 12px;
+        font-family: inherit;
+        font-size: 0.95rem;
+        color: var(--text-color);
+        transition: all 0.3s ease;
+        box-sizing: border-box;
+    }
+
+    body.dark-mode .setting-input {
+        background: #0f172a;
+        border-color: #334155;
+        color: #f1f5f9;
+    }
+
+    .setting-input:focus {
+        outline: none;
+        border-color: var(--primary-color, #3b82f6);
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+    }
+
+    .btn-save {
+        background: linear-gradient(135deg, var(--primary-color, #3b82f6) 0%, #2563eb 100%);
+        color: white;
+        border: none;
+        padding: 14px 24px;
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 1rem;
+        cursor: pointer;
+        width: 100%;
+        margin-top: 10px;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .btn-save:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(37, 99, 235, 0.3);
+    }
+
+    .data-box {
+        background: var(--bg-color, #f8fafc);
+        border-radius: 16px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        border: 1px solid var(--border-color, #e2e8f0);
+    }
+
+    body.dark-mode .data-box {
+        background: #0f172a;
+        border-color: #334155;
+    }
+
+    .pill-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .pill {
+        background: var(--white, #ffffff);
+        border: 1px solid var(--border-color, #e2e8f0);
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--text-color);
+        box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+    }
+
+    body.dark-mode .pill {
+        background: #1e293b;
+        border-color: #334155;
+    }
+
+    .pill.primary {
+        background: rgba(59, 130, 246, 0.1);
+        border-color: rgba(59, 130, 246, 0.2);
+        color: #3b82f6;
+    }
+
+    .data-title {
+        color: var(--text-secondary, #64748b);
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        font-weight: 800;
+        letter-spacing: 1px;
+        margin-bottom: 12px;
+    }
+    
+    .data-text {
+        font-size: 1rem;
+        line-height: 1.6;
+        color: var(--text-color);
+        white-space: pre-wrap;
+    }
+
+    .builder-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem 2rem;
+        border: 2px dashed var(--border-color, #e2e8f0);
+        border-radius: 20px;
+    }
+
+    body.dark-mode .empty-state {
+        border-color: #334155;
+    }
+
+    .empty-state p {
+        color: var(--text-secondary, #64748b);
+        margin: 0;
+        font-size: 1.1rem;
+    }
+    
+    .empty-state a {
+        color: var(--primary-color, #3b82f6);
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    .btn-action {
+        background: rgba(59, 130, 246, 0.1);
+        color: var(--primary-color, #3b82f6);
+        padding: 10px 20px;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.95rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.2s;
+    }
+
+    .btn-action:hover {
+        background: var(--primary-color, #3b82f6);
+        color: white;
+    }
+</style>
+
+<div class="profile-page-wrapper">
+    <div style="max-width: 1200px; margin: 0 auto;">
+        <header class="profile-header">
+            <div>
+                <h1 class="profile-title">Account Profile</h1>
+                <p class="profile-subtitle">Manage your professional identity and security settings.</p>
+            </div>
+            <a href="{{ url_for('user.dashboard') }}" class="btn-action" style="background: var(--white); border: 1px solid var(--border-color); color: var(--text-color); box-shadow: 0 4px 6px rgba(0,0,0,0.02)">
+                ← Back to Dashboard
             </a>
-        </div>
-    </header>
+        </header>
 
-    <main class="content" style="max-width: 800px; margin: 0 auto;">
-        <div class="welcome-box" style="margin-bottom: 2rem; border-left: 5px solid var(--primary-color);">
-            <h1 style="font-size: 2rem;">User Profile</h1>
-            <p>Your professional identity on CareerConnect.</p>
-        </div>
-
-        <div class="grid-container" style="grid-template-columns: 1fr;">
-            <!-- Profile Info Card -->
-            <div class="card" style="padding: 2.5rem; margin-bottom: 2rem;">
-                <div
-                    style="display: flex; align-items: center; gap: 2rem; margin-bottom: 2.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border-color);">
-                    <div
-                        style="width: 100px; height: 100px; background: var(--bg-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 3rem; color: var(--primary-color); border: 4px solid var(--white); box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
-                        {{ (user['username'] or 'U')[0] | upper }}
+        <div class="profile-grid">
+            <!-- Left Column: User details + Password change -->
+            <div style="display: flex; flex-direction: column; gap: 2rem;">
+                <div class="profile-card">
+                    <div class="avatar-wrapper">
+                        <div class="avatar-circle">
+                            {{ (user['username'] or 'U')[0] | upper }}
+                        </div>
+                        <h2 class="user-name">{{ user['username'] }}</h2>
+                        <div class="status-badge">Active Candidate</div>
                     </div>
-                    <div>
-                        <h2 style="margin: 0; font-size: 1.75rem;">{{ user['username'] }}</h2>
-                        <span class="badge success" style="font-size: 0.85rem; padding: 0.4rem 0.8rem;">Active
-                            Candidate</span>
+                    
+                    <div class="info-list">
+                        <div class="info-item">
+                            <span class="info-label">Email Address</span>
+                            <span class="info-val">{{ user['email'] or 'Not provided' }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Member Since</span>
+                            <span class="info-val">{{ user['created_at'] or 'Recent' }}</span>
+                        </div>
                     </div>
                 </div>
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
-                    <div>
-                        <h4
-                            style="color: var(--text-color); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; opacity: 0.8;">
-                            Email Address</h4>
-                        <p style="font-size: 1.1rem; font-weight: 600; color: var(--text-color);">{{ user['email'] or
-                            'Not
-                            provided' }}</p>
-                    </div>
-                    <div>
-                        <h4
-                            style="color: var(--text-color); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; opacity: 0.8;">
-                            Member Since</h4>
-                        <p style="font-size: 1.1rem; font-weight: 600; color: var(--text-color);">{{ user['created_at']
-                            or
-                            'Recent' }}</p>
+                <div class="profile-card">
+                    <h3 class="section-title">
+                        <span>🔐</span> Security Settings
+                    </h3>
+                    
+                    <button id="toggle-password-btn" class="btn-action" style="width: 100%; justify-content: center; margin-bottom: 1rem; background: rgba(59, 130, 246, 0.1);">
+                        Change Password
+                    </button>
+
+                    <div id="password-form-container" style="display: none;">
+                        <form action="{{ url_for('user.settings') }}" method="POST">
+                            <div class="setting-group">
+                                <label>Current Password</label>
+                                <input type="password" name="current_password" class="setting-input" required placeholder="••••••••">
+                            </div>
+                            <div class="setting-group">
+                                <label>New Password</label>
+                                <input type="password" name="new_password" class="setting-input" required placeholder="••••••••">
+                            </div>
+                            <div class="setting-group">
+                                <label>Confirm New Password</label>
+                                <input type="password" name="confirm_password" class="setting-input" required placeholder="••••••••">
+                            </div>
+                            <button type="submit" class="btn-save">Update Password</button>
+                        </form>
                     </div>
                 </div>
             </div>
 
-            <!-- Resume & Jobs Card -->
-            <div class="card" style="padding: 2.5rem;">
-                <h3 style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 10px;">
-                    <span style="font-size: 1.5rem;">📄</span> Professional Data
-                </h3>
+            <!-- Right Column: Professional Data & Builder Data -->
+            <div style="display: flex; flex-direction: column; gap: 2rem;">
+                <!-- Professional Data -->
+                <div class="profile-card">
+                    <h3 class="section-title">
+                        <span>📄</span> Profile Data
+                    </h3>
+                    
+                    <div class="data-box">
+                        <div class="data-title">Target Job Roles</div>
+                        <div class="pill-list">
+                            {% if user['applied_job'] %}
+                                {% for job in user['applied_job'].split(',') %}
+                                    <span class="pill">{{ job.strip() }}</span>
+                                {% endfor %}
+                            {% else %}
+                                <span style="font-style: italic; color: var(--text-secondary); font-size: 0.95rem;">No job roles specified yet.</span>
+                            {% endif %}
+                        </div>
+                    </div>
 
-                <div
-                    style="background: var(--bg-color); border-radius: 1rem; padding: 1.5rem; margin-bottom: 1.5rem; border: 1px solid var(--border-color);">
-                    <h4 style="margin-bottom: 1rem; color: var(--text-color); opacity: 0.8;">Target Job Roles</h4>
-                    <div style="display: flex; flex-wrap: wrap; gap: 0.75rem;">
-                        {% if user['applied_job'] %}
-                        {% for job in user['applied_job'].split(',') %}
-                        <span
-                            style="background: var(--white); border: 1px solid var(--border-color); padding: 0.5rem 1rem; border-radius: 0.75rem; font-size: 0.9rem; font-weight: 600; color: var(--text-color); box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
-                            {{ job.strip() }}
-                        </span>
-                        {% endfor %}
-                        {% else %}
-                        <p style="color: var(--text-color); font-style: italic; opacity: 0.6;">No job roles specified
-                            yet.</p>
+                    <div class="data-box" style="display: flex; align-items: center; justify-content: space-between; border-left: 4px solid var(--primary-color);">
+                        <div>
+                            <div class="data-title" style="margin-bottom: 4px;">Resume File</div>
+                            <div style="font-weight: 600; font-size: 1.05rem">{{ user['resume_filename'] or 'No resume uploaded' }}</div>
+                        </div>
+                        {% if user['resume_filename'] %}
+                            <a href="{{ url_for('static', filename='uploads/' + user['resume_filename']) }}" target="_blank" class="btn-action">
+                                View PDF
+                            </a>
                         {% endif %}
                     </div>
                 </div>
 
-                <div
-                    style="background: var(--bg-color); border-radius: 1rem; padding: 1.5rem; border: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
-                    <div>
-                        <h4 style="margin-bottom: 0.25rem; color: var(--text-color); opacity: 0.8;">Resume File</h4>
-                        <p style="font-size: 0.9rem; color: var(--text-color); opacity: 0.7;">
-                            {{ user['resume_filename'] or 'No resume uploaded' }}
-                        </p>
-                    </div>
-                    {% if user['resume_filename'] %}
-                    <a href="{{ url_for('static', filename='uploads/' + user['resume_filename']) }}" target="_blank"
-                        style="background: var(--primary-color); color: white; text-decoration: none; padding: 0.6rem 1.2rem; border-radius: 0.5rem; font-weight: 600; font-size: 0.9rem; transition: all 0.2s;">
-                        View File
-                    </a>
+                <!-- Resume Builder Data -->
+                <div class="profile-card">
+                    <h3 class="section-title">
+                        <span>🧾</span> Verified Resume Data
+                    </h3>
+
+                    {% if resume_data %}
+                        {% if resume_data['summary'] %}
+                            <div class="data-box" style="border-left: 4px solid #8b5cf6;">
+                                <div class="data-title">Professional Summary</div>
+                                <div class="data-text">{{ resume_data['summary'] }}</div>
+                            </div>
+                        {% endif %}
+
+                        <div class="builder-grid">
+                            {% if resume_data['full_name'] %}
+                            <div class="data-box" style="margin: 0;">
+                                <div class="data-title">Full Name</div>
+                                <div style="font-weight: 600; font-size: 1.05rem;">{{ resume_data['full_name'] }}</div>
+                            </div>
+                            {% endif %}
+                            {% if resume_data['phone'] %}
+                            <div class="data-box" style="margin: 0;">
+                                <div class="data-title">Phone</div>
+                                <div style="font-weight: 600; font-size: 1.05rem;">{{ resume_data['phone'] }}</div>
+                            </div>
+                            {% endif %}
+                            {% if resume_data['location'] %}
+                            <div class="data-box" style="margin: 0;">
+                                <div class="data-title">Location</div>
+                                <div style="font-weight: 600; font-size: 1.05rem;">{{ resume_data['location'] }}</div>
+                            </div>
+                            {% endif %}
+                            {% if resume_data['linkedin'] %}
+                            <div class="data-box" style="margin: 0;">
+                                <div class="data-title">LinkedIn</div>
+                                <div style="font-weight: 600; font-size: 1.05rem; word-break: break-all;">{{ resume_data['linkedin'] }}</div>
+                            </div>
+                            {% endif %}
+                            {% if resume_data['github'] %}
+                            <div class="data-box" style="margin: 0;">
+                                <div class="data-title">GitHub</div>
+                                <div style="font-weight: 600; font-size: 1.05rem; word-break: break-all;">{{ resume_data['github'] }}</div>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        {% if resume_data['skills'] %}
+                            <div class="data-box">
+                                <div class="data-title">Tech Skills</div>
+                                <div class="pill-list">
+                                    {% set skills_list = resume_data['skills'].split(',') if ',' in resume_data['skills'] else [resume_data['skills']] %}
+                                    {% for skill in skills_list %}
+                                        <span class="pill primary">{{ skill.strip() }}</span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        {% if resume_data['experience'] %}
+                            <div class="data-box">
+                                <div class="data-title">Experience</div>
+                                <div class="data-text">{{ resume_data['experience'] }}</div>
+                            </div>
+                        {% endif %}
+
+                        {% if resume_data['education'] %}
+                            <div class="data-box">
+                                <div class="data-title">Education</div>
+                                <div class="data-text">{{ resume_data['education'] }}</div>
+                            </div>
+                        {% endif %}
+
+                        {% if resume_data['projects'] %}
+                            <div class="data-box">
+                                <div class="data-title">Projects</div>
+                                <div class="data-text">{{ resume_data['projects'] }}</div>
+                            </div>
+                        {% endif %}
+                        
+                    {% else %}
+                        <div class="empty-state">
+                            <div style="font-size: 3.5rem; margin-bottom: 1rem;">📝</div>
+                            <p>No verified builder data found.<br>Use the <a href="{{ url_for('user.resume_builder') }}">Resume Builder</a> to automatically generate yours!</p>
+                        </div>
                     {% endif %}
                 </div>
             </div>
-
-            <!-- Resume Builder Data Card -->
-            {% if resume_data %}
-            <div class="card" style="padding: 2.5rem; margin-top: 2rem;">
-                <h3 style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 10px;">
-                    <span style="font-size: 1.5rem;">🧾</span> Resume Builder Data
-                </h3>
-
-                <!-- Professional Summary -->
-                {% if resume_data['summary'] %}
-                <div
-                    style="background: var(--bg-color); border-radius: 1rem; padding: 1.5rem; margin-bottom: 1.5rem; border: 1px solid var(--border-color); border-left: 4px solid var(--primary-color);">
-                    <h4
-                        style="margin: 0 0 0.75rem 0; color: var(--primary-color); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.08em;">
-                        💡 Professional Summary
-                    </h4>
-                    <p style="margin: 0; color: var(--text-color); font-size: 0.97rem; line-height: 1.7;">
-                        {{ resume_data['summary'] }}
-                    </p>
-                </div>
-                {% endif %}
-
-                <!-- Contact Info Row -->
-                <div
-                    style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
-                    {% if resume_data['full_name'] %}
-                    <div
-                        style="background: var(--bg-color); border-radius: 0.75rem; padding: 1rem; border: 1px solid var(--border-color);">
-                        <div
-                            style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-color); opacity: 0.6; margin-bottom: 0.3rem;">
-                            Full Name</div>
-                        <div style="font-weight: 600; color: var(--text-color);">{{ resume_data['full_name'] }}</div>
-                    </div>
-                    {% endif %}
-                    {% if resume_data['phone'] %}
-                    <div
-                        style="background: var(--bg-color); border-radius: 0.75rem; padding: 1rem; border: 1px solid var(--border-color);">
-                        <div
-                            style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-color); opacity: 0.6; margin-bottom: 0.3rem;">
-                            Phone</div>
-                        <div style="font-weight: 600; color: var(--text-color);">{{ resume_data['phone'] }}</div>
-                    </div>
-                    {% endif %}
-                    {% if resume_data['location'] %}
-                    <div
-                        style="background: var(--bg-color); border-radius: 0.75rem; padding: 1rem; border: 1px solid var(--border-color);">
-                        <div
-                            style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-color); opacity: 0.6; margin-bottom: 0.3rem;">
-                            Location</div>
-                        <div style="font-weight: 600; color: var(--text-color);">{{ resume_data['location'] }}</div>
-                    </div>
-                    {% endif %}
-                    {% if resume_data['linkedin'] %}
-                    <div
-                        style="background: var(--bg-color); border-radius: 0.75rem; padding: 1rem; border: 1px solid var(--border-color);">
-                        <div
-                            style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-color); opacity: 0.6; margin-bottom: 0.3rem;">
-                            LinkedIn</div>
-                        <div style="font-weight: 600; color: var(--text-color);">{{ resume_data['linkedin'] }}</div>
-                    </div>
-                    {% endif %}
-                    {% if resume_data['github'] %}
-                    <div
-                        style="background: var(--bg-color); border-radius: 0.75rem; padding: 1rem; border: 1px solid var(--border-color);">
-                        <div
-                            style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-color); opacity: 0.6; margin-bottom: 0.3rem;">
-                            GitHub</div>
-                        <div style="font-weight: 600; color: var(--text-color);">{{ resume_data['github'] }}</div>
-                    </div>
-                    {% endif %}
-                </div>
-
-                <!-- Skills -->
-                {% if resume_data['skills'] %}
-                <div
-                    style="background: var(--bg-color); border-radius: 1rem; padding: 1.5rem; margin-bottom: 1.5rem; border: 1px solid var(--border-color);">
-                    <h4
-                        style="margin: 0 0 1rem 0; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-color); opacity: 0.8;">
-                        🛠 Skills</h4>
-                    <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
-                        {% set skills_list = resume_data['skills'].split(',') if ',' in resume_data['skills'] else
-                        [resume_data['skills']] %}
-                        {% for skill in skills_list %}
-                        <span
-                            style="background: rgba(37, 99, 235, 0.08); border: 1px solid rgba(37, 99, 235, 0.2); color: var(--primary-color); padding: 0.35rem 0.85rem; border-radius: 2rem; font-size: 0.85rem; font-weight: 600;">
-                            {{ skill.strip() }}
-                        </span>
-                        {% endfor %}
-                    </div>
-                </div>
-                {% endif %}
-
-                <!-- Experience -->
-                {% if resume_data['experience'] %}
-                <div
-                    style="background: var(--bg-color); border-radius: 1rem; padding: 1.5rem; margin-bottom: 1.5rem; border: 1px solid var(--border-color);">
-                    <h4
-                        style="margin: 0 0 1rem 0; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-color); opacity: 0.8;">
-                        💼 Experience</h4>
-                    <p
-                        style="margin: 0; color: var(--text-color); font-size: 0.95rem; line-height: 1.7; white-space: pre-line;">
-                        {{ resume_data['experience'] }}</p>
-                </div>
-                {% endif %}
-
-                <!-- Education -->
-                {% if resume_data['education'] %}
-                <div
-                    style="background: var(--bg-color); border-radius: 1rem; padding: 1.5rem; margin-bottom: 1.5rem; border: 1px solid var(--border-color);">
-                    <h4
-                        style="margin: 0 0 1rem 0; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-color); opacity: 0.8;">
-                        🎓 Education</h4>
-                    <p
-                        style="margin: 0; color: var(--text-color); font-size: 0.95rem; line-height: 1.7; white-space: pre-line;">
-                        {{ resume_data['education'] }}</p>
-                </div>
-                {% endif %}
-
-                <!-- Projects -->
-                {% if resume_data['projects'] %}
-                <div
-                    style="background: var(--bg-color); border-radius: 1rem; padding: 1.5rem; border: 1px solid var(--border-color);">
-                    <h4
-                        style="margin: 0 0 1rem 0; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-color); opacity: 0.8;">
-                        🚀 Projects</h4>
-                    <p
-                        style="margin: 0; color: var(--text-color); font-size: 0.95rem; line-height: 1.7; white-space: pre-line;">
-                        {{ resume_data['projects'] }}</p>
-                </div>
-                {% endif %}
-
-            </div>
-            {% else %}
-            <div class="card"
-                style="padding: 2rem; margin-top: 2rem; text-align: center; border: 2px dashed var(--border-color);">
-                <p style="color: var(--text-color); opacity: 0.6; margin: 0;">No resume builder data saved yet. Use the
-                    <a href="{{ url_for('user.resume_builder') }}"
-                        style="color: var(--primary-color); font-weight: 600;">Resume Builder</a>
-                    to create your resume!
-                </p>
-            </div>
-            {% endif %}
-
         </div>
-    </main>
+    </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const toggleBtn = document.getElementById('toggle-password-btn');
+        const formContainer = document.getElementById('password-form-container');
+
+        if (toggleBtn && formContainer) {
+            toggleBtn.addEventListener('click', () => {
+                if (formContainer.style.display === 'none') {
+                    formContainer.style.display = 'block';
+                    toggleBtn.textContent = 'Cancel Password Change';
+                    toggleBtn.style.background = 'rgba(239, 68, 68, 0.1)';
+                    toggleBtn.style.color = '#ef4444';
+                } else {
+                    formContainer.style.display = 'none';
+                    toggleBtn.textContent = 'Change Password';
+                    toggleBtn.style.background = 'rgba(59, 130, 246, 0.1)';
+                    toggleBtn.style.color = 'var(--primary-color)';
+                }
+            });
+        }
+    });
+</script>
 {% endblock %}

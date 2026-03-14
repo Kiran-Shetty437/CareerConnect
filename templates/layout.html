@@ -7,6 +7,9 @@
     <title>{% block title %}App{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Custom Popup Alerts -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='alerts.css') }}">
 </head>
 
 <body>
@@ -32,6 +35,9 @@
             }
         });
     </script>
+
+    <!-- Custom Popup Alerts JS -->
+    <script src="{{ url_for('static', filename='alerts.js') }}"></script>
 </body>
 
 </html>

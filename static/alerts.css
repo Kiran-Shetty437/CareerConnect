@@ -1,0 +1,142 @@
+/* Premium Popup Alerts */
+#global-alerts-container {
+    position: fixed;
+    top: 25px;
+    right: 25px;
+    z-index: 999999;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    pointer-events: none;
+}
+
+.popup-alert {
+    width: 340px;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    padding: 16px 20px;
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    pointer-events: auto;
+    position: relative;
+    overflow: hidden;
+    transform: translateX(120%);
+    opacity: 0;
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s ease;
+    border-left: 6px solid #ccc;
+    font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+body.dark-mode .popup-alert {
+    background: #1e293b;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+}
+
+.popup-alert.show {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+.popup-alert.success { border-left-color: #10b981; }
+.popup-alert.error { border-left-color: #ef4444; }
+.popup-alert.danger { border-left-color: #ef4444; }
+.popup-alert.warning { border-left-color: #f59e0b; }
+.popup-alert.info { border-left-color: #3b82f6; }
+
+.popup-icon {
+    flex-shrink: 0;
+    margin-top: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.popup-alert.success .popup-icon { color: #10b981; }
+.popup-alert.error .popup-icon { color: #ef4444; }
+.popup-alert.danger .popup-icon { color: #ef4444; }
+.popup-alert.warning .popup-icon { color: #f59e0b; }
+.popup-alert.info .popup-icon { color: #3b82f6; }
+
+.popup-content {
+    flex-grow: 1;
+}
+
+.popup-title {
+    font-weight: 700;
+    font-size: 1.05rem;
+    margin-bottom: 4px;
+    color: #1f2937;
+    text-transform: capitalize;
+    line-height: 1.2;
+}
+
+body.dark-mode .popup-title {
+    color: #f1f5f9;
+}
+
+.popup-desc {
+    font-size: 0.9rem;
+    color: #4b5563;
+    line-height: 1.4;
+}
+
+body.dark-mode .popup-desc {
+    color: #94a3b8;
+}
+
+.popup-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #9ca3af;
+    padding: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s;
+    margin-top: 2px;
+    border-radius: 50%;
+}
+
+.popup-close:hover {
+    color: #4b5563;
+    background: rgba(0,0,0,0.05);
+}
+
+body.dark-mode .popup-close:hover {
+    color: #cbd5e1;
+    background: rgba(255,255,255,0.1);
+}
+
+.popup-progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 4px;
+    background: rgba(0,0,0,0.05);
+    width: 100%;
+}
+
+body.dark-mode .popup-progress {
+    background: rgba(255,255,255,0.05);
+}
+
+.popup-progress-bar {
+    height: 100%;
+    width: 100%;
+    transform-origin: left;
+    transition: transform 4s linear;
+}
+
+.popup-alert.success .popup-progress-bar { background: #10b981; }
+.popup-alert.error .popup-progress-bar { background: #ef4444; }
+.popup-alert.danger .popup-progress-bar { background: #ef4444; }
+.popup-alert.warning .popup-progress-bar { background: #f59e0b; }
+.popup-alert.info .popup-progress-bar { background: #3b82f6; }
+
+/* In case any existing alerts display, hide them globally here */
+.flash-messages, .flash-container {
+    display: none !important;
+}

@@ -15,6 +15,9 @@
         rel="stylesheet">
     <!-- Main Style -->
     <link rel="stylesheet" href="{{ url_for('static', filename='resume_builder.css') }}">
+
+    <!-- Custom Popup Alerts -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='alerts.css') }}">
 </head>
 
 <body>
@@ -57,43 +60,29 @@
                     <p>Select from 6 premium, industry-tested templates designed to get you hired.</p>
                 </div>
 
-                <div class="template-grid">
-                    <div class="template-card" data-template="marjorie">
-                        <div class="template-mini-preview" id="preview-marjorie"></div>
+                <div class="template-grid" id="dynamic-template-grid">
+                    {% for template in dynamic_templates %}
+                    <div class="template-card" data-template="{{ template.templateId }}">
+                        <div class="template-mini-preview" id="preview-{{ template.templateId }}"></div>
                         <div class="template-info">
-                            <h3>Classic Professional (Marjorie)</h3>
-                            <p>Traditional layout with Objective, Activities, and References.</p>
-                            <button class="btn btn-primary select-template">Select Classic</button>
+                            <h3>{{ template.name }}</h3>
+                            <p>{{ template.demo.personal.summary | truncate(80) }}</p>
+                            <button class="btn btn-primary select-template">Select {{ template.name.split(' ')[0]
+                                }}</button>
                         </div>
                     </div>
-
-                    <div class="template-card" data-template="john">
-                        <div class="template-mini-preview" id="preview-john"></div>
-                        <div class="template-info">
-                            <h3>IT & Technical (John Smith)</h3>
-                            <p>Modern dark accents with Twitter, Software Ratings, and Certifications.</p>
-                            <button class="btn btn-primary select-template">Select Technical</button>
-                        </div>
+                    {% endfor %}
+                    {% if not dynamic_templates %}
+                    <div
+                        style="grid-column: 1 / -1; text-align: center; padding: 3rem; background: rgba(0,0,0,0.02); border-radius: 1rem;">
+                        <p style="font-size: 1.1rem; color: #64748b;">No active templates available at the moment.</p>
                     </div>
-
-                    <div class="template-card" data-template="juliana">
-                        <div class="template-mini-preview" id="preview-juliana"></div>
-                        <div class="template-info">
-                            <h3>Creative Sidebar (Juliana)</h3>
-                            <p>Two-column layout with About Me, Expertise, and Languages.</p>
-                            <button class="btn btn-primary select-template">Select Creative</button>
-                        </div>
-                    </div>
-
-                    <div class="template-card" data-template="amanda">
-                        <div class="template-mini-preview" id="preview-amanda"></div>
-                        <div class="template-info">
-                            <h3>Academic & Awards (Amanda)</h3>
-                            <p>Centered layout focusing on Profile, Key Skills, and Professional Awards.</p>
-                            <button class="btn btn-primary select-template">Select Academic</button>
-                        </div>
-                    </div>
+                    {% endif %}
                 </div>
+
+                <script>
+                    window.DYNAMIC_TEMPLATES = {{ dynamic_templates | tojson | safe }};
+                </script>
             </section>
 
             <!-- Screen 2: Content Input -->
@@ -238,6 +227,9 @@
     <script src="{{ url_for('static', filename='resume_builder.js') }}"></script>
     <!-- Use html2pdf for downloading -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <!-- Custom Popup Alerts JS -->
+    <script src="{{ url_for('static', filename='alerts.js') }}"></script>
 </body>
 
 </html>

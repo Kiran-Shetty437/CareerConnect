@@ -13,6 +13,9 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='admin_dashboard.css') }}">
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Custom Popup Alerts -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='alerts.css') }}">
 </head>
 
 <body>
@@ -503,6 +506,9 @@
             });
         }, 5000);
     </script>
+
+    <!-- Custom Popup Alerts JS -->
+    <script src="{{ url_for('static', filename='alerts.js') }}"></script>
 </body>
 
 </html>

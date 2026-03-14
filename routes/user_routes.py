@@ -50,7 +50,7 @@ def settings():
                 flash("Incorrect current password.", "error")
             conn.close()
 
-    return render_template("user/settings.html", username=session.get("username"))
+    return redirect(url_for("user.profile"))
 
 
 
