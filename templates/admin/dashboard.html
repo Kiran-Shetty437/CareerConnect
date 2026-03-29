@@ -166,6 +166,11 @@
                         <i class="fas fa-file-invoice"></i> Resume Templates
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" id="btn-aptitude" onclick="switchView('aptitude', this); return false;">
+                        <i class="fas fa-brain"></i> Aptitude Patterns
+                    </a>
+                </li>
             </nav>
 
             <div class="sidebar-footer">
@@ -244,13 +249,23 @@
 
                 <div class="dashboard-grid">
                     <div class="glass-card" style="padding: 1.2rem; align-self: start;">
-                        <div class="chart-header" style="margin-bottom: 1rem;">
+                        <div class="chart-header" style="margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center;">
                             <div style="font-weight: 600; font-size: 1.1rem;">General view</div>
                             <div style="display: flex; gap: 1rem; align-items: center;">
-                                <span style="font-size: 0.8rem; color: var(--text-secondary);">Last 10 days</span>
+                                <select id="chartMetric" onchange="updateChartData()" style="background: rgba(255,255,255,0.05); color: inherit; border: 1px solid var(--glass-border); border-radius: 8px; padding: 5px 10px; outline: none; font-family: 'Outfit', sans-serif;">
+                                    <option value="users" style="color: black;">Total Users</option>
+                                    <option value="active" style="color: black;">Active Users</option>
+                                    <option value="screen_time" style="color: black;">Avg Screen Time</option>
+                                </select>
+                                <select id="chartTimeframe" onchange="updateChartData()" style="background: rgba(255,255,255,0.05); color: inherit; border: 1px solid var(--glass-border); border-radius: 8px; padding: 5px 10px; outline: none; font-family: 'Outfit', sans-serif;">
+                                    <option value="10days" style="color: black;">Last 10 Days</option>
+                                    <option value="week" style="color: black;">Week</option>
+                                    <option value="month" style="color: black;">Month</option>
+                                    <option value="year" style="color: black;">Year</option>
+                                </select>
                             </div>
                         </div>
-                        <div style="height: 120px; width: 100%;">
+                        <div style="height: 360px; width: 100%;">
                             <canvas id="mainChart"></canvas>
                         </div>
                     </div>
@@ -487,6 +502,94 @@
                     </div>
                 </div>
             </div> <!-- End company-view -->
+
+            <div id="aptitude-view" class="view-section">
+                <div class="glass-card" style="margin-top: 2rem;">
+                    <div class="activity-header">
+                        <div style="font-weight: 600; font-size: 1.1rem;">Aptitude Pattern Management</div>
+                    </div>
+
+                    <form action="{{ url_for('admin.add_aptitude') }}" method="POST" style="margin-bottom: 2rem;">
+                        <div style="margin-bottom: 1rem;">
+                            <label style="display: block; font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 5px;">Company Name</label>
+                            <input type="text" name="company_name" class="ratio-input" style="width: 100%; max-width: 400px; height: 40px;" placeholder="e.g. TCS, Capgemini" required>
+                        </div>
+                        
+                        <div id="aptitude-sections-container">
+                            <div class="aptitude-section-row" style="display: flex; gap: 10px; margin-bottom: 10px; align-items: flex-end;">
+                                <div style="flex: 2;">
+                                    <label style="display: block; font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 5px;">Section Pattern Name</label>
+                                    <input type="text" name="section_name[]" class="ratio-input" style="width: 100%; height: 40px;" placeholder="e.g. Verbal" required>
+                                </div>
+                                <div style="flex: 1;">
+                                    <label style="display: block; font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 5px;">Questions</label>
+                                    <input type="number" name="questions[]" class="ratio-input" style="width: 100%; height: 40px;" placeholder="5" required>
+                                </div>
+                                <div style="flex: 1;">
+                                    <label style="display: block; font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 5px;">Minutes</label>
+                                    <input type="number" name="minutes[]" class="ratio-input" style="width: 100%; height: 40px;" placeholder="5" required>
+                                </div>
+                                <button type="button" class="btn-icon" style="height: 40px; width: 40px; background: rgba(255,255,255,0.05); color: #ff7675; border-radius: 8px;" onclick="this.parentElement.remove()">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; gap: 10px; margin-top: 1rem;">
+                            <button type="button" class="btn-secondary" onclick="addAptitudeSectionRow()" style="background: rgba(255,255,255,0.05); color: var(--text-primary); border: 1px solid var(--glass-border); padding: 0 15px; height: 40px; border-radius: 8px; cursor: pointer;">
+                                <i class="fas fa-plus" style="margin-right: 5px;"></i> Add More Pattern
+                            </button>
+                            <button type="submit" class="btn-primary" style="height: 40px;">Save Pattern</button>
+                        </div>
+                    </form>
+
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Company</th>
+                                    <th>Aptitude Patterns Details</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for ap in aptitude_patterns %}
+                                <tr>
+                                    <td>
+                                        <div class="user-cell">
+                                            <div class="user-avatar-mini" style="background: rgba(123, 97, 255, 0.1); color: #7b61ff;">
+                                                <i class="fas fa-building"></i>
+                                            </div>
+                                            <span style="font-weight: 600;">{{ ap['company_name'] }}</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                                            {% for pat in ap['patterns'] %}
+                                            <span class="status-badge" style="background: rgba(0, 210, 255, 0.1); color: #00d2ff; padding: 4px 10px;">
+                                                <b>{{ pat.section }}</b>: {{ pat.questions }} Qs / {{ pat.minutes }} mins
+                                            </span>
+                                            {% endfor %}
+                                            {% if not ap['patterns'] %}
+                                            <span style="color: var(--text-secondary); font-size: 0.85rem;">No sections defined</span>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <form action="{{ url_for('admin.delete_aptitude', pattern_id=ap['id']) }}" method="POST">
+                                            <button type="submit" style="background:none; border:none; color:#ff7675; cursor:pointer;" onclick="return confirm('Delete aptitude pattern?')">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div> <!-- End aptitude-view -->
+
         </main>
     </div>
 
@@ -506,6 +609,32 @@
             btn.classList.add('active');
         }
 
+        let mainChartInstance = null;
+
+        async function updateChartData() {
+            const timeframe = document.getElementById('chartTimeframe').value;
+            const metric = document.getElementById('chartMetric') ? document.getElementById('chartMetric').value : 'users';
+            
+            try {
+                const response = await fetch(`/admin/chart-data?timeframe=${timeframe}&metric=${metric}`);
+                const data = await response.json();
+                
+                if (mainChartInstance) {
+                    mainChartInstance.data.labels = data.labels;
+                    mainChartInstance.data.datasets = data.datasets;
+                    mainChartInstance.options.plugins.legend.display = data.datasets.length > 1;
+                    
+                    data.datasets.forEach(ds => {
+                        ds.pointRadius = 4;
+                    });
+                    
+                    mainChartInstance.update();
+                }
+            } catch (error) {
+                console.error("Failed to fetch chart data:", error);
+            }
+        }
+
         // Main Chart Initialization
         document.addEventListener('DOMContentLoaded', function () {
             if (typeof Chart !== 'undefined' && document.getElementById('mainChart')) {
@@ -515,7 +644,7 @@
                 const chartValues = JSON.parse(dataStore.dataset.values);
 
                 const ctx = document.getElementById('mainChart').getContext('2d');
-                const mainChart = new Chart(ctx, {
+                mainChartInstance = new Chart(ctx, {
                     type: 'line',
                     data: {
                         labels: chartLabels,
@@ -535,7 +664,10 @@
                         maintainAspectRatio: false,
                         plugins: {
                             legend: {
-                                display: false
+                                display: false,
+                                labels: {
+                                    color: '#8b96c9'
+                                }
                             }
                         },
                         scales: {
@@ -701,6 +833,28 @@
             // Trigger the keyup event manually
             const event = new Event('keyup');
             searchInput.dispatchEvent(event);
+        }
+
+        function addAptitudeSectionRow() {
+            const container = document.getElementById('aptitude-sections-container');
+            const row = document.createElement('div');
+            row.className = 'aptitude-section-row';
+            row.style.cssText = 'display: flex; gap: 10px; margin-bottom: 10px; align-items: flex-end;';
+            row.innerHTML = `
+                <div style="flex: 2;">
+                    <input type="text" name="section_name[]" class="ratio-input" style="width: 100%; height: 40px;" placeholder="e.g. Logical Reasoning" required>
+                </div>
+                <div style="flex: 1;">
+                    <input type="number" name="questions[]" class="ratio-input" style="width: 100%; height: 40px;" placeholder="10" required>
+                </div>
+                <div style="flex: 1;">
+                    <input type="number" name="minutes[]" class="ratio-input" style="width: 100%; height: 40px;" placeholder="10" required>
+                </div>
+                <button type="button" class="btn-icon" style="height: 40px; width: 40px; background: rgba(255,255,255,0.05); color: #ff7675; border-radius: 8px;" onclick="this.parentElement.remove()">
+                    <i class="fas fa-trash"></i>
+                </button>
+            `;
+            container.appendChild(row);
         }
     </script>
 

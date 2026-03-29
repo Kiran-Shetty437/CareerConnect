@@ -127,6 +127,13 @@ def init_db():
         base_layout TEXT DEFAULT 'marjorie',
         is_active INTEGER DEFAULT 1
     )''')
+    
+    c.execute('''CREATE TABLE IF NOT EXISTS aptitude_patterns (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        company_name TEXT UNIQUE,
+        patterns_json TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )''')
 
     # Default Templates Initialization
     default_templates = [

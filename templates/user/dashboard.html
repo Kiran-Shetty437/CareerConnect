@@ -603,9 +603,9 @@
         .analyze-btn { width: 100%; margin-top: 1.5rem; padding: 1rem; background: var(--primary); color: white; border: none; border-radius: 12px; font-weight: 800; cursor: pointer; }
         .analyze-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-        .rb-widget { position: fixed; bottom: 2rem; right: 13rem; z-index: 1000; }
-        .rb-toggle-btn { width: 60px; height: 60px; background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem; text-decoration: none; box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3); transition: var(--transition); }
-        .rb-toggle-btn:hover { transform: scale(1.1) rotate(5deg); }
+        .rb-widget, .aptitude-widget { z-index: 1000; }
+        .rb-toggle-btn, .aptitude-toggle-btn { transition: var(--transition); }
+        .rb-toggle-btn:hover, .aptitude-toggle-btn:hover { transform: scale(1.1) rotate(5deg); }
     </style>
 </head>
 
@@ -640,6 +640,7 @@
                             <span class="user-role">User Portal</span>
                         </div>
                         <a href="{{ url_for('user.profile') }}" class="dropdown-item">👤 Profile / Settings</a>
+                        <a href="{{ url_for('user.aptitude') }}" class="dropdown-item">🧠 Aptitude Tests</a>
                         <a href="{{ url_for('auth.logout') }}" class="dropdown-item logout">👋 Logout</a>
                     </div>
                 </div>
@@ -755,9 +756,18 @@
         </div>
     </div>
 
+    <!-- Aptitude Test Widget -->
+    <div class="aptitude-widget" style="position: fixed; bottom: 2rem; right: 13rem; z-index: 1000;">
+        <a href="{{ url_for('user.aptitude') }}" class="aptitude-toggle-btn" title="Take Aptitude Test" 
+           style="width: 60px; height: 60px; background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem; text-decoration: none; box-shadow: 0 10px 25px rgba(139, 92, 246, 0.3); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);">
+            <span>🧠</span>
+        </a>
+    </div>
+
     <!-- Resume Builder Link -->
-    <div class="rb-widget">
-        <a href="{{ url_for('user.resume_builder') }}" class="rb-toggle-btn" title="Open Resume Builder">
+    <div class="rb-widget" style="position: fixed; bottom: 2rem; right: 18.5rem; z-index: 1000;">
+        <a href="{{ url_for('user.resume_builder') }}" class="rb-toggle-btn" title="Open Resume Builder"
+           style="width: 60px; height: 60px; background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem; text-decoration: none; box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);">
             <span>🛠️</span>
         </a>
     </div>

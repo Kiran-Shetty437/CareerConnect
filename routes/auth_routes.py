@@ -131,8 +131,12 @@ def verify_otp():
 
 @auth.route("/reset-password", methods=["POST"])
 def reset_password():
-    new_password = request.form["password"]
+    new_password = request.form.get("new_password")
     email = session.get("reset_email")
+
+    if not new_password:
+        flash("Password cannot be empty.", "error")
+        return render_template("login.html", state="reset")
 
     if email:
         conn = get_connection()

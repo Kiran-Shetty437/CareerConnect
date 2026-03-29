@@ -1,0 +1,385 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div id="aptitude-app" class="dashboard-container" style="max-width: 1000px; margin: 2rem auto; min-height: 80vh;">
+    
+    <!-- Header Area -->
+    <div class="portal-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <div class="logo" style="display: flex; align-items: center; gap: 12px;">
+            <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #8b5cf6, #6d28d9); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; font-size: 1.2rem; box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);">🧠</div>
+            <span style="font-size: 1.5rem; font-weight: 800; color: var(--text-main); letter-spacing: -0.5px;">Aptitude Portal</span>
+        </div>
+        <a href="{{ url_for('user.dashboard') }}" style="text-decoration: none; color: var(--text-muted); font-weight: 700; font-size: 0.9rem; transition: color 0.3s;" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--text-muted)'">← Back to Dashboard</a>
+    </div>
+
+    <!-- Screen 1: Setup -->
+    <div id="screen-setup" class="portal-screen active">
+        <div class="welcome-box" style="background: linear-gradient(135deg, #4c1d95 0%, #6d28d9 100%); color: white; padding: 3.5rem; border-radius: 32px; margin-bottom: 3rem; box-shadow: 0 20px 40px rgba(76, 29, 149, 0.3); border: 1px solid rgba(255,255,255,0.1);">
+            <h1 style="font-size: 2.5rem; font-weight: 800; margin: 0 0 0.75rem 0;">Ready to level up?</h1>
+            <p style="font-size: 1.1rem; opacity: 0.9; margin: 0;">Select a company and difficulty to generate your customized AI aptitude test.</p>
+        </div>
+
+        <div class="company-card" style="padding: 3rem; background: var(--bg-card); backdrop-filter: var(--glass-blur); border-radius: 28px; box-shadow: var(--card-shadow); border: 1px solid var(--border-glass);">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2.5rem;">
+                <div class="input-group">
+                    <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main);">Target Company</label>
+                    <select id="company-name" style="width: 100%; padding: 1.1rem; border-radius: 16px; border: 1px solid var(--border-glass); background: rgba(0,0,0,0.03); color: var(--text-main); font-family: inherit; font-size: 1rem; cursor: pointer; transition: all 0.3s;">
+                        <option value="">-- Choose Company Pattern --</option>
+                        {% for p in patterns %}
+                        <option value="{{ p['company_name'] }}">{{ p['company_name'] }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label style="display: block; margin-bottom: 0.75rem; font-weight: 700; color: var(--text-main);">Test Difficulty</label>
+                    <select id="test-difficulty" style="width: 100%; padding: 1.1rem; border-radius: 16px; border: 1px solid var(--border-glass); background: rgba(0,0,0,0.03); color: var(--text-main); font-family: inherit; font-size: 1rem; cursor: pointer; transition: all 0.3s;">
+                        <option value="easy">🟢 Easy</option>
+                        <option value="medium" selected>🟡 Medium</option>
+                        <option value="difficult">🔴 Difficult</option>
+                    </select>
+                </div>
+            </div>
+            <button id="btn-generate" style="width: 100%; padding: 1.25rem; background: linear-gradient(135deg, #8b5cf6, #6d28d9); color: white; border: none; border-radius: 18px; font-weight: 800; font-size: 1.1rem; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 10px 25px rgba(139, 92, 246, 0.4);">
+                Begin AI Evaluation
+            </button>
+        </div>
+    </div>
+
+    <!-- Screen 2: Loading State -->
+    <div id="screen-loading" class="portal-screen" style="display: none; text-align: center; padding: 6rem 2rem;">
+        <div class="loader-container" style="margin-bottom: 2rem;">
+            <div style="width: 80px; height: 80px; border: 6px solid rgba(139, 92, 246, 0.1); border-top-color: #8b5cf6; border-radius: 50%; display: inline-block; animation: spin 1s infinite linear;"></div>
+        </div>
+        <h2 style="font-weight: 800; font-size: 2rem; color: var(--text-main);">Creating Your Test...</h2>
+        <p style="color: var(--text-muted); font-size: 1.1rem; max-width: 400px; margin: 0 auto;">Gemini AI is analyzing company patterns and generating unique questions just for you.</p>
+    </div>
+
+    <!-- Screen 3: Test -->
+    <div id="screen-test" class="portal-screen" style="display: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; background: var(--bg-card); backdrop-filter: var(--glass-blur); padding: 1.5rem 2.5rem; border-radius: 20px; box-shadow: var(--card-shadow); border: 1px solid var(--border-glass); margin-bottom: 2rem; position: sticky; top: 1rem; z-index: 100;">
+            <div>
+                <h3 id="test-info-company" style="font-weight: 800; margin: 0; color: var(--text-main);"></h3>
+                <span id="test-info-meta" style="font-weight: 600; font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;"></span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 15px; background: rgba(239, 68, 68, 0.1); color: #ef4444; padding: 0.75rem 1.5rem; border-radius: 14px; font-weight: 800; font-size: 1.4rem;">
+                <span style="font-size: 1.1rem;">⏳</span> <span id="portal-timer">--:--</span>
+            </div>
+        </div>
+
+        <div id="test-questions-container">
+            <!-- Questions injected here -->
+        </div>
+
+        <div style="text-align: right; margin: 3rem 0;">
+            <button id="btn-submit-test" style="padding: 1.25rem 4rem; background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; border-radius: 18px; font-weight: 800; font-size: 1.1rem; cursor: pointer; transition: all 0.3s; box-shadow: 0 10px 20px rgba(16, 185, 129, 0.2);">
+                Final Submission
+            </button>
+        </div>
+    </div>
+
+    <!-- Screen 4: Results -->
+    <div id="screen-result" class="portal-screen" style="display: none; text-align: center; padding: 4rem 2rem;">
+        <div id="result-emoji" style="font-size: 6rem; margin-bottom: 1.5rem; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.1)); animation: bounce 2s infinite;">🏆</div>
+        <h2 style="font-weight: 800; font-size: 2.75rem; color: var(--text-main); margin-bottom: 0.5rem;">Assessment Complete!</h2>
+        <p id="result-meta" style="color: var(--text-muted); font-size: 1.25rem; font-weight: 500; margin-bottom: 3.5rem;"></p>
+
+        <div style="max-width: 600px; margin: 0 auto 4rem auto; background: var(--bg-card); padding: 2.5rem; border-radius: 32px; box-shadow: var(--card-shadow); border: 1px solid var(--border-glass);">
+            <div style="display: flex; justify-content: center; gap: 2.5rem; margin-bottom: 3rem;">
+                <div class="stat-card">
+                    <div id="res-score" style="font-size: 3.5rem; font-weight: 800; color: #10b981; line-height: 1;">0</div>
+                    <div style="font-weight: 700; color: var(--text-muted); margin-top: 0.5rem; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px;">Correct</div>
+                </div>
+                <div style="width: 2px; background: var(--border-glass); margin: 0.5rem 0;"></div>
+                <div class="stat-card">
+                    <div id="res-total" style="font-size: 3.5rem; font-weight: 800; color: #3b82f6; line-height: 1;">0</div>
+                    <div style="font-weight: 700; color: var(--text-muted); margin-top: 0.5rem; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px;">Questions</div>
+                </div>
+            </div>
+            
+            <div style="margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; font-weight: 700;">
+                <span style="color: var(--text-main);">Accuracy Score</span>
+                <span id="res-percent-label" style="color: #8b5cf6;">0%</span>
+            </div>
+            <div style="width: 100%; height: 12px; background: rgba(0,0,0,0.05); border-radius: 6px; overflow: hidden; border: 1px solid var(--border-glass);">
+                <div id="res-progress-bar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #8b5cf6, #d946ef); transition: width 1.5s cubic-bezier(0.34, 1.56, 0.64, 1);"></div>
+            </div>
+        </div>
+
+        <div style="display: flex; justify-content: center; gap: 1.25rem;">
+            <button onclick="resetApp()" style="padding: 1.25rem 2.5rem; background: rgba(0,0,0,0.05); color: var(--text-main); border: 1px solid var(--border-glass); font-weight: 800; border-radius: 18px; cursor: pointer; transition: all 0.3s; font-family: inherit;">Retake Test</button>
+            <a href="{{ url_for('user.dashboard') }}" style="padding: 1.25rem 2.5rem; background: linear-gradient(135deg, #8b5cf6, #6d28d9); color: white; text-decoration: none; font-weight: 800; border-radius: 18px; transition: all 0.3s; box-shadow: 0 10px 20px rgba(139, 92, 246, 0.3);">Exit to Dashboard</a>
+        </div>
+    </div>
+</div>
+
+<style>
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+    @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+    .portal-screen { animation: fadeIn 0.4s ease-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    
+    .opt-label {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 1.25rem 1.75rem;
+        background: var(--bg-card);
+        border: 1px solid var(--border-glass);
+        border-radius: 20px;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        margin-bottom: 1rem;
+    }
+    .opt-label:hover { 
+        background: rgba(139, 92, 246, 0.04); 
+        border-color: rgba(139, 92, 246, 0.3); 
+        transform: translateX(8px) scale(1.01); 
+    }
+    .opt-label.selected { 
+        background: rgba(139, 92, 246, 0.08); 
+        border-color: #8b5cf6; 
+        box-shadow: 0 8px 20px rgba(139,92,246,0.12);
+        transform: translateX(10px) scale(1.02);
+    }
+    
+    .opt-input { display: none; }
+    .opt-radio { width: 20px; height: 20px; border: 2px solid var(--border-glass); border-radius: 50%; position: relative; }
+    .opt-label.selected .opt-radio { border-color: #8b5cf6; }
+    .opt-label.selected .opt-radio::after { content: ''; position: absolute; width: 10px; height: 10px; background: #8b5cf6; border-radius: 50%; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+    .portal-screen button:disabled { 
+        opacity: 0.5; 
+        cursor: not-allowed; 
+        transform: none !important;
+        box-shadow: none !important;
+    }
+</style>
+
+<script>
+let currentTestData = null;
+let timerInterval = null;
+let remainingSeconds = 0;
+let currentSectionIdx = 0;
+let allAnswers = {};
+
+function switchScreen(screenId) {
+    document.querySelectorAll('.portal-screen').forEach(s => s.style.display = 'none');
+    document.getElementById(`screen-${screenId}`).style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+async function generateTest() {
+    const company = document.getElementById('company-name').value;
+    const difficulty = document.getElementById('test-difficulty').value;
+
+    if (!company) {
+        alert("Please select a target company.");
+        return;
+    }
+
+    switchScreen('loading');
+
+    try {
+        const res = await fetch('/aptitude/generate_json', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ company_name: company, difficulty: difficulty })
+        });
+        
+        const data = await res.json();
+        if (data.error) throw new Error(data.error);
+
+        currentTestData = data;
+        currentSectionIdx = 0;
+        allAnswers = {};
+        
+        startSection();
+        switchScreen('test');
+
+    } catch (e) {
+        alert("Error: " + e.message);
+        switchScreen('setup');
+    }
+}
+
+function startSection() {
+    const section = currentTestData.questions[currentSectionIdx];
+    const totalMins = section.minutes || 5; // Fallback to 5 if not in JSON (unlikely)
+    
+    document.getElementById('test-info-company').textContent = `${currentTestData.company_name} - Section ${currentSectionIdx + 1}/${currentTestData.questions.length}`;
+    document.getElementById('test-info-meta').textContent = `Round: ${section.section || 'General'}`;
+    
+    renderCurrentSection();
+    
+    // Update button text and ensure it is enabled
+    console.log(`Starting Section: ${currentSectionIdx + 1} of ${currentTestData.questions.length}`);
+    const btn = document.getElementById('btn-submit-test');
+    btn.disabled = false;
+    
+    if (currentSectionIdx === currentTestData.questions.length - 1) {
+        btn.textContent = "Final Submission";
+        btn.onclick = () => handleSectionNavigation(true);
+    } else {
+        btn.textContent = "Continue to Next Round";
+        btn.onclick = () => handleSectionNavigation(false);
+    }
+    
+    startTimer(totalMins);
+}
+
+function renderCurrentSection() {
+    const container = document.getElementById('test-questions-container');
+    const section = currentTestData.questions[currentSectionIdx];
+    
+    let html = `<div class="test-section" style="margin-top: 2rem;">`;
+    
+    // Calculate globally unique indices across sections
+    let qGlobalOffset = 0;
+    for (let i = 0; i < currentSectionIdx; i++) {
+        qGlobalOffset += currentTestData.questions[i].questions.length;
+    }
+
+    section.questions.forEach((q, idx) => {
+        const qIdx = qGlobalOffset + idx;
+        html += `
+            <div class="question-card" style="background: var(--bg-card); padding: 2rem 2.5rem; border-radius: 24px; border: 1px solid var(--border-glass); margin-bottom: 2rem; box-shadow: var(--card-shadow);">
+                <p style="font-weight: 700; font-size: 1.15rem; color: var(--text-main); margin-bottom: 1.75rem; line-height: 1.6;">${idx+1}. ${q.text}</p>
+                <div class="options-container" data-q-idx="${qIdx}">
+        `;
+
+        q.options.forEach((opt, oIdx) => {
+            const isSelected = allAnswers[qIdx] == oIdx;
+            html += `
+                <label class="opt-label ${isSelected ? 'selected' : ''}" onclick="selectOption(this, ${qIdx}, ${oIdx})">
+                    <input type="radio" name="q_${qIdx}" value="${oIdx}" class="opt-input" ${isSelected ? 'checked' : ''}>
+                    <div class="opt-radio"></div>
+                    <span style="font-weight: 600; color: var(--text-main);">${opt}</span>
+                </label>
+            `;
+        });
+
+        html += `</div></div>`;
+    });
+
+    html += `</div>`;
+    container.innerHTML = html;
+}
+
+function selectOption(el, qIdx, oIdx) {
+    const parent = el.closest('.options-container');
+    parent.querySelectorAll('.opt-label').forEach(l => l.classList.remove('selected'));
+    el.classList.add('selected');
+    el.querySelector('input').checked = true;
+    allAnswers[qIdx] = oIdx;
+}
+
+function handleSectionNavigation(fromTimer = false) {
+    console.log(`Navigation triggered. FromTimer: ${fromTimer}, CurrentIdx: ${currentSectionIdx}, TotalSections: ${currentTestData.questions.length}`);
+    // Stop any existing timer immediately to prevent collisions
+    if (timerInterval) clearInterval(timerInterval);
+    
+    // Check if current section questions are answered (if not from timer)
+    if (!fromTimer) {
+        const currentContainer = document.getElementById('test-questions-container');
+        const totalQs = currentContainer.querySelectorAll('.options-container').length;
+        const answeredQs = currentContainer.querySelectorAll('.opt-input:checked').length;
+        
+        if (answeredQs < totalQs) {
+            alert("Please answer all questions before proceeding, or wait for the timer to expire.");
+            // Restart timer logic if they stay
+            const section = currentTestData.questions[currentSectionIdx];
+            startTimer(remainingSeconds / 60); // Resume with remaining time
+            return;
+        }
+    }
+
+    // Prevent double clicking from skipping sections
+    const btn = document.getElementById('btn-submit-test');
+    if (btn) btn.disabled = true;
+
+    if (currentSectionIdx < currentTestData.questions.length - 1) {
+        currentSectionIdx++;
+        startSection();
+    } else {
+        submitTest();
+    }
+}
+
+function startTimer(minutes) {
+    remainingSeconds = Math.max(minutes * 60, 1);
+    updateTimerDisplay();
+    
+    // Safety clear again
+    if (timerInterval) clearInterval(timerInterval);
+    
+    timerInterval = setInterval(() => {
+        remainingSeconds--;
+        updateTimerDisplay();
+        
+        if (remainingSeconds <= 0) {
+            clearInterval(timerInterval);
+            alert("⏰ Round Over! Moving to the next step.");
+            handleSectionNavigation(true);
+        }
+    }, 1000);
+}
+
+function updateTimerDisplay() {
+    const mins = Math.floor(remainingSeconds / 60);
+    const secs = remainingSeconds % 60;
+    document.getElementById('portal-timer').textContent = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+}
+
+async function submitTest() {
+    if (timerInterval) clearInterval(timerInterval);
+    
+    switchScreen('loading');
+    document.querySelector('#screen-loading h2').textContent = "Calculating Final Score...";
+
+    try {
+        const res = await fetch('/aptitude/submit_json', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ answers: allAnswers })
+        });
+        
+        const data = await res.json();
+        if (data.error) throw new Error(data.error);
+
+        showResults(data);
+
+    } catch (e) {
+        alert("Submission failed: " + e.message);
+        switchScreen('test');
+    }
+}
+
+function showResults(data) {
+    document.getElementById('res-score').textContent = data.score;
+    document.getElementById('res-total').textContent = data.total;
+    
+    // Update progress bar and percentage labels
+    const percentage = data.percentage;
+    document.getElementById('res-percent-label').textContent = percentage + '%';
+    document.getElementById('res-progress-bar').style.width = percentage + '%';
+    
+    document.getElementById('result-meta').textContent = `Performance overview for ${data.company_name} (${data.difficulty})`;
+    
+    const emoji = document.getElementById('result-emoji');
+    if (percentage >= 80) emoji.textContent = '🏆';
+    else if (percentage >= 50) emoji.textContent = '👍';
+    else emoji.textContent = '📚';
+
+    switchScreen('result');
+}
+
+function resetApp() {
+    document.getElementById('company-name').value = '';
+    document.getElementById('test-difficulty').value = 'medium';
+    switchScreen('setup');
+}
+
+document.getElementById('btn-generate').addEventListener('click', generateTest);
+document.getElementById('btn-submit-test').addEventListener('click', submitTest);
+
+</script>
+{% endblock %}

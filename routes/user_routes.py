@@ -5,6 +5,7 @@ from werkzeug.utils import secure_filename
 from services.chatbot_service import job_chatbot
 from routes.admin_routes import check_and_notify_user
 from services.resume_service import analyze_resume, extract_pdf_text, extract_docx_text
+from services.aptitude_service import generate_aptitude_questions
 
 user = Blueprint("user", __name__)
 
@@ -243,3 +244,99 @@ def resume_builder():
     return render_template("user/resume_builder.html", 
                            username=session.get("username"),
                            dynamic_templates=templates)
+
+@user.route("/aptitude", methods=["GET"])
+def aptitude():
+    if session.get("role") != "user":
+        return redirect(url_for("auth.login"))
+    
+    conn = get_connection()
+    patterns = conn.execute("SELECT company_name FROM aptitude_patterns").fetchall()
+    conn.close()
+    
+    return render_template("user/aptitude_portal.html", 
+                           username=session.get("username"), 
+                           patterns=patterns)
+
+@user.route("/aptitude/generate_json", methods=["POST"])
+def generate_aptitude_json():
+    if session.get("role") != "user":
+        return jsonify({"error": "Unauthorized"}), 403
+        
+    data = request.json
+    company_name = data.get("company_name")
+    difficulty = data.get("difficulty")
+    
+    conn = get_connection()
+    pattern_row = conn.execute("SELECT patterns_json FROM aptitude_patterns WHERE company_name=?", (company_name,)).fetchone()
+    conn.close()
+    
+    if not pattern_row:
+        return jsonify({"error": "Pattern not found"}), 404
+        
+    # Build test questions using Gemini
+    generated_test = generate_aptitude_questions(company_name, difficulty, pattern_row["patterns_json"])
+    
+    if not generated_test:
+        return jsonify({"error": "Generation failed"}), 500
+        
+    # Calculate total minutes and attach them to each section
+    sections_pattern = json.loads(pattern_row["patterns_json"])
+    total_minutes = 0
+    
+    for gen_sec in generated_test:
+        # Find matching pattern entry to get minutes
+        match = next((s for s in sections_pattern if s.get('section', '').lower() == gen_sec.get('section', '').lower()), None)
+        mins = int(match.get('minutes', 5)) if match else 5
+        gen_sec['minutes'] = mins
+        total_minutes += mins
+    
+    # Store test info in session
+    session["aptitude_test"] = {
+        "company_name": company_name,
+        "difficulty": difficulty,
+        "data": generated_test,
+        "total_minutes": total_minutes
+    }
+    
+    return jsonify({
+        "questions": generated_test,
+        "total_minutes": total_minutes,
+        "company_name": company_name,
+        "difficulty": difficulty
+    })
+
+@user.route("/aptitude/submit_json", methods=["POST"])
+def submit_aptitude_json():
+    if session.get("role") != "user":
+        return jsonify({"error": "Unauthorized"}), 403
+        
+    test_info = session.get("aptitude_test")
+    if not test_info:
+        return jsonify({"error": "Session expired"}), 400
+        
+    user_answers = request.json.get("answers", {})
+    score = 0
+    total = 0
+    question_index = 0
+    
+    for section in test_info["data"]:
+        for q in section["questions"]:
+            user_ans = user_answers.get(str(question_index))
+            if user_ans is not None and str(user_ans) == str(q.get("correct_index")):
+                score += 1
+            total += 1
+            question_index += 1
+            
+    percentage = int((score / total) * 100) if total > 0 else 0
+    
+    # Clear test session
+    session.pop("aptitude_test", None)
+    
+    return jsonify({
+        "score": score,
+        "total": total,
+        "percentage": percentage,
+        "company_name": test_info["company_name"],
+        "difficulty": test_info["difficulty"]
+    })

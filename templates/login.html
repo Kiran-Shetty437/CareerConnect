@@ -184,6 +184,7 @@
                 emailInput.required = true;
                 emailInput.name = "email";
                 forgotEmailInput.required = false;
+                forgotEmailInput.name = "forgot_email";
             } else if (tab === 'forgot') {
                 form.action = "{{ url_for('auth.forgot_password') }}";
                 formAction.value = 'forgot';
@@ -198,6 +199,7 @@
                 usernameInput.required = false;
                 passwordInput.required = false;
                 emailInput.required = false;
+                emailInput.name = "signup_email";
                 forgotEmailInput.required = true;
                 forgotEmailInput.name = "email";
             } else if (tab === 'verify') {
@@ -242,6 +244,8 @@
                 usernameInput.required = true;
                 passwordInput.required = true;
                 emailInput.required = false;
+                emailInput.name = "signup_email";
+                forgotEmailInput.name = "forgot_email";
             }
         }
 
