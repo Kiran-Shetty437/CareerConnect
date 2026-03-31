@@ -83,25 +83,42 @@
         <h2 style="font-weight: 800; font-size: 2.75rem; color: var(--text-main); margin-bottom: 0.5rem;">Assessment Complete!</h2>
         <p id="result-meta" style="color: var(--text-muted); font-size: 1.25rem; font-weight: 500; margin-bottom: 3.5rem;"></p>
 
-        <div style="max-width: 600px; margin: 0 auto 4rem auto; background: var(--bg-card); padding: 2.5rem; border-radius: 32px; box-shadow: var(--card-shadow); border: 1px solid var(--border-glass);">
-            <div style="display: flex; justify-content: center; gap: 2.5rem; margin-bottom: 3rem;">
-                <div class="stat-card">
-                    <div id="res-score" style="font-size: 3.5rem; font-weight: 800; color: #10b981; line-height: 1;">0</div>
-                    <div style="font-weight: 700; color: var(--text-muted); margin-top: 0.5rem; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px;">Correct</div>
+        <div style="max-width: 800px; margin: 0 auto 4rem auto;">
+            <div style="background: var(--bg-card); padding: 2.5rem; border-radius: 32px; box-shadow: var(--card-shadow); border: 1px solid var(--border-glass); margin-bottom: 2rem;">
+                <div style="display: flex; justify-content: center; gap: 2.5rem; margin-bottom: 3rem;">
+                    <div class="stat-card">
+                        <div id="res-score" style="font-size: 3.5rem; font-weight: 800; color: #10b981; line-height: 1;">0</div>
+                        <div style="font-weight: 700; color: var(--text-muted); margin-top: 0.5rem; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px;">Correct</div>
+                    </div>
+                    <div style="width: 2px; background: var(--border-glass); margin: 0.5rem 0;"></div>
+                    <div class="stat-card">
+                        <div id="res-total" style="font-size: 3.5rem; font-weight: 800; color: #3b82f6; line-height: 1;">0</div>
+                        <div style="font-weight: 700; color: var(--text-muted); margin-top: 0.5rem; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px;">Questions</div>
+                    </div>
                 </div>
-                <div style="width: 2px; background: var(--border-glass); margin: 0.5rem 0;"></div>
-                <div class="stat-card">
-                    <div id="res-total" style="font-size: 3.5rem; font-weight: 800; color: #3b82f6; line-height: 1;">0</div>
-                    <div style="font-weight: 700; color: var(--text-muted); margin-top: 0.5rem; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px;">Questions</div>
+                
+                <div style="margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; font-weight: 700;">
+                    <span style="color: var(--text-main);">Accuracy Score</span>
+                    <span id="res-percent-label" style="color: #8b5cf6;">0%</span>
+                </div>
+                <div style="width: 100%; height: 12px; background: rgba(0,0,0,0.05); border-radius: 6px; overflow: hidden; border: 1px solid var(--border-glass); margin-bottom: 2rem;">
+                    <div id="res-progress-bar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #8b5cf6, #d946ef); transition: width 1.5s cubic-bezier(0.34, 1.56, 0.64, 1);"></div>
+                </div>
+
+                <div id="section-breakdown-container">
+                    <!-- Section scores go here -->
                 </div>
             </div>
-            
-            <div style="margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; font-weight: 700;">
-                <span style="color: var(--text-main);">Accuracy Score</span>
-                <span id="res-percent-label" style="color: #8b5cf6;">0%</span>
-            </div>
-            <div style="width: 100%; height: 12px; background: rgba(0,0,0,0.05); border-radius: 6px; overflow: hidden; border: 1px solid var(--border-glass);">
-                <div id="res-progress-bar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #8b5cf6, #d946ef); transition: width 1.5s cubic-bezier(0.34, 1.56, 0.64, 1);"></div>
+
+            <button id="btn-toggle-review" onclick="toggleDetailedReview()" style="width: 100%; padding: 1.25rem; background: rgba(0,0,0,0.03); color: var(--text-main); border: 1px dashed var(--border-glass); border-radius: 20px; font-weight: 700; cursor: pointer; transition: all 0.3s; margin-bottom: 2rem;">
+                🔍 Analyze Detailed Performance & Review Answers
+            </button>
+
+            <div id="detailed-review-wrapper" style="display: none; text-align: left; animation: fadeIn 0.5s ease-out;">
+                <h3 style="font-weight: 800; margin-bottom: 2rem; color: var(--text-main);">Question-by-Question Analysis</h3>
+                <div id="detailed-questions-container">
+                    <!-- Detailed question feedback goes here -->
+                </div>
             </div>
         </div>
 
@@ -152,6 +169,58 @@
         transform: none !important;
         box-shadow: none !important;
     }
+
+    #portal-timer.low-time {
+        color: #ef4444;
+        animation: pulse-danger 1s infinite;
+    }
+
+    @keyframes pulse-danger {
+        0% { transform: scale(1); text-shadow: 0 0 0px rgba(239, 68, 68, 0); }
+        50% { transform: scale(1.1); text-shadow: 0 0 10px rgba(239, 68, 68, 0.4); }
+        100% { transform: scale(1); text-shadow: 0 0 0px rgba(239, 68, 68, 0); }
+    }
+
+    .round-breakdown-card {
+        background: var(--bg-card);
+        padding: 1.5rem;
+        border-radius: 20px;
+        border: 1px solid var(--border-glass);
+        margin-bottom: 1rem;
+        text-align: left;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .detailed-review-item {
+        background: var(--bg-card);
+        padding: 1.5rem;
+        border-radius: 20px;
+        border: 1px solid var(--border-glass);
+        margin-bottom: 1rem;
+        text-align: left;
+    }
+
+    .correct-ans { color: #10b981; font-weight: 700; }
+    .wrong-ans { color: #ef4444; font-weight: 700; }
+
+    .opt-label.review-mode { cursor: default; transform: none !important; }
+    .opt-label.review-mode:hover { background: var(--bg-card); border-color: var(--border-glass); }
+    
+    .opt-label.review-correct { 
+        background: rgba(16, 185, 129, 0.08) !important; 
+        border-color: #10b981 !important; 
+    }
+    .opt-label.review-correct .opt-radio { border-color: #10b981 !important; }
+    .opt-label.review-correct .opt-radio::after { background: #10b981 !important; display: block !important; content: ''; position: absolute; width: 10px; height: 10px; border-radius: 50%; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+
+    .opt-label.review-wrong { 
+        background: rgba(239, 68, 68, 0.08) !important; 
+        border-color: #ef4444 !important; 
+    }
+    .opt-label.review-wrong .opt-radio { border-color: #ef4444 !important; }
+    .opt-label.review-wrong .opt-radio::after { background: #ef4444 !important; display: block !important; content: ''; position: absolute; width: 10px; height: 10px; border-radius: 50%; top: 50%; left: 50%; transform: translate(-50%, -50%); }
 </style>
 
 <script>
@@ -217,7 +286,7 @@ function startSection() {
     
     if (currentSectionIdx === currentTestData.questions.length - 1) {
         btn.textContent = "Final Submission";
-        btn.onclick = () => handleSectionNavigation(true);
+        btn.onclick = () => handleSectionNavigation(false);
     } else {
         btn.textContent = "Continue to Next Round";
         btn.onclick = () => handleSectionNavigation(false);
@@ -317,7 +386,8 @@ function startTimer(minutes) {
         
         if (remainingSeconds <= 0) {
             clearInterval(timerInterval);
-            alert("⏰ Round Over! Moving to the next step.");
+            // Non-blocking notification (optional: could add a toast or similar)
+            console.log("Round Over! Moving to the next step.");
             handleSectionNavigation(true);
         }
     }, 1000);
@@ -326,7 +396,14 @@ function startTimer(minutes) {
 function updateTimerDisplay() {
     const mins = Math.floor(remainingSeconds / 60);
     const secs = remainingSeconds % 60;
-    document.getElementById('portal-timer').textContent = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+    const timerEl = document.getElementById('portal-timer');
+    timerEl.textContent = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+    
+    if (remainingSeconds < 30) {
+        timerEl.classList.add('low-time');
+    } else {
+        timerEl.classList.remove('low-time');
+    }
 }
 
 async function submitTest() {
@@ -369,7 +446,79 @@ function showResults(data) {
     else if (percentage >= 50) emoji.textContent = '👍';
     else emoji.textContent = '📚';
 
+    // 1. Render Section Breakdown
+    const breakdownContainer = document.getElementById('section-breakdown-container');
+    let breakdownHtml = `<h4 style="font-weight: 700; margin-bottom: 1rem; text-align: left; font-size: 0.9rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 1px;">Section Performance</h4>`;
+    
+    data.sections_results.forEach(sec => {
+        const secPercent = (sec.score / sec.total) * 100;
+        breakdownHtml += `
+            <div class="round-breakdown-card">
+                <div>
+                    <div style="font-weight: 800; color: var(--text-main); font-size: 1.1rem;">${sec.section_name}</div>
+                    <div style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">Scored ${sec.score} out of ${sec.total}</div>
+                </div>
+                <div style="font-weight: 800; color: ${secPercent >= 70 ? '#10b981' : secPercent >= 40 ? '#f59e0b' : '#ef4444'}">${Math.round(secPercent)}%</div>
+            </div>
+        `;
+    });
+    breakdownContainer.innerHTML = breakdownHtml;
+
+    // 2. Render Detailed Question Review in Round Style
+    const detailContainer = document.getElementById('detailed-questions-container');
+    let detailHtml = '';
+    
+    let qNum = 1;
+    data.sections_results.forEach(sec => {
+        detailHtml += `<div style="margin-top: 3rem; margin-bottom: 1.5rem; font-weight: 800; font-size: 0.9rem; text-transform: uppercase; color: var(--text-muted); border-bottom: 1px solid var(--border-glass); padding-bottom: 0.5rem;">${sec.section_name} Breakdown</div>`;
+        
+        sec.questions.forEach(q => {
+            const isCorrect = q.is_correct;
+            const userAnsIdx = q.user_answer;
+            const correctAnsIdx = q.correct_index;
+            
+            detailHtml += `
+                <div class="question-card" style="background: var(--bg-card); padding: 2rem 2.5rem; border-radius: 24px; border: 1px solid var(--border-glass); margin-bottom: 2rem;">
+                    <p style="font-weight: 700; font-size: 1.15rem; color: var(--text-main); margin-bottom: 1.75rem; line-height: 1.6;">${qNum}. ${q.text}</p>
+                    <div class="options-container">
+            `;
+
+            q.options.forEach((opt, oIdx) => {
+                let statusClass = 'review-mode';
+                if (oIdx == correctAnsIdx) statusClass += ' review-correct';
+                else if (oIdx == userAnsIdx && !isCorrect) statusClass += ' review-wrong';
+
+                detailHtml += `
+                    <label class="opt-label ${statusClass}">
+                        <div class="opt-radio"></div>
+                        <span style="font-weight: 600; color: var(--text-main);">${opt}</span>
+                    </label>
+                `;
+            });
+
+            detailHtml += `</div></div>`;
+            qNum++;
+        });
+    });
+    detailContainer.innerHTML = detailHtml;
+    
+    // Hide review by default
+    document.getElementById('detailed-review-wrapper').style.display = 'none';
+
     switchScreen('result');
+}
+
+function toggleDetailedReview() {
+    const wrapper = document.getElementById('detailed-review-wrapper');
+    const btn = document.getElementById('btn-toggle-review');
+    if (wrapper.style.display === 'none') {
+        wrapper.style.display = 'block';
+        btn.textContent = "🔼 Hide Detailed Review";
+        window.scrollTo({ top: btn.offsetTop - 20, behavior: 'smooth' });
+    } else {
+        wrapper.style.display = 'none';
+        btn.textContent = "🔍 Analyze Detailed Performance & Review Answers";
+    }
 }
 
 function resetApp() {
@@ -379,7 +528,7 @@ function resetApp() {
 }
 
 document.getElementById('btn-generate').addEventListener('click', generateTest);
-document.getElementById('btn-submit-test').addEventListener('click', submitTest);
+// Note: btn-submit-test onclick is managed dynamically in startSection()
 
 </script>
 {% endblock %}

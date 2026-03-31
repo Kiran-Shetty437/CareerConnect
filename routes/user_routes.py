@@ -320,13 +320,39 @@ def submit_aptitude_json():
     total = 0
     question_index = 0
     
+    sections_results = []
+    
     for section in test_info["data"]:
+        section_score = 0
+        section_total = 0
+        section_questions = []
+        
         for q in section["questions"]:
-            user_ans = user_answers.get(str(question_index))
-            if user_ans is not None and str(user_ans) == str(q.get("correct_index")):
+            user_ans_idx = user_answers.get(str(question_index))
+            is_correct = False
+            if user_ans_idx is not None and str(user_ans_idx) == str(q.get("correct_index")):
                 score += 1
+                section_score += 1
+                is_correct = True
+            
+            section_questions.append({
+                "text": q.get("text"),
+                "options": q.get("options"),
+                "user_answer": user_ans_idx,
+                "correct_index": q.get("correct_index"),
+                "is_correct": is_correct
+            })
+            
             total += 1
+            section_total += 1
             question_index += 1
+            
+        sections_results.append({
+            "section_name": section.get("section", "General"),
+            "score": section_score,
+            "total": section_total,
+            "questions": section_questions
+        })
             
     percentage = int((score / total) * 100) if total > 0 else 0
     
@@ -338,5 +364,6 @@ def submit_aptitude_json():
         "total": total,
         "percentage": percentage,
         "company_name": test_info["company_name"],
-        "difficulty": test_info["difficulty"]
+        "difficulty": test_info["difficulty"],
+        "sections_results": sections_results
     })
