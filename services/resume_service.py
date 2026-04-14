@@ -82,48 +82,40 @@ def analyze_resume_image(image_file):
         }
         """
 
-        # Try with Gemini models in order of probability of success
-        models_to_try = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro"]
-        last_error = ""
-
-        for model_name in models_to_try:
-            try:
-                response = client.models.generate_content(
-                    model=model_name,
-                    contents=[prompt, img]
-                )
-                if response and response.text:
-                    json_text = response.text.strip()
-                    
-                    # More robust JSON extraction (handles markdown and leading/trailing text)
-                    if "```" in json_text:
-                        # Find the first { after ``` and last } before ```
-                        start_pos = json_text.find("{")
-                        end_pos = json_text.rfind("}") + 1
-                        if start_pos != -1 and end_pos != -1:
-                            json_text = json_text[start_pos:end_pos]
-                    
-                    # Try direct parse
-                    try:
-                        return json.loads(json_text)
-                    except json.JSONDecodeError:
-                        # Find the first { and last } regardless
-                        start_pos = json_text.find("{")
-                        end_pos = json_text.rfind("}") + 1
-                        if start_pos != -1 and end_pos != -1:
-                            return json.loads(json_text[start_pos:end_pos])
-                        raise
-            except Exception as e:
-                last_error = str(e).upper()
-                print(f"[{model_name}] Error: {last_error}")
-                if any(x in last_error for x in ["429", "RESOURCE_EXHAUSTED", "QUOTA", "NOT_FOUND"]):
-                    continue # Try next model
-                else:
-                    break # Probably non-quota error
-
-        if any(x in last_error for x in ["429", "RESOURCE_EXHAUSTED", "QUOTA"]):
-            return {"error": "⚠️ **AI Quota Exceeded.** All available Gemini models have hit their free-tier limits. Please wait about 60 seconds and try again. This happens often with free API keys."}
-        return {"error": f"AI Analysis failed: {last_error}"}
+        try:
+            response = client.models.generate_content(
+                model="gemini-2.5-flash",
+                contents=[prompt, img]
+            )
+            if response and response.text:
+                json_text = response.text.strip()
+                
+                # More robust JSON extraction (handles markdown and leading/trailing text)
+                if "```" in json_text:
+                    # Find the first { after ``` and last } before ```
+                    start_pos = json_text.find("{")
+                    end_pos = json_text.rfind("}") + 1
+                    if start_pos != -1 and end_pos != -1:
+                        json_text = json_text[start_pos:end_pos]
+                
+                # Try direct parse
+                try:
+                    return json.loads(json_text)
+                except json.JSONDecodeError:
+                    # Find the first { and last } regardless
+                    start_pos = json_text.find("{")
+                    end_pos = json_text.rfind("}") + 1
+                    if start_pos != -1 and end_pos != -1:
+                        return json.loads(json_text[start_pos:end_pos])
+                    raise
+            else:
+                return {"error": "AI Analysis failed: No response text."}
+        except Exception as e:
+            last_error = str(e).upper()
+            print(f"[gemini-2.5-flash] Error: {last_error}")
+            if any(x in last_error for x in ["429", "RESOURCE_EXHAUSTED", "QUOTA"]):
+                return {"error": "⚠️ **AI Quota Exceeded.** Gemini model has hit its free-tier limit. Please wait about 60 seconds and try again. This happens often with free API keys."}
+            return {"error": f"AI Analysis failed: {last_error}"}
 
     except Exception as e:
         print(f"Error in image analysis: {e}")
@@ -171,18 +163,14 @@ def analyze_resume(text):
     {text}
     """
     try:
-        # Fallback for text analysis too
-        for model_name in ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"]:
-            try:
-                response = client.models.generate_content(
-                    model=model_name,
-                    contents=prompt
-                )
-                return response.text
-            except Exception as e:
-                if "429" in str(e) or "RESOURCE_EXHAUSTED" in str(e):
-                    continue
-                raise e
+        try:
+            response = client.models.generate_content(
+                model="gemini-2.5-flash",
+                contents=prompt
+            )
+            return response.text
+        except Exception as e:
+            raise e
     except Exception as e:
         error_msg = str(e).upper()
         if "429" in error_msg or "RESOURCE_EXHAUSTED" in error_msg:

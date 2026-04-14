@@ -135,6 +135,17 @@ def init_db():
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )''')
 
+    c.execute('''CREATE TABLE IF NOT EXISTS aptitude_questions (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        section TEXT,
+        question_text TEXT,
+        options_json TEXT,
+        correct_index INTEGER,
+        difficulty TEXT,
+        company_name TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )''')
+
     # Default Templates Initialization
     default_templates = [
         {
