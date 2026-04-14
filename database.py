@@ -50,6 +50,26 @@ def init_db():
         pass
 
     try:
+        c.execute("ALTER TABLE user ADD COLUMN profile_pic TEXT")
+    except sqlite3.OperationalError:
+        pass
+
+    try:
+        c.execute("ALTER TABLE user ADD COLUMN experience_level TEXT DEFAULT 'Intermediate'")
+    except sqlite3.OperationalError:
+        pass
+
+    try:
+        c.execute("ALTER TABLE user ADD COLUMN location TEXT")
+    except sqlite3.OperationalError:
+        pass
+
+    try:
+        c.execute("ALTER TABLE user ADD COLUMN skills TEXT")
+    except sqlite3.OperationalError:
+        pass
+
+    try:
         c.execute("ALTER TABLE company ADD COLUMN last_sync TIMESTAMP")
     except sqlite3.OperationalError:
         pass
@@ -70,12 +90,29 @@ def init_db():
         location TEXT,
         linkedin TEXT,
         github TEXT,
+        instagram TEXT,
+        website TEXT,
         skills TEXT,
         education TEXT,
         experience TEXT,
         projects TEXT,
         summary TEXT
     )''')
+
+    try:
+        c.execute("ALTER TABLE resume_data ADD COLUMN instagram TEXT")
+    except sqlite3.OperationalError:
+        pass
+
+    try:
+        c.execute("ALTER TABLE resume_data ADD COLUMN website TEXT")
+    except sqlite3.OperationalError:
+        pass
+
+    try:
+        c.execute("ALTER TABLE resume_data ADD COLUMN extraction_status TEXT DEFAULT 'pending'")
+    except sqlite3.OperationalError:
+        pass
 
     c.execute('''CREATE TABLE IF NOT EXISTS company (
         id INTEGER PRIMARY KEY AUTOINCREMENT,

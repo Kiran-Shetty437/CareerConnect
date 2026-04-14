@@ -104,13 +104,20 @@ def generate_aptitude_questions(company_name, difficulty, pattern_json):
         prompt = f"""You are an expert aptitude tester and examiner for {company_name}.
 Generate a {difficulty} difficulty aptitude test for {company_name}. 
 
-CRITICAL: You MUST return a JSON array containing exactly {len(sections)} objects, one for each of these sections:
+CRITICAL: You MUST return a JSON array containing EXACTLY {len(sections)} objects.
+Each object MUST represent one of the FOLLOWING ROUNDS in order:
 """
-        for s in sections:
-            prompt += f"- {s.get('section', 'General')}: exactly {s.get('questions', 5)} questions\n"
+        for i, s in enumerate(sections):
+            prompt += f"{i+1}. {s.get('section', 'General')} (exactly {s.get('questions', 5)} questions)\n"
 
         prompt += """
-Each section MUST be a separate object in the array. Do NOT merge them.
+DO NOT merge these rounds. DO NOT combine them. If I ask for 3 rounds, you MUST return 3 separate objects in the top-level array.
+Section names MUST match exactly:
+"""
+        for s in sections:
+             prompt += f"- {s.get('section', 'General')}\n"
+
+        prompt += """
 Return the questions as a JSON array with this exact structure:
 [
   {
@@ -127,18 +134,33 @@ Return the questions as a JSON array with this exact structure:
 """
         response = client.models.generate_content(
             model="gemini-2.5-flash", 
-            contents=prompt
+            contents=prompt,
+            config={
+                "system_instruction": "You are a professional examiner. You strictly follow JSON schemas and round counts.",
+                "response_mime_type": "application/json"
+            }
         )
         
-        # More robust JSON extraction
         text = response.text.strip()
-        match = re.search(r'(\[.*\])', text, re.DOTALL)
-        if match:
-            json_str = match.group(1)
-            generated_test = json.loads(json_str)
-        else:
-            # Fallback to direct load
+        generated_test = json.loads(text)
+
+        # FORCE VALIDATION: If rounds are combined, it's a failure.
+        if not isinstance(generated_test, list) or len(generated_test) != len(sections):
+            print(f"AI returned invalid format. Retrying once...")
+            response = client.models.generate_content(
+                model="gemini-2.0-flash", 
+                contents=prompt + "\n\nCRITICAL: DO NOT COMBINE ROUNDS. GIVE ME EXACTLY " + str(len(sections)) + " OBJECTS IN THE ARRAY.",
+                config={
+                    "system_instruction": "You are a professional examiner. You strictly follow JSON schemas and round counts.",
+                    "response_mime_type": "application/json"
+                }
+            )
+            text = response.text.strip()
             generated_test = json.loads(text)
+            
+        if not isinstance(generated_test, list) or len(generated_test) == 0:
+            raise ValueError("Failed to generate valid array after retry")
+
         
         # Save successfully generated questions to DB for future use
         if generated_test:

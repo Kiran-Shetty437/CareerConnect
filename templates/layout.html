@@ -4,35 +4,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}App{% endblock %}</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
+    <title>{% block title %}CareerConnect{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
     <!-- Custom Popup Alerts -->
     <link rel="stylesheet" href="{{ url_for('static', filename='alerts.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 
-<body>
+<body class="{% block body_class %}{% endblock %}" style="display: flex; min-height: 100vh; overflow-x: hidden;">
     {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
-    <div class="flash-container" style="position: fixed; top: 20px; right: 20px; z-index: 1000;">
+    <div class="flash-container" style="position: fixed; top: 20px; right: 20px; z-index: 2000;">
         {% for category, message in messages %}
-        <div class="alert {{ category }}" style="margin-bottom: 10px;">{{ message }}</div>
+        <div class="cc-badge cc-badge-{{ 'success' if category == 'success' else 'error' }} animate-fade-in" style="margin-bottom: 10px; padding: 1rem 1.5rem; box-shadow: var(--shadow-xl); border: 1px solid var(--border-glass);">
+            {{ message }}
+        </div>
         {% endfor %}
     </div>
     {% endif %}
     {% endwith %}
 
-    {% block content %}{% endblock %}
+    {% block sidebar %}{% endblock %}
+
+    <div style="flex: 1; display: flex; flex-direction: column; width: 100%;">
+        {% block navbar %}{% endblock %}
+        
+        <div class="content-wrapper" style="flex: 1; overflow-y: auto; padding-bottom: 3rem;">
+            {% block content %}{% endblock %}
+        </div>
+    </div>
 
     {% block chatbot %}{% endblock %}
+    
     <script>
-        // Initialize theme on load for all pages using layout
+        // Global Utility Scripts
         document.addEventListener('DOMContentLoaded', function () {
-            const savedTheme = localStorage.getItem('user-theme');
-            if (savedTheme === 'dark') {
-                document.body.classList.add('dark-mode');
-            }
+            // Flash messages are now entirely handled by alerts.js
+
+            // Heartbeat System for screen time tracking
+            {% if session.get('user_id') and session.get('role') == 'user' %}
+            setInterval(() => {
+                fetch('/heartbeat', { method: 'POST', headers: { 'Content-Type': 'application/json' } })
+                    .catch(err => console.debug('Heartbeat failed', err));
+            }, 60000); // Pulse every 60 seconds
+            {% endif %}
         });
     </script>
 

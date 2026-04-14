@@ -84,7 +84,7 @@ def analyze_resume_image(image_file):
 
         try:
             response = client.models.generate_content(
-                model="gemini-2.5-flash",
+                model="gemini-2.0-flash",
                 contents=[prompt, img]
             )
             if response and response.text:
@@ -165,7 +165,7 @@ def analyze_resume(text):
     try:
         try:
             response = client.models.generate_content(
-                model="gemini-2.5-flash",
+                model="gemini-2.0-flash",
                 contents=prompt
             )
             return response.text
@@ -176,3 +176,44 @@ def analyze_resume(text):
         if "429" in error_msg or "RESOURCE_EXHAUSTED" in error_msg:
             return "⚠️ **Service is busy.** Quota exceeded. Please wait 60 seconds."
         return f"Error analyzing resume: {str(e)}"
+
+def extract_resume_info(text):
+    prompt = f"""
+    Extract the following information from the resume text into a VALID JSON format.
+    Fields to extract:
+    - full_name
+    - phone
+    - location (Base city/country)
+    - linkedin (url or handle)
+    - github (url or handle)
+    - instagram (url or handle)
+    - website (personal portfolio or website)
+    - skills (comma separated string)
+    - education (brief summary)
+    - experience (brief summary)
+    - summary (professional summary)
+
+    Return ONLY the raw JSON. If some info is missing, use an empty string.
+    DO NOT include markdown code blocks or any other explanation.
+
+    Resume Text:
+    {text}
+    """
+    try:
+        response = client.models.generate_content(
+            model="gemini-2.0-flash",
+            contents=prompt
+        )
+        if response and response.text:
+            raw_text = response.text.strip()
+            # Clean possible markdown
+            if "```json" in raw_text:
+                raw_text = raw_text.split("```json")[-1].split("```")[0].strip()
+            elif "```" in raw_text:
+                raw_text = raw_text.split("```")[-1].split("```")[0].strip()
+            
+            return json.loads(raw_text)
+        return None
+    except Exception as e:
+        print(f"Extraction error: {e}")
+        return None

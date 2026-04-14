@@ -1,318 +1,293 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "layout.html" %}
+{% block title %}CareerConnect - Login / Sign Up{% endblock %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CareerConnect - Login</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <!-- Google Fonts for premium typography -->
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+{% block content %}
+<style>
+    .login-container {
+        display: flex;
+        min-height: 100vh;
+        overflow: hidden;
+    }
 
-    <!-- Custom Popup Alerts -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='alerts.css') }}">
+    .login-form-side {
+        width: 40%;
+        padding: 4rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        background: var(--surface);
+        z-index: 10;
+        box-shadow: 20px 0 50px rgba(0,0,0,0.05);
+        position: relative;
+        overflow: hidden;
+    }
 
-    <style>
-        .slide-1 { background-image: url("{{ url_for('static', filename='hero_login.png') }}"); }
-        .slide-2 { background-image: url("{{ url_for('static', filename='hero_login_2.png') }}"); }
-        .slide-3 { background-image: url("{{ url_for('static', filename='hero_login_3.png') }}"); }
-        .slide-4 { background-image: url("{{ url_for('static', filename='hero_login_4.png') }}"); }
-        .slide-5 { background-image: url("{{ url_for('static', filename='hero_login_5.png') }}"); }
-        .slide-6 { background-image: url("{{ url_for('static', filename='hero_login_6.png') }}"); }
-    </style>
-</head>
+    .login-form-side::before {
+        content: '';
+        position: absolute;
+        top: -10%;
+        left: -10%;
+        width: 200px;
+        height: 200px;
+        background: var(--primary);
+        filter: blur(100px);
+        opacity: 0.05;
+        z-index: -1;
+    }
 
-<body>
-    <div class="container">
-        <div class="form-box">
-            <div class="header" style="margin-bottom: 2.5rem;">
-                <a href="{{ url_for('auth.login') }}" class="logo"
-                    style="display: flex; align-items: center; gap: 10px; text-decoration: none; margin-bottom: 2rem;">
-                    <div
-                        style="width: 32px; height: 32px; background: #111827; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 1rem; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
-                        <span style="font-weight: 800;">C</span>
+    .login-hero-side {
+        width: 60%;
+        position: relative;
+        overflow: hidden;
+        background: #f1f5f9;
+    }
+
+    .hero-slide {
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background-size: cover;
+        background-position: center;
+        opacity: 0;
+        transition: opacity 1s ease-in-out;
+    }
+
+    .hero-slide.active {
+        opacity: 1;
+        transform: scale(1.05);
+    }
+
+    .login-hero-side {
+        width: 60%;
+        position: relative;
+        overflow: hidden;
+        background: #0f172a;
+    }
+
+    .hero-overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(to bottom, transparent, rgba(15, 23, 42, 0.6));
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        padding: 4rem;
+        color: white;
+    }
+
+    .hero-text h2 {
+        font-size: 3rem;
+        color: white;
+        margin-bottom: 1rem;
+    }
+
+    .hero-text p {
+        font-size: 1.25rem;
+        opacity: 0.9;
+        max-width: 500px;
+    }
+
+    @media (max-width: 1024px) {
+        .login-form-side { width: 50%; padding: 2.5rem; }
+        .login-hero-side { width: 50%; }
+    }
+
+    @media (max-width: 768px) {
+        .login-container { flex-direction: column; }
+        .login-form-side { width: 100%; min-height: 100vh; }
+        .login-hero-side { display: none; }
+    }
+</style>
+
+<div class="login-container">
+    <div class="login-form-side cc-glass">
+        <div class="header mb-4">
+            <div class="cc-logo mb-4">
+                <div class="cc-logo-icon">C</div>
+                <span>CareerConnect</span>
+            </div>
+            <h1 id="form-title">Welcome Back</h1>
+            <p id="form-subtitle" class="text-secondary">Please enter your details to sign in.</p>
+        </div>
+
+        <form action="/" method="POST" id="auth-form">
+            <input type="hidden" name="action" id="form-action" value="login">
+
+            <div id="login-signup-fields">
+                <div class="cc-form-group">
+                    <label class="cc-label" for="username">Username</label>
+                    <input type="text" id="username" name="username" class="cc-input" placeholder="Enter your username">
+                </div>
+
+                <div class="cc-form-group" id="email-group" style="display: none;">
+                    <label class="cc-label" for="email">Email</label>
+                    <input type="email" id="email" name="email" class="cc-input" placeholder="Enter your email">
+                </div>
+
+                <div class="cc-form-group" id="password-group">
+                    <div class="flex-between mb-2">
+                        <label class="cc-label mb-0" for="password">Password</label>
+                        <a href="javascript:void(0)" onclick="switchTab('forgot')" class="text-secondary" style="font-size: 0.8rem;" id="forgot-password-link">Forgot Password?</a>
                     </div>
-                    <span style="font-size: 1.5rem; font-weight: 800; color: #111827; opacity: 0.9;">CareerConnect</span>
-                </a>
-                <h1 id="form-title" style="margin-bottom: 0.5rem;">Welcome Back</h1>
-                <p id="form-subtitle" style="color: #6b7280;">Please enter your details to sign in.</p>
+                    <input type="password" id="password" name="password" class="cc-input" placeholder="Enter your password">
+                    <div id="password-requirements" class="text-secondary mt-2" style="font-size: 0.75rem; display: none;">
+                        Min 8 chars, uppercase, lowercase, number, and special character.
+                    </div>
+                </div>
             </div>
 
-            <form action="/" method="POST" id="auth-form">
-                <input type="hidden" name="action" id="form-action" value="login">
-
-                <div id="login-signup-fields">
-                    <div class="input-group">
-                        <label for="username">Username</label>
-                        <input type="text" id="username" name="username" placeholder="Enter your username">
-                    </div>
-
-                    <div class="input-group" id="email-group" style="display: none;">
-                        <label for="email">Email</label>
-                        <input type="email" id="email" name="email" placeholder="Enter your email">
-                    </div>
-
-                    <div class="input-group" id="password-group">
-                        <label for="password">Password</label>
-                        <input type="password" id="password" name="password" placeholder="Enter your password">
-                        <div id="password-requirements" style="font-size: 0.75rem; color: #6b7280; margin-top: 8px; line-height: 1.4; display: none;">
-                             Password must be 8-12 characters, include uppercase, lowercase, a number, and a special character.
-                        </div>
-                        <div style="text-align: right; margin-top: 5px;" id="forgot-password-link">
-                            <a href="javascript:void(0)" onclick="switchTab('forgot')"
-                                style="font-size: 0.85rem; color: #111827; text-decoration: none; opacity: 0.6;">Forgot
-                                Password?</a>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="forgot-fields" style="display: none;">
-                    <div class="input-group">
-                        <label for="forgot-email">Email Address</label>
-                        <input type="email" id="forgot-email" name="forgot_email" placeholder="Enter your registered email">
-                    </div>
-                </div>
-
-                <div id="verify-fields" style="display: none;">
-                    <div class="input-group">
-                        <label for="otp">OTP Code</label>
-                        <input type="text" id="otp" name="otp" placeholder="6-digit code" maxlength="6"
-                            style="text-align: center; font-size: 1.5rem; letter-spacing: 0.5rem;">
-                    </div>
-                </div>
-
-                <div id="reset-fields" style="display: none;">
-                    <div class="input-group">
-                        <label for="new-password">New Password</label>
-                        <input type="password" id="new-password" name="new_password" placeholder="Enter new password">
-                        <div style="font-size: 0.75rem; color: #6b7280; margin-top: 8px; line-height: 1.4;">
-                             Password must be 8-12 characters, include uppercase, lowercase, a number, and a special character.
-                        </div>
-                    </div>
-                </div>
-
-                <button type="submit" class="submit-btn" id="submit-btn" style="margin-bottom: 2rem;">Sign In</button>
-
-                <!-- Navigation Link Between Button and Social Divider -->
-                <div id="auth-toggle-link" style="text-align: left; margin-bottom: 2rem; font-size: 0.95rem; color: #6b7280;">
-                    <span id="toggle-text" style="opacity: 0.8;">Don't have an account?</span>
-                    <a href="{{ url_for('auth.signup') }}" id="toggle-action" onclick="switchTab('signup'); return false;" style="font-weight: 800; text-decoration: none; color: #111827; transition: color 0.3s; margin-left: 8px;">Sign Up</a>
-                </div>
-
-                <!-- Left-Aligned Social Divider -->
-                <div style="text-align: left; border-top: 1px solid rgba(0,0,0,0.05); padding-top: 2rem; margin-top: 1rem;">
-                    <p style="font-size: 0.85rem; color: #6b7280; margin-bottom: 1.5rem;">Or continue with Apple or Google</p>
-                </div>
-
-                <div id="back-to-login" style="display: none; text-align: center; margin-top: 1rem;">
-                    <a href="{{ url_for('auth.login') }}" onclick="switchTab('login'); return false;"
-                        style="color: #6b7280; text-decoration: none; font-size: 0.9rem;">Back to Login</a>
-                </div>
-            </form>
-
-            <div class="form-footer" style="margin-top: auto; display: flex; justify-content: flex-end; font-size: 0.95rem; color: #6b7280; padding-bottom: 1rem;">
-                <div>
-                    <a href="#" style="text-decoration: none; color: #6b7280; opacity: 0.7;">Terms & Conditions</a>
+            <div id="forgot-fields" style="display: none;">
+                <div class="cc-form-group">
+                    <label class="cc-label" for="forgot-email">Email Address</label>
+                    <input type="email" id="forgot-email" name="forgot_email" class="cc-input" placeholder="Enter your registered email">
                 </div>
             </div>
 
-            {% with messages = get_flashed_messages(with_categories=true) %}
-                {% if messages %}
-                <div class="flash-messages">
-                    {% for category, message in messages %}
-                    <div class="alert {{ category }}">{{ message }}</div>
-                    {% endfor %}
+            <div id="verify-fields" style="display: none;">
+                <div class="cc-form-group">
+                    <label class="cc-label text-center" for="otp">OTP Code</label>
+                    <input type="text" id="otp" name="otp" class="cc-input text-center" placeholder="6-digit code" maxlength="6"
+                        style="font-size: 1.5rem; letter-spacing: 0.5rem; font-weight: 700;">
                 </div>
-                {% endif %}
-            {% endwith %}
-        </div> <!-- End Current Form Box -->
+            </div>
 
-        <!-- Dynamic Hero Slider (40% Width area) -->
-        <div class="hero-slider">
-            <div class="hero-slide slide-1"></div>
-            <div class="hero-slide slide-2"></div>
-            <div class="hero-slide slide-3"></div>
-            <div class="hero-slide slide-4"></div>
-            <div class="hero-slide slide-5"></div>
-            <div class="hero-slide slide-6"></div>
+            <div id="reset-fields" style="display: none;">
+                <div class="cc-form-group">
+                    <label class="cc-label" for="new-password">New Password</label>
+                    <input type="password" id="new-password" name="new_password" class="cc-input" placeholder="Enter new password">
+                </div>
+            </div>
+
+            <button type="submit" class="cc-btn cc-btn-primary w-full mt-4" id="submit-btn" style="width: 100%;">Sign In</button>
+
+            <div id="auth-toggle-link" class="text-center mt-4 text-secondary" style="font-size: 0.9rem;">
+                <span id="toggle-text">Don't have an account?</span>
+                <a href="{{ url_for('auth.signup') }}" id="toggle-action" onclick="switchTab('signup'); return false;" class="font-weight-bold ml-1">Sign Up</a>
+            </div>
+
+            <div id="back-to-login" style="display: none;" class="text-center mt-4">
+                <a href="{{ url_for('auth.login') }}" onclick="switchTab('login'); return false;" class="text-secondary">Back to Login</a>
+            </div>
+        </form>
+
+        <div class="mt-auto pt-8 flex-between text-muted" style="font-size: 0.8rem; border-top: 1px solid var(--border);">
+            <span>&copy; 2024 CareerConnect</span>
+            <a href="#" class="text-muted">Terms of Service</a>
         </div>
     </div>
 
-    <script>
-        function switchTab(tab) {
-            const container = document.querySelector('.container');
-            const form = document.getElementById('auth-form');
-            const formAction = document.getElementById('form-action');
-            const submitBtn = document.getElementById('submit-btn');
-            const title = document.getElementById('form-title');
-            const subtitle = document.getElementById('form-subtitle');
-            
-            const loginSignupFields = document.getElementById('login-signup-fields');
-            const forgotFields = document.getElementById('forgot-fields');
-            const emailGroup = document.getElementById('email-group');
-            const backToLogin = document.getElementById('back-to-login');
-            
-            // Footer elements
-            const toggleLink = document.getElementById('auth-toggle-link');
-            const toggleText = document.getElementById('toggle-text');
-            const toggleAction = document.getElementById('toggle-action');
- 
-            // Inputs
-            const usernameInput = document.getElementById('username');
-            const passwordInput = document.getElementById('password');
-            const emailInput = document.getElementById('email');
-            const forgotEmailInput = document.getElementById('forgot-email');
- 
-            // Elements to hide/show
-            const forgotPasswordLink = document.getElementById('forgot-password-link');
- 
-            if (tab === 'signup') {
-                form.action = "{{ url_for('auth.login') }}";
-                formAction.value = 'signup';
-                submitBtn.textContent = 'Sign Up';
-                title.textContent = 'Create Account';
-                subtitle.textContent = 'Join us today';
-                loginSignupFields.style.display = 'block';
-                forgotFields.style.display = 'none';
-                emailGroup.style.display = 'block';
-                backToLogin.style.display = 'none';
-                forgotPasswordLink.style.display = 'none';
-                
-                // Update Footer
-                toggleLink.style.display = 'block';
-                toggleText.textContent = 'Have account?';
-                toggleAction.textContent = 'Sign In';
-                toggleAction.setAttribute('onclick', "switchTab('login'); return false;");
-                toggleAction.setAttribute('href', "{{ url_for('auth.login') }}");
+    <div class="login-hero-side">
+        <div class="hero-slide active" style="background-image: url('{{ url_for('static', filename='hero_login.png') }}')"></div>
+        <div class="hero-slide" style="background-image: url('{{ url_for('static', filename='hero_login_2.png') }}')"></div>
+        <div class="hero-slide" style="background-image: url('{{ url_for('static', filename='hero_login_3.png') }}')"></div>
+        <div class="hero-slide" style="background-image: url('{{ url_for('static', filename='hero_login_4.png') }}')"></div>
+        
+        <div class="hero-overlay">
+            <div class="hero-text animate-fade-in">
+                <h2>Shape Your Future</h2>
+                <p>Connecting talented individuals with the world's most innovative companies.</p>
+            </div>
+        </div>
+    </div>
+</div>
 
-                document.getElementById('password-requirements').style.display = 'block';
+<script>
+    function switchTab(tab) {
+        const form = document.getElementById('auth-form');
+        const formAction = document.getElementById('form-action');
+        const submitBtn = document.getElementById('submit-btn');
+        const title = document.getElementById('form-title');
+        const subtitle = document.getElementById('form-subtitle');
+        
+        const loginSignupFields = document.getElementById('login-signup-fields');
+        const forgotFields = document.getElementById('forgot-fields');
+        const verifyFields = document.getElementById('verify-fields');
+        const resetFields = document.getElementById('reset-fields');
+        const emailGroup = document.getElementById('email-group');
+        const backToLogin = document.getElementById('back-to-login');
+        
+        const toggleLink = document.getElementById('auth-toggle-link');
+        const toggleText = document.getElementById('toggle-text');
+        const toggleAction = document.getElementById('toggle-action');
 
-                usernameInput.required = true;
-                passwordInput.required = true;
-                emailInput.required = true;
-                emailInput.name = "email";
-                forgotEmailInput.required = false;
-                forgotEmailInput.name = "forgot_email";
-            } else if (tab === 'forgot') {
-                form.action = "{{ url_for('auth.forgot_password') }}";
-                formAction.value = 'forgot';
-                submitBtn.textContent = 'Send OTP';
-                title.textContent = 'Forgot Password';
-                subtitle.textContent = 'Enter your email to receive an OTP.';
-                loginSignupFields.style.display = 'none';
-                forgotFields.style.display = 'block';
-                backToLogin.style.display = 'block';
-                toggleLink.style.display = 'none';
-                
-                usernameInput.required = false;
-                passwordInput.required = false;
-                emailInput.required = false;
-                emailInput.name = "signup_email";
-                forgotEmailInput.required = true;
-                forgotEmailInput.name = "email";
-            } else if (tab === 'verify') {
-                form.action = "{{ url_for('auth.verify_otp') }}";
-                formAction.value = 'verify';
-                submitBtn.textContent = 'Verify OTP';
-                title.textContent = 'Verify OTP';
-                subtitle.textContent = 'Please enter the 6-digit code sent to your email.';
-                loginSignupFields.style.display = 'none';
-                document.getElementById('verify-fields').style.display = 'block';
-                backToLogin.style.display = 'block';
-                toggleLink.style.display = 'none';
-            } else if (tab === 'reset') {
-                form.action = "{{ url_for('auth.reset_password') }}";
-                formAction.value = 'reset';
-                submitBtn.textContent = 'Update Password';
-                title.textContent = 'Reset Password';
-                subtitle.textContent = 'Enter your new password below.';
-                loginSignupFields.style.display = 'none';
-                document.getElementById('reset-fields').style.display = 'block';
-                backToLogin.style.display = 'block';
-                toggleLink.style.display = 'none';
-            } else {
-                form.action = "{{ url_for('auth.login') }}";
-                formAction.value = 'login';
-                submitBtn.textContent = 'Sign In';
-                title.textContent = 'Welcome Back';
-                subtitle.textContent = 'Please enter your details to sign in.';
-                loginSignupFields.style.display = 'block';
-                forgotFields.style.display = 'none';
-                emailGroup.style.display = 'none';
-                backToLogin.style.display = 'none';
-                forgotPasswordLink.style.display = 'block';
-                
-                // Update Footer
-                toggleLink.style.display = 'block';
-                toggleText.textContent = "Don't have an account?";
-                toggleAction.textContent = 'Sign Up';
-                toggleAction.setAttribute('onclick', "switchTab('signup'); return false;");
-                toggleAction.setAttribute('href', "{{ url_for('auth.signup') }}");
+        const forgotPasswordLink = document.getElementById('forgot-password-link');
+        const passwordRequirements = document.getElementById('password-requirements');
 
-                document.getElementById('password-requirements').style.display = 'none';
-
-                usernameInput.required = true;
-                passwordInput.required = true;
-                emailInput.required = false;
-                emailInput.name = "signup_email";
-                forgotEmailInput.name = "forgot_email";
-            }
+        // Reset all sections
+        [loginSignupFields, forgotFields, verifyFields, resetFields].forEach(el => el.style.display = 'none');
+        
+        if (tab === 'signup') {
+            form.action = "{{ url_for('auth.login') }}";
+            formAction.value = 'signup';
+            submitBtn.textContent = 'Create Account';
+            title.textContent = 'Create Account';
+            subtitle.textContent = 'Join our community of professionals';
+            loginSignupFields.style.display = 'block';
+            emailGroup.style.display = 'block';
+            backToLogin.style.display = 'none';
+            forgotPasswordLink.style.display = 'none';
+            passwordRequirements.style.display = 'block';
+            toggleLink.style.display = 'block';
+            toggleText.textContent = 'Already have an account?';
+            toggleAction.textContent = 'Sign In';
+            toggleAction.setAttribute('onclick', "switchTab('login'); return false;");
+        } else if (tab === 'forgot') {
+            form.action = "{{ url_for('auth.forgot_password') }}";
+            formAction.value = 'forgot';
+            submitBtn.textContent = 'Send OTP';
+            title.textContent = 'Forgot Password';
+            subtitle.textContent = 'Enter your email to receive a verification code';
+            forgotFields.style.display = 'block';
+            backToLogin.style.display = 'block';
+            toggleLink.style.display = 'none';
+        } else if (tab === 'verify') {
+            form.action = "{{ url_for('auth.verify_otp') }}";
+            formAction.value = 'verify';
+            submitBtn.textContent = 'Verify OTP';
+            title.textContent = 'Verify Identity';
+            subtitle.textContent = 'A code was sent to your email';
+            verifyFields.style.display = 'block';
+            backToLogin.style.display = 'block';
+            toggleLink.style.display = 'none';
+        } else if (tab === 'reset') {
+            form.action = "{{ url_for('auth.reset_password') }}";
+            formAction.value = 'reset';
+            submitBtn.textContent = 'Update Password';
+            title.textContent = 'Reset Password';
+            subtitle.textContent = 'Set your new secure password';
+            resetFields.style.display = 'block';
+            backToLogin.style.display = 'block';
+            toggleLink.style.display = 'none';
+        } else {
+            form.action = "{{ url_for('auth.login') }}";
+            formAction.value = 'login';
+            submitBtn.textContent = 'Sign In';
+            title.textContent = 'Welcome Back';
+            subtitle.textContent = 'Sign in to continue your journey';
+            loginSignupFields.style.display = 'block';
+            emailGroup.style.display = 'none';
+            backToLogin.style.display = 'none';
+            forgotPasswordLink.style.display = 'block';
+            passwordRequirements.style.display = 'none';
+            toggleLink.style.display = 'block';
+            toggleText.textContent = "Don't have an account?";
+            toggleAction.textContent = 'Sign Up';
+            toggleAction.setAttribute('onclick', "switchTab('signup'); return false;");
         }
+    }
 
-        // On page load, check if backend requested a specific state
-        document.addEventListener('DOMContentLoaded', () => {
-            const state = "{{ state }}";
-            if (state) switchTab(state);
+    // Hero Slider logic
+    document.addEventListener('DOMContentLoaded', () => {
+        const slides = document.querySelectorAll('.hero-slide');
+        let currentSlide = 0;
+        
+        setInterval(() => {
+            slides[currentSlide].classList.remove('active');
+            currentSlide = (currentSlide + 1) % slides.length;
+            slides[currentSlide].classList.add('active');
+        }, 5000);
 
-            // Add form validation logic
-            const authForm = document.getElementById('auth-form');
-            authForm.addEventListener('submit', function(e) {
-                const action = document.getElementById('form-action').value;
-                
-                // Only validate for signup and reset actions
-                if (action === 'signup' || action === 'reset') {
-                    let pw = '';
-                    if (action === 'signup') {
-                        pw = document.getElementById('password').value;
-                    } else if (action === 'reset') {
-                        pw = document.getElementById('new-password').value;
-                    }
-                    
-                    const validation = validatePassword(pw);
-                    if (!validation.valid) {
-                        e.preventDefault();
-                        if (window.showPopupAlert) {
-                            window.showPopupAlert(validation.message, 'error');
-                        } else {
-                            alert(validation.message);
-                        }
-                    }
-                }
-            });
-        });
-
-        function validatePassword(password) {
-            if (password.length < 8 || password.length > 12) {
-                return { valid: false, message: "Password must be 8-12 characters long." };
-            }
-            if (!/[A-Z]/.test(password)) {
-                return { valid: false, message: "Password must contain at least one uppercase letter." };
-            }
-            if (!/[a-z]/.test(password)) {
-                return { valid: false, message: "Password must contain at least one lowercase letter." };
-            }
-            if (!/[0-9]/.test(password)) {
-                return { valid: false, message: "Password must contain at least one number." };
-            }
-            if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
-                return { valid: false, message: "Password must contain at least one special character." };
-            }
-            return { valid: true };
-        }
-    </script>
-
-    <!-- Custom Popup Alerts JS -->
-    <script src="{{ url_for('static', filename='alerts.js') }}"></script>
-</body>
-
-</html>
+        const state = "{{ state }}";
+        if (state) switchTab(state);
+    });
+</script>
+{% endblock %}

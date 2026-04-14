@@ -1,755 +1,367 @@
 {% extends "layout.html" %}
 
-{% block title %}CareerConnect - User Profile{% endblock %}
+{% block title %}CareerConnect - Professional Profile{% endblock %}
+
+{% block sidebar %}
+<aside class="cc-sidebar">
+    <a href="{{ url_for('user.dashboard') }}" class="sidebar-nav-item" title="Dashboard">
+        <i class="fas fa-th-large"></i>
+    </a>
+    <a href="{{ url_for('user.profile') }}" class="sidebar-nav-item active" title="Profile">
+        <i class="fas fa-user"></i>
+    </a>
+    <a href="{{ url_for('user.resume_builder') }}" class="sidebar-nav-item" title="Resume Builder">
+        <i class="fas fa-file-invoice"></i>
+    </a>
+    <a href="{{ url_for('user.aptitude') }}" class="sidebar-nav-item" title="Aptitude Portal">
+        <i class="fas fa-brain"></i>
+    </a>
+    <a href="{{ url_for('auth.logout') }}" class="sidebar-nav-item" title="Logout" style="margin-top: auto; margin-bottom: 0;">
+        <i class="fas fa-sign-out-alt"></i>
+    </a>
+</aside>
+{% endblock %}
+
+{% block navbar %}
+<nav class="cc-nav">
+    <div style="flex: 1; max-width: 500px; position: relative;">
+        <i class="fas fa-search" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-muted);"></i>
+        <input type="text" class="cc-input" placeholder="Search profile details..." style="padding-left: 2.75rem; border-radius: var(--radius-full); background: #1f2937;">
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 1.5rem;">
+        <div class="sidebar-nav-item" style="margin-bottom: 0; width: 40px; height: 40px; background: rgba(99, 102, 241, 0.1);">
+            <i class="fas fa-bell" style="font-size: 1.1rem;"></i>
+        </div>
+        <div class="sidebar-nav-item" style="margin-bottom: 0; width: 40px; height: 40px; background: rgba(16, 185, 129, 0.1); color: var(--accent);">
+            <i class="fas fa-gift" style="font-size: 1.1rem;"></i>
+        </div>
+        
+        <div style="display: flex; align-items: center; gap: 0.75rem; padding: 0.25rem 0.5rem; border-radius: var(--radius-full); background: rgba(255,255,255,0.03); border: 1px solid var(--border);">
+            <div id="nav-avatar" style="width: 32px; height: 32px; background: var(--gradient-primary); border-radius: 50%; overflow: hidden; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; font-weight: 800; color: white;">
+                {% if user['profile_pic'] %}
+                    <img src="{{ url_for('static', filename='uploads/' + user['profile_pic']) }}" style="width: 100%; height: 100%; object-fit: cover;">
+                {% else %}
+                    {{ (user['username'] or 'U')[0] | upper }}
+                {% endif %}
+            </div>
+            <div style="text-align: left;">
+                <p style="font-size: 0.85rem; font-weight: 700; color: white;">{{ user['username'] }}</p>
+                <p style="font-size: 0.7rem; color: #4ade80;">Premium User</p>
+            </div>
+            <i class="fas fa-chevron-down" style="font-size: 0.7rem; margin-left: 0.5rem; color: var(--text-muted);"></i>
+        </div>
+    </div>
+</nav>
+{% endblock %}
 
 {% block content %}
+<div class="cc-container mt-8 animate-fade-in" style="max-width: 1200px;">
+    
+    <!-- Title Section -->
+    <div class="mb-8">
+        <h1 style="font-size: 2.5rem; margin-bottom: 0.25rem;">Profile</h1>
+        <p class="text-secondary" style="font-size: 1rem;">View all your profile details here.</p>
+        <div style="border-bottom: 1px dashed var(--border); margin-top: 2rem; width: 100%; opacity: 0.3;"></div>
+    </div>
+
+    <div class="profile-grid">
+        <!-- Left Card: Identity -->
+        <div class="cc-card profile-card-left" style="background: #0f172a; border-color: rgba(255,255,255,0.05);">
+            <h2 style="font-size: 2rem; color: white; margin-bottom: 0;">{{ resume_data['full_name'] or user['username'] }}</h2>
+            <span class="premium-text">Premium User</span>
+
+            <div class="profile-avatar-container" onclick="document.getElementById('profile-pic-input').click()" style="cursor: pointer;">
+                <div class="profile-avatar-ring"></div>
+                <div class="profile-avatar-image shadow-xl" style="background: var(--gradient-primary); overflow: hidden; display: flex; align-items: center; justify-content: center;">
+                    {% if user['profile_pic'] %}
+                        <img src="{{ url_for('static', filename='uploads/' + user['profile_pic']) }}" style="width: 100%; height: 100%; object-fit: cover;">
+                    {% else %}
+                        <span style="font-size: 6rem; color: white;">{{ (user['username'] or 'U')[0] | upper }}</span>
+                    {% endif %}
+                    <div class="avatar-overlay">
+                        <i class="fas fa-camera"></i>
+                    </div>
+                </div>
+                <!-- Hidden file input for profile pic -->
+                <form id="profile-pic-form" action="{{ url_for('user.update_profile') }}" method="POST" enctype="multipart/form-data" style="display: none;">
+                    <input type="file" id="profile-pic-input" name="profile_pic" onchange="document.getElementById('profile-pic-form').submit()">
+                </form>
+            </div>
+
+            <div style="width: 100%; display: flex; flex-direction: column; gap: 1rem; margin-top: 2rem;">
+                <button class="cc-btn cc-btn-primary w-full" onclick="openEditModal()">
+                    <i class="fas fa-edit mr-2"></i> Edit Profile
+                </button>
+                <button id="toggle-password-btn" class="cc-btn cc-btn-secondary w-full" style="background: #1e293b;">
+                    <i class="fas fa-key mr-2"></i> Update Security
+                </button>
+            </div>
+
+            <!-- Hidden Password Form -->
+            <div id="password-form-container" style="display: none; width: 100%; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border);">
+                <form action="{{ url_for('user.settings') }}" method="POST">
+                    <input type="hidden" name="action" value="change_password">
+                    <div class="cc-form-group" style="text-align: left;">
+                        <label class="cc-label">Current Password</label>
+                        <input type="password" name="current_password" class="cc-input" required>
+                    </div>
+                    <div class="cc-form-group" style="text-align: left;">
+                        <label class="cc-label">New Password</label>
+                        <input type="password" name="new_password" class="cc-input" required>
+                    </div>
+                    <div class="cc-form-group" style="text-align: left;">
+                        <label class="cc-label">Confirm New Password</label>
+                        <input type="password" name="confirm_password" class="cc-input" required>
+                    </div>
+                    <button type="submit" class="cc-btn cc-btn-primary w-full">Apply Changes</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Right Card: Bio & Details -->
+        <div class="cc-card" style="background: #0f172a; border-color: rgba(255,255,255,0.05);">
+            <div class="flex-between mb-8">
+                <h3 style="font-size: 1.25rem;">Bio & other details</h3>
+                <div style="width: 10px; height: 10px; background: #22c55e; border-radius: 50%; box-shadow: 0 0 10px #22c55e;"></div>
+            </div>
+
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="info-label">My Roles</span>
+                    <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.5rem;">
+                        {% if user['applied_job'] %}
+                            {% for job in user['applied_job'].split(',') %}
+                                <span class="cc-badge cc-badge-primary" style="font-size: 0.75rem;">{{ job.strip() }}</span>
+                            {% endfor %}
+                        {% else %}
+                            <span class="info-value">None selected</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">My Experience Level</span>
+                    <span class="info-value">{{ user['experience_level'] or 'Not set' }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Username</span>
+                    <span class="info-value">{{ user['username'] }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Email / Gmail</span>
+                    <span class="info-value">{{ user['email'] or 'Not set' }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Location</span>
+                    <span class="info-value">{{ user['location'] or 'Not set' }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Skills</span>
+                    <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.5rem;">
+                        {% if user['skills'] %}
+                            {% for skill in user['skills'].split(',') %}
+                                <span class="cc-badge" style="background: rgba(255,255,255,0.1); font-size: 0.75rem;">{{ skill.strip() }}</span>
+                            {% endfor %}
+                        {% else %}
+                            <span class="info-value">Not set</span>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="info-item" style="grid-column: span 2;">
+                    <span class="info-label">Job Notifications</span>
+                    <form action="{{ url_for('user.settings') }}" method="POST" id="noti-form">
+                        <input type="hidden" name="action" value="update_notifications">
+                        <div style="display: flex; align-items: center; gap: 1rem; margin-top: 0.5rem;">
+                            <label class="cc-switch" style="position: relative; display: inline-block; width: 50px; height: 26px;">
+                                <input type="checkbox" name="notifications_enabled" {% if user['notifications_enabled'] %}checked{% endif %} onchange="document.getElementById('noti-form').submit()" style="opacity: 0; width: 0; height: 0;">
+                                <span class="cc-slider" style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(255,255,255,0.1); transition: .4s; border-radius: 34px; border: 1px solid var(--border);"></span>
+                            </label>
+                            <span style="font-size: 0.9rem; font-weight: 600; color: {{ '#22c55e' if user['notifications_enabled'] else 'var(--text-secondary)' }};">
+                                {{ 'Notifications On' if user['notifications_enabled'] else 'Notifications Off' }}
+                            </span>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+
+<!-- Edit Profile Modal -->
+<div id="edit-profile-modal" class="modal">
+    <div class="modal-content">
+        <button class="modal-close" onclick="closeEditModal()">&times;</button>
+        <h2 class="mb-6">Edit Profile</h2>
+        
+        <form action="{{ url_for('user.update_profile') }}" method="POST">
+            <div class="cc-form-group">
+                <label class="cc-label">Experience Level</label>
+                <select name="experience_level" class="cc-input">
+                    <option value="Fresher" {% if user['experience_level'] == 'Fresher' %}selected{% endif %}>Fresher</option>
+                    <option value="Junior" {% if user['experience_level'] == 'Junior' %}selected{% endif %}>Junior (1-2 years)</option>
+                    <option value="Intermediate" {% if user['experience_level'] == 'Intermediate' or not user['experience_level'] %}selected{% endif %}>Intermediate (3-5 years)</option>
+                    <option value="Senior" {% if user['experience_level'] == 'Senior' %}selected{% endif %}>Senior (5+ years)</option>
+                </select>
+            </div>
+
+            <div class="cc-form-group">
+                <label class="cc-label">Location (City, Country)</label>
+                <input type="text" name="location" class="cc-input" value="{{ user['location'] or '' }}" placeholder="e.g. London, UK">
+            </div>
+
+            <div class="cc-form-group">
+                <label class="cc-label">Skills (Comma separated)</label>
+                <textarea name="skills" class="cc-input" rows="3" placeholder="Python, JavaScript, SQL, ...">{{ user['skills'] or '' }}</textarea>
+            </div>
+
+            <div class="cc-form-group">
+                <label class="cc-label">Interested Job Roles</label>
+                <div id="job-roles-list" style="display: flex; flex-direction: column; gap: 0.75rem;">
+                    {% if user['applied_job'] %}
+                        {% for job in user['applied_job'].split(',') %}
+                        <div class="job-role-item flex-between" style="background: rgba(255,255,255,0.03); padding: 0.5rem 1rem; border: 1px solid var(--border); border-radius: var(--radius);">
+                            <input type="text" name="job_role_item" class="cc-input-ghost" value="{{ job.strip() }}" style="border: none; background: transparent; color: white; flex: 1; outline: none;">
+                            <button type="button" onclick="this.parentElement.remove()" style="background: none; border: none; color: var(--secondary); cursor: pointer;"><i class="fas fa-trash"></i></button>
+                        </div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+                <button type="button" onclick="addJobRoleField()" class="cc-btn cc-btn-secondary w-full mt-4" style="background: rgba(255,255,255,0.05);">
+                    <i class="fas fa-plus mr-2"></i> Add Job Role
+                </button>
+            </div>
+
+            <div class="cc-form-group" style="border-top: 1px solid var(--border); padding-top: 1.5rem; margin-top: 2rem;">
+                <label class="cc-label" style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;">
+                    <span>Job Notifications</span>
+                    <input type="checkbox" name="notifications_enabled" {% if user['notifications_enabled'] %}checked{% endif %} style="width: 1.2rem; height: 1.2rem;">
+                </label>
+                <p class="text-secondary" style="font-size: 0.8rem; margin-top: 0.5rem;">Receive email alerts when new jobs match your roles.</p>
+            </div>
+
+            <button type="submit" class="cc-btn cc-btn-primary w-full mt-8" style="height: 55px;">Save Changes</button>
+        </form>
+    </div>
+</div>
+
 <style>
-    /* Premium Profile CSS */
-    .profile-page-wrapper {
-        min-height: 100vh;
-        padding: 2rem;
-        font-family: 'Outfit', sans-serif;
-        background: var(--bg-color);
+    .profile-avatar-image {
+        position: relative;
     }
-
-    .profile-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 2.5rem;
-    }
-
-    .profile-title {
-        font-size: 2.2rem;
-        font-weight: 800;
-        color: var(--text-color);
-        margin: 0;
-        letter-spacing: -0.5px;
-    }
-
-    .profile-subtitle {
-        color: var(--text-secondary, #64748b);
-        font-size: 1rem;
-        margin-top: 5px;
-    }
-
-    .profile-grid {
-        display: grid;
-        grid-template-columns: 350px 1fr;
-        gap: 2rem;
-        align-items: start;
-    }
-
-    @media (max-width: 900px) {
-        .profile-grid {
-            grid-template-columns: 1fr;
-        }
-    }
-
-    .profile-card {
-        background: var(--white, #ffffff);
-        border-radius: 20px;
-        padding: 2.5rem;
-        box-shadow: 0 10px 40px -10px rgba(0,0,0,0.08);
-        border: 1px solid rgba(0,0,0,0.03);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    body.dark-mode .profile-card {
-        background: #1e293b;
-        border-color: rgba(255,255,255,0.05);
-        box-shadow: 0 10px 40px -10px rgba(0,0,0,0.4);
-    }
-
-    .avatar-wrapper {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-        padding-bottom: 2rem;
-        border-bottom: 1px solid var(--border-color, #e2e8f0);
-        margin-bottom: 2rem;
-    }
-
-    body.dark-mode .avatar-wrapper {
-        border-color: #334155;
-    }
-
-    .avatar-circle {
-        width: 120px;
-        height: 120px;
-        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-        border-radius: 50%;
+    .avatar-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(0,0,0,0.5);
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 3.5rem;
         color: white;
-        font-weight: 800;
-        box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.4);
-        margin-bottom: 1.5rem;
-        border: 4px solid var(--white, #fff);
-    }
-    
-    body.dark-mode .avatar-circle {
-        border-color: #0f172a;
-    }
-
-    .user-name {
-        font-size: 1.6rem;
-        font-weight: 700;
-        margin: 0 0 8px 0;
-        color: var(--text-color);
-    }
-
-    .status-badge {
-        background: rgba(16, 185, 129, 0.1);
-        color: #10b981;
-        padding: 6px 14px;
-        border-radius: 20px;
-        font-size: 0.85rem;
-        font-weight: 600;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-    }
-
-    .status-badge::before {
-        content: '';
-        width: 8px;
-        height: 8px;
-        background: #10b981;
-        border-radius: 50%;
-        display: block;
-    }
-
-    .info-list {
-        display: flex;
-        flex-direction: column;
-        gap: 1.25rem;
-    }
-
-    .info-item {
-        display: flex;
-        flex-direction: column;
-    }
-
-    .info-label {
-        font-size: 0.8rem;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        color: var(--text-secondary, #64748b);
-        font-weight: 700;
-        margin-bottom: 4px;
-    }
-
-    .info-val {
-        font-size: 1.05rem;
-        color: var(--text-color);
-        font-weight: 500;
-        word-break: break-all;
-    }
-
-    .section-title {
-        font-size: 1.3rem;
-        font-weight: 700;
-        color: var(--text-color);
-        margin: 0 0 1.5rem 0;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding-bottom: 1rem;
-        border-bottom: 1px solid var(--border-color, #e2e8f0);
-    }
-
-    body.dark-mode .section-title {
-        border-color: #334155;
-    }
-
-    .setting-group {
-        margin-bottom: 1.25rem;
-    }
-
-    .setting-group label {
-        display: block;
-        font-size: 0.9rem;
-        font-weight: 600;
-        margin-bottom: 8px;
-        color: var(--text-color);
-    }
-
-    .setting-input {
-        width: 100%;
-        padding: 14px 16px;
-        background: var(--bg-color, #f8fafc);
-        border: 1px solid var(--border-color, #e2e8f0);
-        border-radius: 12px;
-        font-family: inherit;
-        font-size: 0.95rem;
-        color: var(--text-color);
-        transition: all 0.3s ease;
-        box-sizing: border-box;
-    }
-
-    body.dark-mode .setting-input {
-        background: #0f172a;
-        border-color: #334155;
-        color: #f1f5f9;
-    }
-
-    .setting-input:focus {
-        outline: none;
-        border-color: #10b981;
-        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
-    }
-
-    .btn-save {
-        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-        color: white;
-        border: none;
-        padding: 14px 24px;
-        border-radius: 12px;
-        font-weight: 700;
-        font-size: 1rem;
-        cursor: pointer;
-        width: 100%;
-        margin-top: 10px;
-        transition: transform 0.2s, box-shadow 0.2s;
-    }
-
-    .btn-save:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
-    }
-
-    .data-box {
-        background: var(--bg-color, #f8fafc);
-        border-radius: 16px;
-        padding: 1.5rem;
-        margin-bottom: 1.5rem;
-        border: 1px solid var(--border-color, #e2e8f0);
-    }
-
-    body.dark-mode .data-box {
-        background: #0f172a;
-        border-color: #334155;
-    }
-
-    .pill-list {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-    }
-
-    .pill {
-        background: var(--white, #ffffff);
-        border: 1px solid var(--border-color, #e2e8f0);
-        padding: 8px 16px;
-        border-radius: 20px;
-        font-size: 0.9rem;
-        font-weight: 600;
-        color: var(--text-color);
-        box-shadow: 0 2px 5px rgba(0,0,0,0.02);
-    }
-
-    body.dark-mode .pill {
-        background: #1e293b;
-        border-color: #334155;
-    }
-
-    .pill.primary {
-        background: rgba(59, 130, 246, 0.1);
-        border-color: rgba(59, 130, 246, 0.2);
-        color: #3b82f6;
-    }
-
-    .data-title {
-        color: var(--text-secondary, #64748b);
-        font-size: 0.85rem;
-        text-transform: uppercase;
-        font-weight: 800;
-        letter-spacing: 1px;
-        margin-bottom: 12px;
-    }
-    
-    .data-text {
-        font-size: 1rem;
-        line-height: 1.6;
-        color: var(--text-color);
-        white-space: pre-wrap;
-    }
-
-    .builder-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-        gap: 1rem;
-        margin-bottom: 1.5rem;
-    }
-
-    .empty-state {
-        text-align: center;
-        padding: 3rem 2rem;
-        border: 2px dashed var(--border-color, #e2e8f0);
-        border-radius: 20px;
-    }
-
-    body.dark-mode .empty-state {
-        border-color: #334155;
-    }
-
-    .empty-state p {
-        color: var(--text-secondary, #64748b);
-        margin: 0;
-        font-size: 1.1rem;
-    }
-    
-    .empty-state a {
-        color: var(--primary-color, #3b82f6);
-        font-weight: 600;
-        text-decoration: none;
-    }
-
-    .btn-action {
-        background: rgba(59, 130, 246, 0.1);
-        color: var(--primary-color, #3b82f6);
-        padding: 10px 20px;
-        border-radius: 10px;
-        text-decoration: none;
-        font-weight: 600;
-        font-size: 0.95rem;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        transition: all 0.2s;
-    }
-
-    .btn-action:hover {
-        background: var(--primary-color, #3b82f6);
-        color: white;
-    }
-
-    /* Modern Toggle Switch */
-    .switch {
-        position: relative;
-        display: inline-block;
-        width: 44px;
-        height: 24px;
-    }
-
-    .switch input {
+        font-size: 1.5rem;
         opacity: 0;
-        width: 0;
-        height: 0;
+        transition: var(--transition);
     }
-
-    .slider {
+    .profile-avatar-container:hover .avatar-overlay {
+        opacity: 1;
+    }
+    .profile-avatar-ring {
         position: absolute;
-        cursor: pointer;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background-color: #cbd5e1;
-        transition: .4s;
-        border-radius: 34px;
+        inset: -10px;
+        border: 2px dashed var(--primary);
+        border-radius: 50%;
+        animation: spin 30s linear infinite;
+        opacity: 0.5;
     }
-
-    body.dark-mode .slider {
-        background-color: #334155;
-    }
-
-    .slider:before {
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+    
+    .cc-slider:before {
         position: absolute;
         content: "";
         height: 18px;
         width: 18px;
-        left: 3px;
+        left: 4px;
         bottom: 3px;
         background-color: white;
         transition: .4s;
         border-radius: 50%;
     }
-
-    input:checked + .slider {
-        background-color: #10b981;
+    input:checked + .cc-slider {
+        background-color: var(--primary);
+    }
+    input:checked + .cc-slider:before {
+        transform: translateX(24px);
     }
 
-    input:checked + .slider:before {
-        transform: translateX(20px);
+    .social-link-icon {
+        width: 50px;
+        height: 50px;
+        background: rgba(255,255,255,0.05);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        transition: var(--transition);
+    }
+    .social-link-icon:hover {
+        background: var(--surface-glass);
+        transform: translateY(-5px);
+        border-color: var(--primary);
+        box-shadow: 0 5px 15px rgba(99, 102, 241, 0.2);
     }
 </style>
 
-<div class="profile-page-wrapper">
-    <div style="max-width: 1200px; margin: 0 auto;">
-        <header class="profile-header">
-            <div>
-                <h1 class="profile-title">Account Profile</h1>
-                <p class="profile-subtitle">Manage your professional identity and security settings.</p>
-            </div>
-            <a href="{{ url_for('user.dashboard') }}" class="btn-action" style="background: var(--white); border: 1px solid var(--border-color); color: var(--text-color); box-shadow: 0 4px 6px rgba(0,0,0,0.02)">
-                ← Back to Dashboard
-            </a>
-        </header>
-
-        <div class="profile-grid">
-            <!-- Left Column: User details + Password change -->
-            <div style="display: flex; flex-direction: column; gap: 2rem;">
-                <div class="profile-card">
-                    <div class="avatar-wrapper">
-                        <div class="avatar-circle">
-                            {{ (user['username'] or 'U')[0] | upper }}
-                        </div>
-                        <h2 class="user-name">{{ user['username'] }}</h2>
-                        <div class="status-badge">Active Candidate</div>
-                    </div>
-                    
-                    <div class="info-list">
-                        <div class="info-item">
-                            <span class="info-label">Email Address</span>
-                            <span class="info-val">{{ user['email'] or 'Not provided' }}</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">Member Since</span>
-                            <span class="info-val">{{ user['created_at'] or 'Recent' }}</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="profile-card">
-                    <h3 class="section-title">
-                        <span>🔔</span> Preferences
-                    </h3>
-                    <p style="font-size: 0.85rem; color: var(--text-secondary, #64748b); margin-bottom: 1.25rem; line-height: 1.4;">
-                        Control how you receive alerts about available jobs that match your specified interests.
-                    </p>
-                    
-                    <form action="{{ url_for('user.settings') }}" method="POST" id="notif-form">
-                        <input type="hidden" name="action" value="update_notifications">
-                        <div style="display: flex; align-items: center; justify-content: space-between; background: var(--bg-color, #f8fafc); padding: 1rem 1.25rem; border-radius: 14px; border: 1px solid var(--border-color, #e2e8f0);">
-                            <div style="display: flex; flex-direction: column;">
-                                <span style="font-weight: 700; font-size: 0.95rem; color: var(--text-color);">Job Notifications</span>
-                                <span style="font-size: 0.75rem; color: var(--text-secondary, #64748b);">Alerts for matching roles</span>
-                            </div>
-                            <label class="switch">
-                                <input type="checkbox" name="notifications_enabled" onchange="this.form.submit()" {% if user['notifications_enabled'] %}checked{% endif %}>
-                                <span class="slider"></span>
-                            </label>
-                        </div>
-                    </form>
-                </div>
-
-                <div class="profile-card">
-                    <h3 class="section-title">
-                        <span>🔐</span> Security Settings
-                    </h3>
-                    
-                    <button id="toggle-password-btn" class="btn-action" style="width: 100%; justify-content: center; margin-bottom: 1rem; background: rgba(59, 130, 246, 0.1);">
-                        Change Password
-                    </button>
-
-                    <div id="password-form-container" style="display: none;">
-                        <form action="{{ url_for('user.settings') }}" method="POST">
-                            <input type="hidden" name="action" value="change_password">
-                            <div class="setting-group">
-                                <label>Current Password</label>
-                                <input type="password" name="current_password" class="setting-input" required placeholder="••••••••">
-                            </div>
-                            <div class="setting-group">
-                                <label>New Password</label>
-                                <input type="password" name="new_password" class="setting-input" required placeholder="••••••••">
-                                <div style="font-size: 0.75rem; color: #6b7280; margin-top: 8px; line-height: 1.4;">
-                                     Password must be 8-12 characters, include uppercase, lowercase, a number, and a special character.
-                                </div>
-                            </div>
-                            <div class="setting-group">
-                                <label>Confirm New Password</label>
-                                <input type="password" name="confirm_password" class="setting-input" required placeholder="••••••••">
-                            </div>
-                            <button type="submit" class="btn-save">Update Password</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Right Column: Professional Data & Builder Data -->
-            <div style="display: flex; flex-direction: column; gap: 2rem;">
-                <!-- Professional Data -->
-                <div class="profile-card">
-                    <h3 class="section-title">
-                        <span>📄</span> Profile Data
-                    </h3>
-                    
-                    <div class="data-box">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                            <div class="data-title" style="margin-bottom: 0;">Target Job Roles</div>
-                            <button id="edit-roles-btn" class="btn-action" style="padding: 4px 10px; font-size: 0.85rem; border: none; cursor: pointer; background: transparent; color: var(--primary-color);">
-                                <i class="fas fa-edit"></i> Edit
-                            </button>
-                        </div>
-                        
-                        <div id="roles-display-container">
-                            <div class="pill-list">
-                                {% if user['applied_job'] %}
-                                    {% for job in user['applied_job'].split(',') %}
-                                        <span class="pill">{{ job.strip() }}</span>
-                                    {% endfor %}
-                                {% else %}
-                                    <span style="font-style: italic; color: var(--text-secondary); font-size: 0.95rem;">No job roles specified yet.</span>
-                                {% endif %}
-                            </div>
-                        </div>
-
-                        <div id="roles-edit-container" style="display: none; margin-top: 15px;">
-                            <form action="{{ url_for('user.settings') }}" method="POST">
-                                <input type="hidden" name="action" value="update_roles">
-                                <div id="edit-job-fields-container" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px;">
-                                    {% if user['applied_job'] %}
-                                        {% for job in user['applied_job'].split(',') %}
-                                            <div class="job-item" style="display: flex; gap: 10px; align-items: center;">
-                                                <input type="text" name="applied_job" class="setting-input" value="{{ job.strip() }}" required>
-                                                <button type="button" class="remove-job-btn" onclick="this.parentElement.remove()" style="background: #fee2e2; color: #ef4444; border: none; width: 42px; height: 42px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: transform 0.2s;">✕</button>
-                                            </div>
-                                        {% endfor %}
-                                    {% else %}
-                                        <div class="job-item" style="display: flex; gap: 10px; align-items: center;">
-                                            <input type="text" name="applied_job" class="setting-input" placeholder="e.g. Software Engineer" required>
-                                            <button type="button" class="remove-job-btn" onclick="this.parentElement.remove()" style="background: #fee2e2; color: #ef4444; border: none; width: 42px; height: 42px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: transform 0.2s;">✕</button>
-                                        </div>
-                                    {% endif %}
-                                </div>
-                                <button type="button" onclick="addEditJob()" class="btn-action" style="background: rgba(16, 185, 129, 0.1); color: #10b981; margin-bottom: 20px; border: none; cursor: pointer;">
-                                    + Add Another Role
-                                </button>
-                                <div style="display: flex; gap: 10px;">
-                                    <button type="submit" class="btn-save" style="margin-top: 0; padding: 12px 20px; flex: 1;">Save Roles</button>
-                                    <button type="button" id="cancel-roles-btn" class="btn-save" style="margin-top: 0; padding: 12px 20px; background: #e2e8f0; color: #475569; flex: 1;">Cancel</button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-
-                    <div class="data-box" style="display: flex; align-items: center; justify-content: space-between; border-left: 4px solid var(--primary-color);">
-                        <div>
-                            <div class="data-title" style="margin-bottom: 4px;">Resume File</div>
-                            <div style="font-weight: 600; font-size: 1.05rem">{{ user['resume_filename'] or 'No resume uploaded' }}</div>
-                        </div>
-                        {% if user['resume_filename'] %}
-                            <a href="{{ url_for('static', filename='uploads/' + user['resume_filename']) }}" target="_blank" class="btn-action">
-                                View PDF
-                            </a>
-                        {% endif %}
-                    </div>
-                </div>
-
-                <!-- Resume Builder Data -->
-                <div class="profile-card">
-                    <h3 class="section-title">
-                        <span>🧾</span> Verified Resume Data
-                    </h3>
-
-                    {% if resume_data %}
-                        {% if resume_data['summary'] %}
-                            <div class="data-box" style="border-left: 4px solid #8b5cf6;">
-                                <div class="data-title">Professional Summary</div>
-                                <div class="data-text">{{ resume_data['summary'] }}</div>
-                            </div>
-                        {% endif %}
-
-                        <div class="builder-grid">
-                            {% if resume_data['full_name'] %}
-                            <div class="data-box" style="margin: 0;">
-                                <div class="data-title">Full Name</div>
-                                <div style="font-weight: 600; font-size: 1.05rem;">{{ resume_data['full_name'] }}</div>
-                            </div>
-                            {% endif %}
-                            {% if resume_data['phone'] %}
-                            <div class="data-box" style="margin: 0;">
-                                <div class="data-title">Phone</div>
-                                <div style="font-weight: 600; font-size: 1.05rem;">{{ resume_data['phone'] }}</div>
-                            </div>
-                            {% endif %}
-                            {% if resume_data['location'] %}
-                            <div class="data-box" style="margin: 0;">
-                                <div class="data-title">Location</div>
-                                <div style="font-weight: 600; font-size: 1.05rem;">{{ resume_data['location'] }}</div>
-                            </div>
-                            {% endif %}
-                            {% if resume_data['linkedin'] %}
-                            <div class="data-box" style="margin: 0;">
-                                <div class="data-title">LinkedIn</div>
-                                <div style="font-weight: 600; font-size: 1.05rem; word-break: break-all;">{{ resume_data['linkedin'] }}</div>
-                            </div>
-                            {% endif %}
-                            {% if resume_data['github'] %}
-                            <div class="data-box" style="margin: 0;">
-                                <div class="data-title">GitHub</div>
-                                <div style="font-weight: 600; font-size: 1.05rem; word-break: break-all;">{{ resume_data['github'] }}</div>
-                            </div>
-                            {% endif %}
-                        </div>
-
-                        {% if resume_data['skills'] %}
-                            <div class="data-box">
-                                <div class="data-title">Tech Skills</div>
-                                <div class="pill-list">
-                                    {% set skills_list = resume_data['skills'].split(',') if ',' in resume_data['skills'] else [resume_data['skills']] %}
-                                    {% for skill in skills_list %}
-                                        <span class="pill primary">{{ skill.strip() }}</span>
-                                    {% endfor %}
-                                </div>
-                            </div>
-                        {% endif %}
-
-                        {% if resume_data['experience'] %}
-                            <div class="data-box">
-                                <div class="data-title">Experience</div>
-                                <div class="data-text">{{ resume_data['experience'] }}</div>
-                            </div>
-                        {% endif %}
-
-                        {% if resume_data['education'] %}
-                            <div class="data-box">
-                                <div class="data-title">Education</div>
-                                <div class="data-text">{{ resume_data['education'] }}</div>
-                            </div>
-                        {% endif %}
-
-                        {% if resume_data['projects'] %}
-                            <div class="data-box">
-                                <div class="data-title">Projects</div>
-                                <div class="data-text">{{ resume_data['projects'] }}</div>
-                            </div>
-                        {% endif %}
-                        
-                    {% else %}
-                        <div class="empty-state">
-                            <div style="font-size: 3.5rem; margin-bottom: 1rem;">📝</div>
-                            <p>No verified builder data found.<br>Use the <a href="{{ url_for('user.resume_builder') }}">Resume Builder</a> to automatically generate yours!</p>
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
 <script>
+    function openEditModal() {
+        document.getElementById('edit-profile-modal').classList.add('active');
+    }
+
+    function closeEditModal() {
+        document.getElementById('edit-profile-modal').classList.remove('active');
+    }
+
+    function addJobRoleField() {
+        const container = document.getElementById('job-roles-list');
+        const div = document.createElement('div');
+        div.className = 'job-role-item flex-between';
+        div.style.background = 'rgba(255,255,255,0.03)';
+        div.style.padding = '0.5rem 1rem';
+        div.style.border = '1px solid var(--border)';
+        div.style.borderRadius = 'var(--radius)';
+        div.style.marginTop = '0.5rem';
+
+        div.innerHTML = `
+            <input type="text" name="job_role_item" class="cc-input-ghost" placeholder="New Job Role" style="border: none; background: transparent; color: white; flex: 1; outline: none;">
+            <button type="button" onclick="this.parentElement.remove()" style="background: none; border: none; color: var(--secondary); cursor: pointer;"><i class="fas fa-trash"></i></button>
+        `;
+        container.appendChild(div);
+        div.querySelector('input').focus();
+    }
+
+
+
     document.addEventListener('DOMContentLoaded', () => {
         const toggleBtn = document.getElementById('toggle-password-btn');
         const formContainer = document.getElementById('password-form-container');
 
-        if (toggleBtn && formContainer) {
-            toggleBtn.addEventListener('click', () => {
-                if (formContainer.style.display === 'none') {
-                    formContainer.style.display = 'block';
-                    toggleBtn.textContent = 'Cancel Password Change';
-                    toggleBtn.style.background = 'rgba(239, 68, 68, 0.1)';
-                    toggleBtn.style.color = '#ef4444';
-                } else {
-                    formContainer.style.display = 'none';
-                    toggleBtn.textContent = 'Change Password';
-                    toggleBtn.style.background = 'rgba(59, 130, 246, 0.1)';
-                    toggleBtn.style.color = 'var(--primary-color)';
-                }
-            });
-        }
-
-        const editRolesBtn = document.getElementById('edit-roles-btn');
-        const cancelRolesBtn = document.getElementById('cancel-roles-btn');
-        const rolesDisplay = document.getElementById('roles-display-container');
-        const rolesEdit = document.getElementById('roles-edit-container');
-
-        if (editRolesBtn) {
-            editRolesBtn.addEventListener('click', () => {
-                rolesDisplay.style.display = 'none';
-                editRolesBtn.style.display = 'none';
-                rolesEdit.style.display = 'block';
-            });
-        }
-
-        if (cancelRolesBtn) {
-            cancelRolesBtn.addEventListener('click', () => {
-                rolesEdit.style.display = 'none';
-                rolesDisplay.style.display = 'block';
-                editRolesBtn.style.display = 'block';
-            });
-        }
-
-        window.addEditJob = function() {
-            const container = document.getElementById('edit-job-fields-container');
-            const div = document.createElement('div');
-            div.className = 'job-item';
-            div.style.display = 'flex';
-            div.style.gap = '10px';
-            div.style.alignItems = 'center';
-
-            div.innerHTML = `
-                <input type="text" name="applied_job" class="setting-input" required placeholder="e.g. Project Manager">
-                <button type="button" class="remove-job-btn" onclick="this.parentElement.remove()" style="background: #fee2e2; color: #ef4444; border: none; width: 42px; height: 42px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: transform 0.2s;">✕</button>
-            `;
-
-            container.appendChild(div);
-            div.querySelector('input').focus();
-        };
-
-        // Add hover effects for dynamically created remove buttons
-        document.addEventListener('mouseover', function(e) {
-            if (e.target.classList.contains('remove-job-btn')) {
-                e.target.style.transform = 'scale(1.05)';
-                e.target.style.background = '#fecaca';
-            }
-        });
-        document.addEventListener('mouseout', function(e) {
-            if (e.target.classList.contains('remove-job-btn')) {
-                e.target.style.transform = 'scale(1)';
-                e.target.style.background = '#fee2e2';
-            }
-        });
-
-        // Password Validation Logic
-        const passwordForm = document.querySelector('#password-form-container form');
-        if (passwordForm) {
-            passwordForm.addEventListener('submit', function(e) {
-                const newPwd = this.querySelector('input[name="new_password"]').value;
-                const confirmPwd = this.querySelector('input[name="confirm_password"]').value;
-                
-                if (newPwd !== confirmPwd) {
-                    e.preventDefault();
-                    if (window.showPopupAlert) window.showPopupAlert("Passwords do not match.", "error");
-                    else alert("Passwords do not match.");
-                    return;
-                }
-                
-                const validation = validatePassword(newPwd);
-                if (!validation.valid) {
-                    e.preventDefault();
-                    if (window.showPopupAlert) {
-                        window.showPopupAlert(validation.message, 'error');
-                    } else {
-                        alert(validation.message);
-                    }
-                }
-            });
-        }
-
-        function validatePassword(password) {
-            if (password.length < 8 || password.length > 12) {
-                return { valid: false, message: "Password must be 8-12 characters long." };
-            }
-            if (!/[A-Z]/.test(password)) {
-                return { valid: false, message: "Password must contain at least one uppercase letter." };
-            }
-            if (!/[a-z]/.test(password)) {
-                return { valid: false, message: "Password must contain at least one lowercase letter." };
-            }
-            if (!/[0-9]/.test(password)) {
-                return { valid: false, message: "Password must contain at least one number." };
-            }
-            if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
-                return { valid: false, message: "Password must contain at least one special character." };
-            }
-            return { valid: true };
+        if (toggleBtn) {
+            toggleBtn.onclick = () => {
+                const isHidden = formContainer.style.display === 'none';
+                formContainer.style.display = isHidden ? 'block' : 'none';
+                toggleBtn.innerHTML = isHidden ? '<i class="fas fa-times mr-2"></i> Dismiss' : '<i class="fas fa-key mr-2"></i> Update Security';
+            };
         }
     });
+
+    // Close modal on click outside
+    window.onclick = function(event) {
+        const modal = document.getElementById('edit-profile-modal');
+        if (event.target == modal) {
+            closeEditModal();
+        }
+    }
 </script>
 {% endblock %}

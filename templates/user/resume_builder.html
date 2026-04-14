@@ -1,238 +1,147 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "layout.html" %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description"
-        content="A premium resume builder with multiple elegant templates to choose from. Build your professional presence in minutes.">
-    <title>Resumify | CareerConnect</title>
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700&display=swap"
-        rel="stylesheet">
-    <!-- Main Style -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='resume_builder.css') }}">
+{% block title %}Resumify | CareerConnect{% endblock %}
 
-    <!-- Custom Popup Alerts -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='alerts.css') }}">
-</head>
+{% block sidebar %}
+<aside class="cc-sidebar">
+    <a href="{{ url_for('user.dashboard') }}" class="sidebar-nav-item" title="Dashboard">
+        <i class="fas fa-th-large"></i>
+    </a>
+    <a href="{{ url_for('user.profile') }}" class="sidebar-nav-item" title="Profile">
+        <i class="fas fa-user"></i>
+    </a>
+    <a href="{{ url_for('user.resume_builder') }}" class="sidebar-nav-item active" title="Resume Builder">
+        <i class="fas fa-file-invoice"></i>
+    </a>
+    <a href="{{ url_for('user.aptitude') }}" class="sidebar-nav-item" title="Aptitude Portal">
+        <i class="fas fa-brain"></i>
+    </a>
+    <a href="{{ url_for('auth.logout') }}" class="sidebar-nav-item" title="Logout" style="margin-top: auto; margin-bottom: 0;">
+        <i class="fas fa-sign-out-alt"></i>
+    </a>
+</aside>
+{% endblock %}
 
-<body>
-    <div id="app">
-        <!-- Navigation / Header -->
-        <header class="main-header">
-            <div class="logo">
-                <a href="{{ url_for('user.dashboard') }}"
-                    style="text-decoration: none; display: flex; align-items: center; gap: 10px;">
-                    <span class="logo-text">Resumify</span>
-                </a>
-            </div>
-            <div class="stepper">
-                <div class="step active" id="step1-indicator">
-                    <span class="step-num">1</span>
-                    <span class="step-label">Template</span>
-                </div>
-                <div class="step" id="step2-indicator">
-                    <span class="step-num">2</span>
-                    <span class="step-label">Content</span>
-                </div>
-                <div class="step" id="step3-indicator">
-                    <span class="step-num">3</span>
-                    <span class="step-label">Download</span>
-                </div>
-            </div>
-            <div class="nav-right">
-                <a href="{{ url_for('user.dashboard') }}"
-                    style="text-decoration: none; color: var(--secondary); font-weight: 600; font-size: 0.9rem;">
-                    Back to Dashboard
-                </a>
-            </div>
-        </header>
-
-        <main id="main-content">
-            <!-- Screen 1: Template Selection -->
-            <section id="template-selection" class="screen active">
-                <div class="screen-header">
-                    <h1>Choose Your Professional Palette</h1>
-                    <p>Select from 5 premium, industry-tested templates designed to get you hired.</p>
-                </div>
-
-                <div class="template-grid" id="dynamic-template-grid">
-                    {% for template in dynamic_templates %}
-                    <div class="template-card" data-template="{{ template.templateId }}">
-                        <div class="template-mini-preview" id="preview-{{ template.templateId }}"></div>
-                        <div class="template-info">
-                            <h3>{{ template.name }}</h3>
-                            <p>{{ template.demo.get('personal', {}).get('summary', '') | truncate(80) }}</p>
-                            <button class="btn btn-primary select-template">Select {{ template.name.split(' ')[0]
-                                }}</button>
-                        </div>
-                    </div>
-                    {% endfor %}
-                    {% if not dynamic_templates %}
-                    <div
-                        style="grid-column: 1 / -1; text-align: center; padding: 3rem; background: rgba(0,0,0,0.02); border-radius: 1rem;">
-                        <p style="font-size: 1.1rem; color: #64748b;">No active templates available at the moment.</p>
-                    </div>
-                    {% endif %}
-                </div>
-
-                <script id="templates-data" type="application/json">
-                    {{ dynamic_templates | tojson | safe }}
-                </script>
-                <script>
-                    window.DYNAMIC_TEMPLATES = JSON.parse(document.getElementById('templates-data').textContent || '[]');
-                </script>
-            </section>
-
-            <!-- Screen 2: Content Input -->
-            <section id="content-input" class="screen">
-                <div class="editor-container">
-                    <div class="editor-sidebar">
-                        <h2>Personal Details</h2>
-                        <form id="resume-form" onsubmit="return false;">
-                            <div class="form-section active" data-section="personal">
-                                <div class="input-group">
-                                    <label for="fullName">Full Name</label>
-                                    <input type="text" id="fullName" placeholder="John Doe" required>
-                                </div>
-                                <div class="input-row">
-                                    <div class="input-group">
-                                        <label for="email">Email</label>
-                                        <input type="email" id="email" placeholder="john@example.com">
-                                    </div>
-                                    <div class="input-group">
-                                        <label for="phone">Phone</label>
-                                        <input type="tel" id="phone" placeholder="+1 234 567 890">
-                                    </div>
-                                </div>
-                                <div class="input-row">
-                                    <div class="input-group">
-                                        <label for="linkedin">LinkedIn URL</label>
-                                        <input type="url" id="linkedin" placeholder="linkedin.com/in/johndoe">
-                                    </div>
-                                    <div class="input-group">
-                                        <label for="github">GitHub URL</label>
-                                        <input type="url" id="github" placeholder="github.com/johndoe">
-                                    </div>
-                                </div>
-                                <div class="input-group">
-                                    <label for="location">Location</label>
-                                    <input type="text" id="location" placeholder="New York, NY">
-                                </div>
-                                <div class="input-group">
-                                    <label for="professionalTitle">Professional Title</label>
-                                    <input type="text" id="professionalTitle" placeholder="Senior Product Designer">
-                                </div>
-                                <div class="input-group">
-                                    <label for="summary">Career Objective / Summary</label>
-                                    <textarea id="summary"
-                                        placeholder="Briefly describe your career goals and key achievements..."></textarea>
-                                </div>
-                            </div>
-
-                            <div class="form-section" data-section="experience">
-                                <h2>Experience / Internship</h2>
-                                <div id="experience-list">
-                                    <!-- Dynamic list of experiences -->
-                                </div>
-                                <button type="button" class="btn btn-outline" id="add-experience">+ Add
-                                    Experience/Internship</button>
-                            </div>
-
-                            <div class="form-section" data-section="projects">
-                                <h2>Projects</h2>
-                                <div id="projects-list">
-                                    <!-- Dynamic list of projects -->
-                                </div>
-                                <button type="button" class="btn btn-outline" id="add-project">+ Add Project</button>
-                            </div>
-
-                            <div class="form-section" data-section="education">
-                                <h2>Education</h2>
-                                <div id="education-list">
-                                    <!-- Dynamic list of education -->
-                                </div>
-                                <button type="button" class="btn btn-outline" id="add-education">+ Add
-                                    Education</button>
-                            </div>
-
-                            <div class="form-section" data-section="skills">
-                                <h2>Skills</h2>
-                                <div class="input-group">
-                                    <label for="tech-skills-input">Technical Skills (comma separated)</label>
-                                    <input type="text" id="tech-skills-input" placeholder="React, Python, SQL...">
-                                </div>
-                                <div class="input-group">
-                                    <label for="soft-skills-input">Soft Skills (comma separated)</label>
-                                    <input type="text" id="soft-skills-input"
-                                        placeholder="Leadership, Communication, Problem Solving...">
-                                </div>
-                            </div>
-
-                            <div class="form-section" data-section="additional">
-                                <h2>Additional Sections</h2>
-                                <div class="input-group">
-                                    <label for="certifications-input">Certifications (comma separated)</label>
-                                    <input type="text" id="certifications-input"
-                                        placeholder="AWS Certified, Google Data Analytics...">
-                                </div>
-                                <div class="input-group">
-                                    <label for="achievements-input">Achievements (comma separated)</label>
-                                    <input type="text" id="achievements-input"
-                                        placeholder="Won Hackathon 2025, Top 1% in University...">
-                                </div>
-                                <div class="input-group">
-                                    <label for="languages-input">Languages (comma separated)</label>
-                                    <input type="text" id="languages-input"
-                                        placeholder="English (Native), Spanish (Fluent)...">
-                                </div>
-                                <div class="input-group">
-                                    <label for="hobbies-input">Hobbies (comma separated)</label>
-                                    <input type="text" id="hobbies-input"
-                                        placeholder="Photography, Chess, Traveling...">
-                                </div>
-                            </div>
-                        </form>
-                        <div class="editor-actions">
-                            <button class="btn btn-secondary" id="back-to-templates">Back</button>
-                            <button class="btn btn-primary" id="go-to-preview">Generate Preview</button>
-                        </div>
-                    </div>
-                    <div class="editor-preview-sticky">
-                        <div class="preview-mini-header">Live Preview</div>
-                        <div id="live-preview-container">
-                            <!-- Live rendered resume -->
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Screen 3: Final Preview / Download -->
-            <section id="final-preview" class="screen">
-                <div class="final-container">
-                    <div class="final-actions">
-                        <button class="btn btn-secondary" id="back-to-editor">Edit Content</button>
-                        <button class="btn btn-primary" id="download-pdf">Download PDF</button>
-                    </div>
-                    <div id="final-resume-container" class="resume-wrapper">
-                        <!-- Final Resume goes here -->
-                    </div>
-                </div>
-            </section>
-        </main>
+{% block navbar %}
+<nav class="cc-nav">
+    <div style="display: flex; align-items: center; gap: 1rem;">
+        <div style="width: 40px; height: 40px; background: var(--gradient-primary); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white;">
+            <i class="fas fa-file-lines"></i>
+        </div>
+        <h2 style="margin: 0; font-size: 1.25rem;">Resumify <span style="font-weight: 300; opacity: 0.6; margin-left: 0.5rem;">| Resume Builder</span></h2>
     </div>
 
-    <!-- Script Section -->
-    <script src="{{ url_for('static', filename='resume_builder.js') }}"></script>
-    <!-- Use html2pdf for downloading -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <div style="display: flex; align-items: center; gap: 2rem;" class="stepper">
+        <div class="step active" id="step1-indicator" style="display: flex; align-items: center; gap: 0.75rem;">
+            <span class="cc-badge cc-badge-primary" style="width: 24px; height: 24px; padding: 0; display: flex; align-items: center; justify-content: center;">1</span>
+            <span style="font-size: 0.9rem; font-weight: 600;">Layout</span>
+        </div>
+        <div class="step" id="step2-indicator" style="display: flex; align-items: center; gap: 0.75rem; opacity: 0.4;">
+            <span class="cc-badge cc-badge-secondary" style="width: 24px; height: 24px; padding: 0; display: flex; align-items: center; justify-content: center;">2</span>
+            <span style="font-size: 0.9rem; font-weight: 600;">Content</span>
+        </div>
+        <div class="step" id="step3-indicator" style="display: flex; align-items: center; gap: 0.75rem; opacity: 0.4;">
+            <span class="cc-badge cc-badge-secondary" style="width: 24px; height: 24px; padding: 0; display: flex; align-items: center; justify-content: center;">3</span>
+            <span style="font-size: 0.9rem; font-weight: 600;">Finalize</span>
+        </div>
+    </div>
+</nav>
+{% endblock %}
 
-    <!-- Custom Popup Alerts JS -->
-    <script src="{{ url_for('static', filename='alerts.js') }}"></script>
-</body>
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='resume_builder.css') }}">
 
-</html>
+<div class="cc-container mt-6 animate-fade-in">
+    <main id="main-content">
+        <!-- Screen 1: Template Selection -->
+        <section id="template-selection" class="screen active">
+            <div style="margin-bottom: 3rem;">
+                <h1 style="font-size: 2rem; margin-bottom: 0.5rem;">Choose your blueprint</h1>
+                <p class="text-secondary">Select a foundation that matches your professional identity.</p>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 2rem;" id="dynamic-template-grid">
+                {% for template in dynamic_templates %}
+                <div class="cc-card template-card" data-template="{{ template.templateId }}" style="padding: 0; cursor: pointer;">
+                    <div class="template-mini-preview" id="preview-{{ template.templateId }}">
+                        <!-- JS injects here -->
+                    </div>
+                    <div style="padding: 1.5rem; background: var(--surface);">
+                        <h3 class="mb-2" style="font-size: 1.1rem;">{{ template.name }}</h3>
+                        <p class="text-secondary mb-4" style="font-size: 0.85rem;">Professional ATS-friendly layout</p>
+                        <button class="cc-btn cc-btn-primary w-full select-template" style="width: 100%;">Select This Template</button>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <script id="templates-data" type="application/json">
+                {{ dynamic_templates | tojson | safe }}
+            </script>
+            <script>
+                const templatesDataEl = document.getElementById('templates-data');
+                window.DYNAMIC_TEMPLATES = templatesDataEl ? JSON.parse(templatesDataEl.textContent || '[]') : [];
+            </script>
+        </section>
+
+        <!-- Screen 2: Content Input -->
+        <section id="content-input" class="screen">
+            <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 2.5rem; align-items: start;">
+                <div class="cc-card" style="padding: 2.5rem;">
+                    <h2 class="mb-8" style="font-size: 1.5rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem;">Personal Information</h2>
+                    <form id="resume-form">
+                        <!-- JS Dynamic Form -->
+                    </form>
+                    
+                    <div style="display: flex; gap: 1rem; margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--border);">
+                        <button class="cc-btn cc-btn-secondary" id="back-to-templates" style="flex: 1;">
+                            <i class="fas fa-chevron-left mr-2"></i> Change Template
+                        </button>
+                        <button class="cc-btn cc-btn-primary" id="go-to-preview" style="flex: 2;">
+                            Review & Download <i class="fas fa-arrow-right ml-2"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div style="position: sticky; top: 6rem;">
+                    <div class="flex-between mb-4">
+                        <label class="cc-label" style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px;">Real-Time Preview</label>
+                        <div style="display: flex; align-items: center; gap: 0.5rem; color: var(--accent); font-size: 0.75rem; font-weight: 700;">
+                            <div style="width: 6px; height: 6px; background: var(--accent); border-radius: 50%; animation: pulse 2s infinite;"></div> SYNC ACTIVE
+                        </div>
+                    </div>
+                    <div id="live-preview-container" class="cc-card cc-glass" style="height: 750px; padding: 0; box-shadow: var(--shadow-xl); border: 1px solid var(--border);"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Screen 3: Download -->
+        <section id="final-preview" class="screen">
+            <div style="max-width: 900px; margin: 0 auto;">
+                <div class="cc-card cc-glass mb-8 p-4 flex-between" style="position: sticky; top: 1rem; z-index: 100; border-radius: var(--radius-full);">
+                    <button class="cc-btn cc-btn-secondary" id="back-to-editor" style="border-radius: var(--radius-full);">
+                        <i class="fas fa-pen-to-square mr-2"></i> Back to Editor
+                    </button>
+                    <div style="display: flex; gap: 1rem;">
+                        <button class="cc-btn cc-btn-primary" id="download-pdf" style="border-radius: var(--radius-full); padding-left: 2rem; padding-right: 2rem;">
+                            <i class="fas fa-download mr-2"></i> Save PDF
+                        </button>
+                    </div>
+                </div>
+                <div class="resume-wrapper animate-fade-in" id="final-resume-container"></div>
+            </div>
+        </section>
+    </main>
+</div>
+
+<style>
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.4; }
+    100% { opacity: 1; }
+}
+</style>
+
+<script src="{{ url_for('static', filename='resume_builder.js') }}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+{% endblock %}

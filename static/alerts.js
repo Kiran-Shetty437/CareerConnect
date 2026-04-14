@@ -67,16 +67,16 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // Auto-detect existing flask flash messages in the DOM (but hidden by CSS)
-    const existingAlerts = document.querySelectorAll('.alert');
+    const existingAlerts = document.querySelectorAll('.flash-container div');
     let delay = 0;
     existingAlerts.forEach((flash) => {
         const message = flash.textContent.trim();
         if(!message) return;
         
         let category = 'info';
-        if (flash.classList.contains('success')) category = 'success';
-        if (flash.classList.contains('error') || flash.classList.contains('danger')) category = 'error';
-        if (flash.classList.contains('warning')) category = 'warning';
+        if (flash.className.includes('success')) category = 'success';
+        if (flash.className.includes('error') || flash.className.includes('danger')) category = 'error';
+        if (flash.className.includes('warning')) category = 'warning';
         
         // Hide original natively (if our CSS override fails somehow)
         flash.style.display = 'none';
