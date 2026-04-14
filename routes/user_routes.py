@@ -168,7 +168,7 @@ def chat():
             return jsonify({"error": "Empty message"})
             
         bot_response = job_chatbot(user_msg)
-        return jsonify({"response": bot_response})
+        return jsonify({"reply": bot_response})
         
     return render_template("user/chatbot.html")
 

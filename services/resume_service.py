@@ -83,10 +83,15 @@ def analyze_resume_image(image_file):
         """
 
         try:
-            response = client.models.generate_content(
-                model="gemini-2.0-flash",
-                contents=[prompt, img]
-            )
+            model_list = ["gemini-2.5-flash", "gemini-1.5-flash"]
+            response = None
+            for model in model_list:
+                try:
+                    response = client.models.generate_content(model=model, contents=[prompt, img])
+                    if response: break
+                except Exception as e:
+                    if "503" in str(e) or "high demand" in str(e).lower(): continue
+                    else: raise e
             if response and response.text:
                 json_text = response.text.strip()
                 
@@ -163,14 +168,22 @@ def analyze_resume(text):
     {text}
     """
     try:
-        try:
-            response = client.models.generate_content(
-                model="gemini-2.0-flash",
-                contents=prompt
-            )
-            return response.text
-        except Exception as e:
-            raise e
+        model_list = ["gemini-2.5-flash", "gemini-1.5-flash"]
+        response = None
+        for model in model_list:
+            try:
+                response = client.models.generate_content(model=model, contents=prompt)
+                if response: break
+            except Exception as e:
+                err_str = str(e).lower()
+                if "503" in err_str or "high demand" in err_str:
+                    continue
+                else: raise e
+        
+        if not response:
+            return "⚠️ All AI models are currently busy. Please try again soon."
+            
+        return response.text
     except Exception as e:
         error_msg = str(e).upper()
         if "429" in error_msg or "RESOURCE_EXHAUSTED" in error_msg:
@@ -200,10 +213,15 @@ def extract_resume_info(text):
     {text}
     """
     try:
-        response = client.models.generate_content(
-            model="gemini-2.0-flash",
-            contents=prompt
-        )
+        model_list = ["gemini-2.5-flash", "gemini-1.5-flash"]
+        response = None
+        for model in model_list:
+            try:
+                response = client.models.generate_content(model=model, contents=prompt)
+                if response: break
+            except Exception as e:
+                if "503" in str(e) or "high demand" in str(e).lower(): continue
+                else: raise e
         if response and response.text:
             raw_text = response.text.strip()
             # Clean possible markdown

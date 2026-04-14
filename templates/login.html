@@ -6,7 +6,8 @@
     .login-container {
         display: flex;
         min-height: 100vh;
-        overflow: hidden;
+        width: 100%;
+        background-color: var(--background);
     }
 
     .login-form-side {
@@ -16,30 +17,18 @@
         flex-direction: column;
         justify-content: center;
         background: var(--surface);
-        z-index: 10;
-        box-shadow: 20px 0 50px rgba(0,0,0,0.05);
         position: relative;
-        overflow: hidden;
-    }
-
-    .login-form-side::before {
-        content: '';
-        position: absolute;
-        top: -10%;
-        left: -10%;
-        width: 200px;
-        height: 200px;
-        background: var(--primary);
-        filter: blur(100px);
-        opacity: 0.05;
-        z-index: -1;
+        z-index: 10;
+        box-shadow: 20px 0 50px rgba(0,0,0,0.1);
+        overflow-y: auto;
     }
 
     .login-hero-side {
         width: 60%;
         position: relative;
         overflow: hidden;
-        background: #f1f5f9;
+        background: #0f172a;
+        display: block;
     }
 
     .hero-slide {
@@ -48,89 +37,95 @@
         background-size: cover;
         background-position: center;
         opacity: 0;
-        transition: opacity 1s ease-in-out;
+        transition: opacity 1s ease-in-out, transform 10s linear;
+        transform: scale(1);
     }
 
     .hero-slide.active {
-        opacity: 1;
-        transform: scale(1.05);
-    }
-
-    .login-hero-side {
-        width: 60%;
-        position: relative;
-        overflow: hidden;
-        background: #0f172a;
+        opacity: 0.6;
+        transform: scale(1.1);
     }
 
     .hero-overlay {
         position: absolute;
         inset: 0;
-        background: linear-gradient(to bottom, transparent, rgba(15, 23, 42, 0.6));
+        background: linear-gradient(to top, rgba(15, 23, 42, 0.9), transparent);
         display: flex;
         flex-direction: column;
         justify-content: flex-end;
         padding: 4rem;
         color: white;
+        z-index: 5;
     }
 
     .hero-text h2 {
-        font-size: 3rem;
+        font-size: clamp(2rem, 5vw, 3.5rem);
         color: white;
-        margin-bottom: 1rem;
+        margin-bottom: 1.5rem;
+        font-weight: 800;
+        line-height: 1.1;
     }
 
     .hero-text p {
         font-size: 1.25rem;
-        opacity: 0.9;
+        opacity: 0.8;
         max-width: 500px;
+        line-height: 1.6;
     }
 
-    @media (max-width: 1024px) {
-        .login-form-side { width: 50%; padding: 2.5rem; }
+    /* RESPONSIVE LOGIN */
+    @media (max-width: 1200px) {
+        .login-form-side { width: 50%; padding: 3rem; }
         .login-hero-side { width: 50%; }
     }
 
-    @media (max-width: 768px) {
-        .login-container { flex-direction: column; }
-        .login-form-side { width: 100%; min-height: 100vh; }
-        .login-hero-side { display: none; }
+    @media (max-width: 992px) {
+        .login-form-side { width: 100%; max-width: 600px; margin: 0 auto; box-shadow: none; background: transparent; }
+        .login-hero-side { position: fixed; inset: 0; width: 100%; z-index: 1; opacity: 0.4; }
+        .hero-overlay { display: none; }
+        .login-container { justify-content: center; align-items: center; padding: 2rem; }
+        .login-form-side { border-radius: 2rem; background: var(--surface-glass); backdrop-filter: blur(20px); border: 1px solid var(--border-glass); }
+    }
+
+    @media (max-width: 576px) {
+        .login-form-side { padding: 2rem 1.5rem; }
+        .login-container { padding: 1rem; }
     }
 </style>
 
 <div class="login-container">
-    <div class="login-form-side cc-glass">
-        <div class="header mb-4">
-            <div class="cc-logo mb-4">
+    <div class="login-form-side">
+        <div class="header mb-8">
+            <div class="cc-logo mb-6">
                 <div class="cc-logo-icon">C</div>
-                <span>CareerConnect</span>
+                <span style="font-size: 1.75rem; letter-spacing: -1px;">CareerConnect</span>
             </div>
-            <h1 id="form-title">Welcome Back</h1>
-            <p id="form-subtitle" class="text-secondary">Please enter your details to sign in.</p>
+            <h1 id="form-title" style="font-size: 2.25rem; margin-bottom: 0.5rem;">Welcome Back</h1>
+            <p id="form-subtitle" class="text-secondary">Sign in to access your professional dashboard.</p>
         </div>
 
-        <form action="/" method="POST" id="auth-form">
+        <form action="/" method="POST" id="auth-form" class="w-full">
             <input type="hidden" name="action" id="form-action" value="login">
 
             <div id="login-signup-fields">
                 <div class="cc-form-group">
                     <label class="cc-label" for="username">Username</label>
-                    <input type="text" id="username" name="username" class="cc-input" placeholder="Enter your username">
+                    <input type="text" id="username" name="username" class="cc-input" placeholder="e.g. johndoe">
                 </div>
 
                 <div class="cc-form-group" id="email-group" style="display: none;">
-                    <label class="cc-label" for="email">Email</label>
-                    <input type="email" id="email" name="email" class="cc-input" placeholder="Enter your email">
+                    <label class="cc-label" for="email">Email Address</label>
+                    <input type="email" id="email" name="email" class="cc-input" placeholder="name@company.com">
                 </div>
 
                 <div class="cc-form-group" id="password-group">
                     <div class="flex-between mb-2">
                         <label class="cc-label mb-0" for="password">Password</label>
-                        <a href="javascript:void(0)" onclick="switchTab('forgot')" class="text-secondary" style="font-size: 0.8rem;" id="forgot-password-link">Forgot Password?</a>
+                        <a href="javascript:void(0)" onclick="switchTab('forgot')" class="text-secondary" style="font-size: 0.85rem;" id="forgot-password-link">Forgot Password?</a>
                     </div>
-                    <input type="password" id="password" name="password" class="cc-input" placeholder="Enter your password">
-                    <div id="password-requirements" class="text-secondary mt-2" style="font-size: 0.75rem; display: none;">
-                        Min 8 chars, uppercase, lowercase, number, and special character.
+                    <input type="password" id="password" name="password" class="cc-input" placeholder="••••••••">
+                    <div id="password-requirements" class="text-secondary mt-3 p-3 rounded-lg" style="font-size: 0.8rem; background: rgba(255,255,255,0.03); display: none; border-left: 3px solid var(--primary);">
+                        <i class="fas fa-info-circle mr-2"></i> Must include 8+ chars, uppercase, lowercase, number.
                     </div>
                 </div>
             </div>
@@ -138,53 +133,65 @@
             <div id="forgot-fields" style="display: none;">
                 <div class="cc-form-group">
                     <label class="cc-label" for="forgot-email">Email Address</label>
-                    <input type="email" id="forgot-email" name="forgot_email" class="cc-input" placeholder="Enter your registered email">
+                    <input type="email" id="forgot-email" name="forgot_email" class="cc-input" placeholder="your@email.com">
                 </div>
             </div>
 
             <div id="verify-fields" style="display: none;">
                 <div class="cc-form-group">
-                    <label class="cc-label text-center" for="otp">OTP Code</label>
-                    <input type="text" id="otp" name="otp" class="cc-input text-center" placeholder="6-digit code" maxlength="6"
-                        style="font-size: 1.5rem; letter-spacing: 0.5rem; font-weight: 700;">
+                    <label class="cc-label text-center" for="otp">Verification Code</label>
+                    <input type="text" id="otp" name="otp" class="cc-input text-center" placeholder="000000" maxlength="6"
+                        style="font-size: 2rem; letter-spacing: 0.5rem; font-weight: 800; padding: 1rem;">
                 </div>
             </div>
 
             <div id="reset-fields" style="display: none;">
                 <div class="cc-form-group">
-                    <label class="cc-label" for="new-password">New Password</label>
-                    <input type="password" id="new-password" name="new_password" class="cc-input" placeholder="Enter new password">
+                    <label class="cc-label" for="new-password">New Secure Password</label>
+                    <input type="password" id="new-password" name="new_password" class="cc-input" placeholder="Create new password">
                 </div>
             </div>
 
-            <button type="submit" class="cc-btn cc-btn-primary w-full mt-4" id="submit-btn" style="width: 100%;">Sign In</button>
+            <button type="submit" class="cc-btn cc-btn-primary w-full mt-4" id="submit-btn" style="height: 55px; font-size: 1.1rem;">Sign In</button>
 
-            <div id="auth-toggle-link" class="text-center mt-4 text-secondary" style="font-size: 0.9rem;">
-                <span id="toggle-text">Don't have an account?</span>
-                <a href="{{ url_for('auth.signup') }}" id="toggle-action" onclick="switchTab('signup'); return false;" class="font-weight-bold ml-1">Sign Up</a>
+            <div id="auth-toggle-link" class="text-center mt-6 text-secondary" style="font-size: 0.95rem;">
+                <span id="toggle-text">New to CareerConnect?</span>
+                <a href="{{ url_for('auth.signup') }}" id="toggle-action" onclick="switchTab('signup'); return false;" class="font-weight-bold ml-1 text-primary">Create Account</a>
             </div>
 
-            <div id="back-to-login" style="display: none;" class="text-center mt-4">
-                <a href="{{ url_for('auth.login') }}" onclick="switchTab('login'); return false;" class="text-secondary">Back to Login</a>
+            <div id="back-to-login" style="display: none;" class="text-center mt-6">
+                <a href="{{ url_for('auth.login') }}" onclick="switchTab('login'); return false;" class="text-secondary"><i class="fas fa-arrow-left mr-2"></i> Back to Login</a>
             </div>
         </form>
 
-        <div class="mt-auto pt-8 flex-between text-muted" style="font-size: 0.8rem; border-top: 1px solid var(--border);">
+        <div class="mt-auto pt-8 flex-between text-muted" style="font-size: 0.85rem; border-top: 1px solid var(--border);">
             <span>&copy; 2024 CareerConnect</span>
-            <a href="#" class="text-muted">Terms of Service</a>
+            <div class="gap-2 flex">
+                <a href="#" class="text-muted">Privacy</a>
+                <span>•</span>
+                <a href="#" class="text-muted">Terms</a>
+            </div>
         </div>
     </div>
 
     <div class="login-hero-side">
-        <div class="hero-slide active" style="background-image: url('{{ url_for('static', filename='hero_login.png') }}')"></div>
-        <div class="hero-slide" style="background-image: url('{{ url_for('static', filename='hero_login_2.png') }}')"></div>
-        <div class="hero-slide" style="background-image: url('{{ url_for('static', filename='hero_login_3.png') }}')"></div>
-        <div class="hero-slide" style="background-image: url('{{ url_for('static', filename='hero_login_4.png') }}')"></div>
+        <div class="hero-slide active" data-bg="{{ url_for('static', filename='hero_login.png') }}"></div>
+        <div class="hero-slide" data-bg="{{ url_for('static', filename='hero_login_2.png') }}"></div>
+        <div class="hero-slide" data-bg="{{ url_for('static', filename='hero_login_3.png') }}"></div>
+        <div class="hero-slide" data-bg="{{ url_for('static', filename='hero_login_4.png') }}"></div>
+        
+        <script>
+            // Set backgrounds from data attributes to avoid IDE validation issues with Jinja in style tags
+            document.querySelectorAll('.hero-slide').forEach(slide => {
+                const bg = slide.getAttribute('data-bg');
+                if (bg) slide.style.backgroundImage = `url('${bg}')`;
+            });
+        </script>
         
         <div class="hero-overlay">
             <div class="hero-text animate-fade-in">
-                <h2>Shape Your Future</h2>
-                <p>Connecting talented individuals with the world's most innovative companies.</p>
+                <h2>Fast-Track Your <br>Career Goals.</h2>
+                <p>An intelligence-driven platform designed to connect ambitious professionals with industry-leading opportunities.</p>
             </div>
         </div>
     </div>

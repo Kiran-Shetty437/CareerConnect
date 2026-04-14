@@ -5,7 +5,7 @@
 {% block body_class %}admin-theme{% endblock %}
 
 {% block sidebar %}
-<aside class="cc-sidebar">
+<aside class="cc-sidebar cc-sidebar-narrow">
     <div class="sidebar-nav-item active nav-link" title="Stats Overview" onclick="switchView('graphs', this)">
         <i class="fas fa-chart-pie"></i>
     </div>
@@ -28,15 +28,20 @@
 {% endblock %}
 
 {% block navbar %}
-<nav class="cc-nav cc-glass">
-    <div class="cc-logo">
-        <div class="cc-logo-icon">C</div>
-        <span>CareerConnect Admin</span>
+<nav class="cc-nav">
+    <div style="display: flex; align-items: center; gap: 1rem;">
+        <button class="cc-mobile-menu-trigger">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="cc-logo" style="font-size: 1.25rem;">
+            <div class="cc-logo-icon" style="width: 2rem; height: 2rem; border-radius: 8px;">C</div>
+            <span class="d-none-mobile">Admin Console</span>
+        </div>
     </div>
 
-    <div style="flex: 1; max-width: 500px; margin: 0 2rem; position: relative;">
+    <div class="d-none-tablet" style="flex: 1; max-width: 400px; position: relative;">
         <i class="fas fa-search" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-muted);"></i>
-        <input type="text" id="globalSearch" class="cc-input" placeholder="Search users, companies..." style="padding-left: 2.75rem; border-radius: var(--radius-full);">
+        <input type="text" id="globalSearch" class="cc-input" placeholder="Search resources..." style="padding-left: 2.75rem; border-radius: var(--radius-full); background: var(--surface-light);">
     </div>
 
     <div style="display: flex; align-items: center; gap: 1.5rem;">
@@ -55,19 +60,19 @@
         <main>
             <!-- Stats View -->
             <div id="graphs-view" class="view-section active">
-                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 2rem;">
-                    <div class="cc-card" style="background: linear-gradient(135deg, #6366f1, #4f46e5); color: white; border: none;">
-                        <span class="cc-label" style="color: rgba(255,255,255,0.8);">Total Users</span>
+                <div class="cc-grid" style="margin-bottom: 2rem;">
+                    <div class="cc-card" style="background: linear-gradient(135deg, #6366f1, #4f46e5); color: white; border: none; min-height: 160px; display: flex; flex-direction: column; justify-content: center;">
+                        <span class="cc-label" style="color: rgba(255,255,255,0.8);">Total Registered Users</span>
                         <div style="font-size: 2.5rem; font-weight: 800; margin: 0.5rem 0;">{{ total_users }}</div>
                         <i class="fas fa-users" style="position: absolute; right: 1.5rem; top: 1.5rem; opacity: 0.2; font-size: 3rem;"></i>
                     </div>
-                    <div class="cc-card" style="background: linear-gradient(135deg, #10b981, #059669); color: white; border: none;">
-                        <span class="cc-label" style="color: rgba(255,255,255,0.8);">Active Profiles</span>
+                    <div class="cc-card" style="background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; min-height: 160px; display: flex; flex-direction: column; justify-content: center;">
+                        <span class="cc-label" style="color: rgba(255,255,255,0.8);">Active Professionals</span>
                         <div style="font-size: 2.5rem; font-weight: 800; margin: 0.5rem 0;">{{ active_today }}</div>
                         <i class="fas fa-user-check" style="position: absolute; right: 1.5rem; top: 1.5rem; opacity: 0.2; font-size: 3rem;"></i>
                     </div>
-                    <div class="cc-card" style="background: linear-gradient(135deg, #f59e0b, #d97706); color: white; border: none;">
-                        <span class="cc-label" style="color: rgba(255,255,255,0.8);">Avg Screen Time</span>
+                    <div class="cc-card" style="background: linear-gradient(135deg, #f59e0b, #d97706); color: white; border: none; min-height: 160px; display: flex; flex-direction: column; justify-content: center;">
+                        <span class="cc-label" style="color: rgba(255,255,255,0.8);">Avg Engagement Time</span>
                         <div style="font-size: 2.5rem; font-weight: 800; margin: 0.5rem 0;">{{ avg_screen_time }}</div>
                         <i class="fas fa-clock" style="position: absolute; right: 1.5rem; top: 1.5rem; opacity: 0.2; font-size: 3rem;"></i>
                     </div>

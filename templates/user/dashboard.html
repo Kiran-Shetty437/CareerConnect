@@ -3,7 +3,7 @@
 {% block title %}CareerConnect - Dashboard{% endblock %}
 
 {% block sidebar %}
-<aside class="cc-sidebar">
+<aside class="cc-sidebar cc-sidebar-narrow">
     <a href="{{ url_for('user.dashboard') }}" class="sidebar-nav-item active" title="Dashboard">
         <i class="fas fa-th-large"></i>
     </a>
@@ -24,28 +24,30 @@
 
 {% block navbar %}
 <nav class="cc-nav">
-    <div style="flex: 1; max-width: 500px; position: relative;">
-        <i class="fas fa-search" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-muted);"></i>
-        <input type="text" id="globalSearch" class="cc-input" placeholder="Search roles, companies, locations..." style="padding-left: 2.75rem; border-radius: var(--radius-full); background: #1f2937;">
+    <div style="display: flex; align-items: center; gap: 1rem;">
+        <button class="cc-mobile-menu-trigger">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="cc-logo" style="font-size: 1.25rem;">
+            <div class="cc-logo-icon" style="width: 2rem; height: 2rem; border-radius: 8px;">C</div>
+            <span class="d-none-mobile">CareerConnect</span>
+        </div>
     </div>
 
-    <div style="display: flex; align-items: center; gap: 1.5rem;">
-        <div class="sidebar-nav-item" style="margin-bottom: 0; width: 40px; height: 40px; background: rgba(99, 102, 241, 0.1);">
-            <i class="fas fa-bell" style="font-size: 1.1rem;"></i>
-        </div>
-        <div class="sidebar-nav-item" style="margin-bottom: 0; width: 40px; height: 40px; background: rgba(16, 185, 129, 0.1); color: var(--accent);">
-            <i class="fas fa-gift" style="font-size: 1.1rem;"></i>
-        </div>
-        
+    <div class="d-none-tablet" style="flex: 1; max-width: 400px; position: relative;">
+        <i class="fas fa-search" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-muted);"></i>
+        <input type="text" id="globalSearch" class="cc-input" placeholder="Search roles..." style="padding-left: 2.75rem; border-radius: var(--radius-full); background: var(--surface-light);">
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 1rem;">
         <div style="display: flex; align-items: center; gap: 0.75rem; padding: 0.25rem 0.5rem; border-radius: var(--radius-full); background: rgba(255,255,255,0.03); border: 1px solid var(--border);">
             <div style="width: 32px; height: 32px; background: var(--gradient-primary); border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; font-weight: 800;">
                 {{ (username or 'U')[0] | upper }}
             </div>
-            <div style="text-align: left;">
+            <div class="d-none-mobile" style="text-align: left;">
                 <p style="font-size: 0.85rem; font-weight: 700; color: white;">{{ username }}</p>
-                <p style="font-size: 0.7rem; color: #4ade80;">Premium User</p>
+                <p style="font-size: 0.7rem; color: #4ade80;"><i class="fas fa-check-circle mr-1"></i>Verified</p>
             </div>
-            <i class="fas fa-chevron-down" style="font-size: 0.7rem; margin-left: 0.5rem; color: var(--text-muted);"></i>
         </div>
     </div>
 </nav>
@@ -54,65 +56,64 @@
 {% block content %}
 <div class="cc-container mt-6 animate-fade-in">
     <!-- Welcome Section -->
-    <div class="cc-card" style="background: var(--gradient-hero); color: white; border: none; padding: 2.5rem 2.5rem; position: relative; overflow: hidden; border-radius: 2rem; margin-bottom: 3.5rem;">
-        <div style="position: absolute; top: -20%; right: -5%; width: 350px; height: 350px; background: rgba(99, 102, 241, 0.2); border-radius: 50%; filter: blur(80px);"></div>
-        <div style="position: absolute; bottom: -10%; left: -5%; width: 250px; height: 250px; background: rgba(236, 72, 153, 0.15); border-radius: 50%; filter: blur(60px);"></div>
+    <div class="cc-card" style="background: var(--gradient-hero); color: white; border: none; padding: 2rem; position: relative; overflow: hidden; border-radius: 1.5rem; margin-bottom: 2rem;">
+        <div style="position: absolute; top: -20%; right: -5%; width: 250px; height: 250px; background: rgba(99, 102, 241, 0.2); border-radius: 50%; filter: blur(50px);"></div>
         
-        <div style="max-width: 650px; position: relative; z-index: 1;">
-            <span class="cc-badge" style="background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); margin-bottom: 1rem; backdrop-filter: blur(4px);">✨ Personal Career Hub</span>
-            <h1 style="color: white; font-size: 2.5rem; line-height: 1.1; letter-spacing: -1px; margin-bottom: 0.75rem;">Hello, {{ username }}!</h1>
-            <p style="opacity: 0.9; font-size: 1.1rem; line-height: 1.5; font-weight: 300;">Ready for your next big move? We've analyzed <strong>the latest opportunities</strong> from top global companies.</p>
+        <div style="max-width: 600px; position: relative; z-index: 1;">
+            <span class="cc-badge" style="background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); margin-bottom: 1rem;">✨ Career Hub</span>
+            <h1 style="color: white; font-size: clamp(1.5rem, 5vw, 2.5rem); margin-bottom: 0.5rem;">Hello, {{ username }}!</h1>
+            <p style="opacity: 0.9; font-size: 1rem; font-weight: 300;">Ready for your next big move? Discover curated roles just for you.</p>
         </div>
     </div>
 
     <!-- Smart Actions Grid -->
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; margin-bottom: 4rem;">
+    <div class="cc-grid" style="margin-bottom: 3rem;">
         <a href="{{ url_for('user.resume_builder') }}" class="cc-card cc-card-hover group" style="background: var(--surface); border: 1px solid var(--border);">
             <div style="width: 50px; height: 50px; background: rgba(99, 102, 241, 0.1); color: var(--primary); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 1.25rem;">
                 <i class="fas fa-wand-magic-sparkles"></i>
             </div>
-            <h3 style="margin-bottom: 0.5rem; font-size: 1.1rem;">Resume Builder</h3>
-            <p class="text-secondary" style="font-size: 0.9rem;">Craft an ATS-optimized professional resume in minutes.</p>
+            <h3 style="margin-bottom: 0.5rem; font-size: 1.15rem;">Resume Builder</h3>
+            <p class="text-secondary" style="font-size: 0.95rem;">Craft an ATS-optimized professional resume in minutes.</p>
         </a>
         
         <a href="{{ url_for('user.aptitude') }}" class="cc-card cc-card-hover" style="background: var(--surface); border: 1px solid var(--border);">
             <div style="width: 50px; height: 50px; background: rgba(16, 185, 129, 0.1); color: var(--accent); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 1.25rem;">
                 <i class="fas fa-brain"></i>
             </div>
-            <h3 style="margin-bottom: 0.5rem; font-size: 1.1rem;">Aptitude Portal</h3>
-            <p class="text-secondary" style="font-size: 0.9rem;">Practice with AI-generated test patterns from top companies.</p>
+            <h3 style="margin-bottom: 0.5rem; font-size: 1.15rem;">Aptitude Portal</h3>
+            <p class="text-secondary" style="font-size: 0.95rem;">Practice with AI-generated test patterns from top companies.</p>
         </a>
 
         <div id="resumeTrigger" class="cc-card cc-card-hover" style="background: var(--surface); border: 1px solid var(--border); cursor: pointer;">
             <div style="width: 50px; height: 50px; background: rgba(236, 72, 153, 0.1); color: var(--secondary); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 1.25rem;">
                 <i class="fas fa-magnifying-glass-chart"></i>
             </div>
-            <h3 style="margin-bottom: 0.5rem; font-size: 1.1rem;">Resume Analysis</h3>
-            <p class="text-secondary" style="font-size: 0.9rem;">Compare your resume against any job role to find gaps.</p>
+            <h3 style="margin-bottom: 0.5rem; font-size: 1.15rem;">Resume Analysis</h3>
+            <p class="text-secondary" style="font-size: 0.95rem;">Compare your resume against any job role to find gaps.</p>
         </div>
 
         <div id="chatTrigger" class="cc-card cc-card-hover" style="background: var(--surface); border: 1px solid var(--border); cursor: pointer;">
             <div style="width: 50px; height: 50px; background: rgba(124, 58, 237, 0.1); color: #7c3aed; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 1.25rem;">
                 <i class="fas fa-robot"></i>
             </div>
-            <h3 style="margin-bottom: 0.5rem; font-size: 1.1rem;">AI Mentor</h3>
-            <p class="text-secondary" style="font-size: 0.9rem;">Get instant career advice and preparation tips from Gemini.</p>
+            <h3 style="margin-bottom: 0.5rem; font-size: 1.15rem;">AI Mentor</h3>
+            <p class="text-secondary" style="font-size: 0.95rem;">Get instant career advice and preparation tips from Gemini.</p>
         </div>
     </div>
 
     <!-- Opportunities Hub -->
     <div class="mb-8">
-        <div class="flex-between mb-8">
+        <div class="flex-between mb-8" style="flex-wrap: wrap; gap: 1rem;">
             <div>
-                <h2 style="font-size: 1.5rem; letter-spacing: -0.5px;">Explore Open Roles</h2>
-                <p class="text-secondary" style="font-size: 0.9rem;">Direct access to verified application portals.</p>
+                <h2 style="font-size: 1.75rem; letter-spacing: -0.5px;">Explore Open Roles</h2>
+                <p class="text-secondary" style="font-size: 1rem;">Direct access to verified application portals.</p>
             </div>
             <div class="flex gap-2">
                 <button id="filterTrigger" class="cc-btn cc-btn-secondary" style="border-radius: var(--radius-full);"><i class="fas fa-sliders mr-2"></i> Filter</button>
             </div>
         </div>
 
-        <div id="jobGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 2rem;">
+        <div id="jobGrid" class="cc-grid">
             {% if companies %}
                 {% for company in companies %}
                     {% for job in company['jobs'] %}

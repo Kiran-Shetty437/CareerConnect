@@ -3,7 +3,7 @@
 {% block title %}CareerConnect - Aptitude Portal{% endblock %}
 
 {% block sidebar %}
-<aside class="cc-sidebar">
+<aside class="cc-sidebar cc-sidebar-narrow">
     <a href="{{ url_for('user.dashboard') }}" class="sidebar-nav-item" title="Dashboard">
         <i class="fas fa-th-large"></i>
     </a>
@@ -25,18 +25,21 @@
 {% block navbar %}
 <nav class="cc-nav">
     <div style="display: flex; align-items: center; gap: 1rem;">
-        <div style="width: 40px; height: 40px; background: var(--gradient-primary); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white;">
-            <i class="fas fa-brain"></i>
+        <button class="cc-mobile-menu-trigger">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="cc-logo" style="font-size: 1.25rem;">
+            <div class="cc-logo-icon" style="width: 2rem; height: 2rem; border-radius: 8px;">C</div>
+            <span class="d-none-mobile">Aptitude Portal</span>
         </div>
-        <h2 style="margin: 0; font-size: 1.25rem;">Aptitude Portal <span style="font-weight: 300; opacity: 0.6; margin-left: 0.5rem;">| Prepare with AI</span></h2>
     </div>
 
-    <div style="display: flex; align-items: center; gap: 1.5rem;">
-        <div style="text-align: right;">
+    <div style="display: flex; align-items: center; gap: 1rem;">
+        <div class="d-none-mobile" style="text-align: right;">
             <p style="font-size: 0.85rem; font-weight: 700; color: white;">{{ username }}</p>
-            <p style="font-size: 0.7rem; color: #4ade80;">Active Learner</p>
+            <p style="font-size: 0.7rem; color: #4ade80;">Active Session</p>
         </div>
-        <div style="width: 40px; height: 40px; background: var(--gradient-primary); border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; font-weight: 800;">
+        <div style="width: 32px; height: 32px; background: var(--gradient-primary); border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; font-weight: 800;">
             {{ (username or 'U')[0] | upper }}
         </div>
     </div>
@@ -47,23 +50,23 @@
 <div class="cc-container mt-6 animate-fade-in" style="max-width: 900px;">
     <!-- Screen 1: Setup -->
     <div id="screen-setup" class="portal-screen active">
-        <div class="cc-card mb-8" style="background: var(--gradient-hero); color: white; border: none; padding: 3rem; overflow: hidden; position: relative;">
+        <div class="cc-card mb-6" style="background: var(--gradient-hero); color: white; border: none; padding: 2.5rem; overflow: hidden; position: relative;">
             <div style="position: absolute; top: -20%; right: -5%; width: 200px; height: 200px; background: rgba(99, 102, 241, 0.2); border-radius: 50%; filter: blur(50px);"></div>
             <div style="position: relative; z-index: 1;">
-                <span class="cc-badge" style="background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); margin-bottom: 1rem;">AI-POWRED TEST ENGINE</span>
-                <h1 style="color: white; font-size: 2.5rem; margin-bottom: 0.5rem;">Ready to level up?</h1>
-                <p style="opacity: 0.8; font-size: 1.1rem; font-weight: 300;">Select a company pattern and difficulty to begin your customized AI evaluation.</p>
+                <span class="cc-badge" style="background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); margin-bottom: 1rem;">INTELLIGENT EVALUATION</span>
+                <h1 style="color: white; font-size: clamp(1.5rem, 5vw, 2.25rem); margin-bottom: 0.5rem;">Preparation Engine</h1>
+                <p style="opacity: 0.8; font-size: 1rem; font-weight: 300;">Simulate real-world assessment patterns with AI-driven adaptive questions.</p>
             </div>
         </div>
 
         <div class="cc-card">
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+            <div class="cc-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
                 <div class="cc-form-group">
-                    <label class="cc-label">Target Company Pattern</label>
+                    <label class="cc-label">Target Pattern</label>
                     <div style="position: relative;">
                         <i class="fas fa-building" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-muted);"></i>
                         <select id="company-name" class="cc-input" style="padding-left: 2.75rem;">
-                            <option value="">-- Choose Company --</option>
+                            <option value="">-- Select Company --</option>
                             {% for p in patterns %}
                             <option value="{{ p['company_name'] }}">{{ p['company_name'] }}</option>
                             {% endfor %}
@@ -71,84 +74,89 @@
                     </div>
                 </div>
                 <div class="cc-form-group">
-                    <label class="cc-label">Test Difficulty</label>
+                    <label class="cc-label">Evaluation Mode</label>
                     <div style="position: relative;">
                         <i class="fas fa-gauge-high" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-muted);"></i>
                         <select id="test-difficulty" class="cc-input" style="padding-left: 2.75rem;">
-                            <option value="easy">🟢 Easy</option>
-                            <option value="medium" selected>🟡 Medium</option>
-                            <option value="difficult">🔴 Difficult</option>
+                            <option value="easy">🟢 Standard</option>
+                            <option value="medium" selected>🟡 Pro</option>
+                            <option value="difficult">🔴 Elite</option>
                         </select>
                     </div>
                 </div>
             </div>
-            <button id="btn-generate" class="cc-btn cc-btn-primary w-full" style="height: 60px; font-size: 1.1rem; border-radius: var(--radius);">
-                Start AI Assessment <i class="fas fa-bolt ml-2"></i>
+            <button id="btn-generate" class="cc-btn cc-btn-primary w-full" style="height: 60px; font-size: 1.1rem;">
+                Launch Assessment <i class="fas fa-rocket ml-2"></i>
             </button>
         </div>
     </div>
 
     <!-- Screen 2: Loading -->
-    <div id="screen-loading" class="portal-screen" style="display: none; text-align: center; padding: 5rem 2rem;">
-        <div class="cc-loader-circle" style="width: 80px; height: 80px; border: 5px solid var(--border); border-top-color: var(--primary); border-radius: 50%; display: inline-block; animation: cc-spin 1s infinite linear; margin-bottom: 2.5rem;"></div>
-        <h2 id="loading-title" style="font-size: 1.75rem;">Generating Your Test...</h2>
-        <p class="text-secondary" style="max-width: 450px; margin: 1rem auto; line-height: 1.6;">Our AI, powered by Gemini, is analyzing company patterns to create standardized questions for you.</p>
+    <div id="screen-loading" class="portal-screen" style="display: none; text-align: center; padding: 4rem 1rem;">
+        <div style="width: 60px; height: 60px; border: 4px solid var(--border); border-top-color: var(--primary); border-radius: 50%; display: inline-block; animation: cc-spin 1s infinite linear; margin-bottom: 2rem;"></div>
+        <h2 id="loading-title" style="font-size: 1.5rem;">Synthesizing Experience...</h2>
+        <p class="text-secondary" style="max-width: 400px; margin: 1rem auto; font-size: 0.95rem;">Gemini is curating relevant questions based on industry standards.</p>
     </div>
 
     <!-- Screen 3: Test -->
     <div id="screen-test" class="portal-screen" style="display: none;">
-        <div class="cc-card cc-glass flex-between mb-8 sticky-top" style="position: sticky; top: 1rem; z-index: 100; padding: 1.25rem 2rem; border-radius: var(--radius-lg);">
-            <div>
-                <h3 id="test-info-company" style="margin: 0; font-size: 1.2rem;">Company Name</h3>
-                <span id="test-info-meta" class="cc-badge" style="background: rgba(129, 140, 248, 0.1); color: var(--primary); margin-top: 0.5rem; display: inline-block;">Section Name</span>
+        <div class="cc-card cc-glass flex-between mb-6 sticky-top" style="position: sticky; top: 5rem; z-index: 100; padding: 1rem 1.5rem; border-radius: var(--radius);">
+            <div style="min-width: 0;">
+                <h3 id="test-info-company" style="margin: 0; font-size: 1.1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Company Name</h3>
+                <span id="test-info-meta" class="cc-badge" style="background: rgba(129, 140, 248, 0.1); color: var(--primary); margin-top: 0.25rem;">Section</span>
             </div>
-            <div style="background: rgba(239, 68, 68, 0.1); color: #ef4444; padding: 0.75rem 1.5rem; border-radius: var(--radius); font-weight: 800; font-size: 1.4rem; border: 1px solid rgba(239, 68, 68, 0.1);">
-                <i class="far fa-clock mr-2"></i> <span id="portal-timer">--:--</span>
+            <div style="background: rgba(239, 68, 68, 0.1); color: #ef4444; padding: 0.5rem 1rem; border-radius: 10px; font-weight: 800; font-size: 1.25rem; flex-shrink: 0; margin-left: 1rem;">
+                <i class="far fa-clock"></i> <span id="portal-timer">--:--</span>
             </div>
         </div>
 
         <div id="test-questions-container"></div>
 
-        <div style="text-align: right; margin-top: 3rem; margin-bottom: 3rem;">
-            <button id="btn-submit-test" class="cc-btn cc-btn-primary" style="padding: 1rem 4rem; height: 60px; font-size: 1.1rem; border-radius: var(--radius-full);">
-                Next Round <i class="fas fa-arrow-right ml-2"></i>
+        <div style="margin-top: 2rem; margin-bottom: 3rem;">
+            <button id="btn-submit-test" class="cc-btn cc-btn-primary w-full" style="height: 60px; font-size: 1.1rem; border-radius: var(--radius);">
+                Continue <i class="fas fa-arrow-right ml-2"></i>
             </button>
         </div>
     </div>
 
     <!-- Screen 4: Results -->
-    <div id="screen-result" class="portal-screen" style="display: none; text-align: center; padding-bottom: 5rem;">
-        <div id="result-emoji" style="font-size: 6rem; margin-bottom: 1.5rem;">🏆</div>
-        <h1 style="font-size: 2.5rem; letter-spacing: -1px; margin-bottom: 0.5rem;">Assessment Complete!</h1>
-        <p id="result-meta" class="text-secondary mb-8" style="font-size: 1.1rem;">Results summary goes here.</p>
+    <div id="screen-result" class="portal-screen" style="display: none; padding-bottom: 5rem;">
+        <div class="text-center mb-10">
+            <h1 style="font-size: 3rem; margin-bottom: 0.5rem; letter-spacing: -2px;">Performance Insight</h1>
+            <p id="result-meta" class="text-secondary" style="font-size: 1.1rem; font-weight: 500;">- Analysis -</p>
+        </div>
 
-        <div class="cc-card mb-8" style="max-width: 600px; margin: 0 auto 3rem; padding: 3rem;">
-            <div style="display: flex; justify-content: space-around; align-items: center; margin-bottom: 3rem;">
-                <div>
-                    <div id="res-score" style="font-size: 4rem; font-weight: 800; color: var(--accent); line-height: 1;">0</div>
-                    <label class="cc-label" style="display: block; margin-top: 0.5rem;">Correct</label>
+        <div class="cc-card mb-12" style="max-width: 700px; margin: 0 auto; padding: 4rem 3rem; background: var(--surface); border: 2px solid var(--border); position: relative; overflow: hidden;">
+            <div id="result-emoji" style="position: absolute; top: -10px; right: -10px; font-size: 8rem; opacity: 0.05; transform: rotate(15deg);">🏆</div>
+            
+            <div style="display: flex; justify-content: center; align-items: center; gap: 4rem; margin-bottom: 4rem;">
+                <div class="text-center">
+                    <div id="res-score" style="font-size: 5rem; font-weight: 900; color: var(--accent); line-height: 1; letter-spacing: -3px;">0</div>
+                    <label class="cc-label" style="display: block; margin-top: 0.5rem; opacity: 0.6;">Correct</label>
                 </div>
-                <div style="width: 2px; height: 60px; background: var(--border);"></div>
-                <div>
-                    <div id="res-total" style="font-size: 4rem; font-weight: 800; color: var(--primary); line-height: 1;">0</div>
-                    <label class="cc-label" style="display: block; margin-top: 0.5rem;">Total</label>
+                <div style="width: 1px; height: 100px; background: var(--border);"></div>
+                <div class="text-center">
+                    <div id="res-total" style="font-size: 5rem; font-weight: 900; color: white; opacity: 0.3; line-height: 1; letter-spacing: -3px;">0</div>
+                    <label class="cc-label" style="display: block; margin-top: 0.5rem; opacity: 0.6;">Total</label>
                 </div>
             </div>
             
-            <div class="flex-between mb-4">
-                <label class="cc-label" style="text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px;">Overall Accuracy</label>
-                <span id="res-percent-label" style="font-weight: 900; color: var(--primary); font-size: 1.25rem;">0%</span>
-            </div>
-            <div style="width: 100%; height: 12px; background: rgba(255,255,255,0.05); border-radius: 6px; overflow: hidden; border: 1px solid var(--border);">
-                <div id="res-progress-bar" style="width: 0%; height: 100%; background: var(--gradient-primary); transition: width 1.5s cubic-bezier(0.19, 1, 0.22, 1);"></div>
+            <div style="max-width: 500px; margin: 0 auto;">
+                <div class="flex-between mb-4">
+                    <label class="cc-label" style="text-transform: uppercase; font-size: 0.75rem; font-weight: 800; letter-spacing: 2px;">Overall Accuracy</label>
+                    <span id="res-percent-label" style="font-weight: 900; color: white; font-size: 1.5rem;">0%</span>
+                </div>
+                <div style="width: 100%; height: 16px; background: rgba(255,255,255,0.02); border-radius: 50px; overflow: hidden; border: 1px solid var(--border); padding: 3px;">
+                    <div id="res-progress-bar" style="width: 0%; height: 100%; background: var(--gradient-primary); border-radius: 50px; transition: width 2s cubic-bezier(0.19, 1, 0.22, 1); box-shadow: 0 0 15px var(--primary);"></div>
+                </div>
             </div>
 
-            <div id="section-breakdown-container" class="mt-8"></div>
+            <div id="section-breakdown-container" class="mt-12"></div>
         </div>
 
-        <div style="display: flex; flex-direction: column; gap: 1rem; max-width: 600px; margin: 0 auto;">
-            <button id="btn-toggle-review" onclick="toggleDetailedReview()" class="cc-btn cc-btn-secondary w-full" style="height: 55px; border-radius: var(--radius);">
-                <i class="fas fa-magnifying-glass mr-2"></i> View Detailed Analysis
+        <div style="display: flex; flex-direction: column; gap: 1.25rem; max-width: 600px; margin: 0 auto;">
+            <button id="btn-toggle-review" onclick="toggleDetailedReview()" class="cc-btn cc-btn-secondary w-full" style="height: 60px; font-weight: 700;">
+                <i class="fas fa-magnifying-glass mr-2"></i> Inspect Submission Details
             </button>
 
             <div id="detailed-review-wrapper" style="display: none; text-align: left; margin-top: 2rem;">
@@ -156,8 +164,8 @@
             </div>
 
             <div class="flex gap-4 justify-center mt-8">
-                <button onclick="resetApp()" class="cc-btn cc-btn-secondary" style="flex: 1; height: 55px; border-radius: var(--radius);">Retake Test</button>
-                <a href="{{ url_for('user.dashboard') }}" class="cc-btn cc-btn-primary" style="flex: 1; height: 55px; border-radius: var(--radius); display: flex; align-items: center; justify-content: center;">Back to Dashboard</a>
+                <button onclick="resetApp()" class="cc-btn cc-btn-secondary" style="flex: 1; height: 60px; font-weight: 800; background: rgba(255,255,255,0.03);">RETAKE TEST</button>
+                <a href="{{ url_for('user.dashboard') }}" class="cc-btn cc-btn-primary" style="flex: 1.5; height: 60px; font-weight: 800; display: flex; align-items: center; justify-content: center;">BACK TO HUB</a>
             </div>
         </div>
     </div>
@@ -269,7 +277,7 @@ async function generateTest() {
 
 function startSection() {
     const section = currentTestData.questions[currentSectionIdx];
-    const totalMins = section.minutes || 5;
+    const totalMins = section.minutes;
     
     const infoCompany = document.getElementById('test-info-company');
     const infoMeta = document.getElementById('test-info-meta');
@@ -301,13 +309,14 @@ function renderCurrentSection() {
     section.questions.forEach((q, idx) => {
         const qIdx = qGlobalOffset + idx;
         html += `
-            <div class="cc-card mb-6" style="padding: 2rem;">
-                <h3 class="mb-6" style="font-size: 1.25rem; line-height: 1.6; color: var(--text-primary);"><span style="color: var(--primary); margin-right: 0.5rem;">Q${idx+1}.</span> ${q.text}</h3>
+            <div class="cc-card mb-10" style="padding: 3rem; position: relative; border-left: 5px solid var(--primary); background: var(--surface);">
+                <div style="position: absolute; top: -14px; left: 28px; background: var(--gradient-primary); padding: 6px 20px; border-radius: 50px; font-size: 0.8rem; font-weight: 900; color: white; box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4); letter-spacing: 1px;">QUESTION ${idx+1}</div>
+                <h3 class="mb-10" style="font-size: 1.4rem; line-height: 1.6; color: white; margin-top: 0.5rem; font-weight: 700;">${q.text}</h3>
                 <div class="options-container" data-q-idx="${qIdx}">
                     ${q.options.map((opt, oIdx) => `
-                        <div class="q-opt ${allAnswers[qIdx] == oIdx ? 'selected' : ''}" onclick="selectOption(this, ${qIdx}, ${oIdx})">
+                        <div class="q-opt ${allAnswers[qIdx] == oIdx ? 'selected' : ''}" onclick="selectOption(this, ${qIdx}, ${oIdx})" style="padding: 1.25rem 1.75rem; border-radius: 12px; margin-bottom: 1.25rem;">
                             <div class="opt-radio"></div>
-                            <span style="font-weight: 500;">${opt}</span>
+                            <span style="font-weight: 600; font-size: 1.05rem;">${opt}</span>
                         </div>
                     `).join('')}
                 </div>
@@ -395,6 +404,13 @@ function showResults(data) {
     if (resScore) resScore.textContent = data.score;
     if (resTotal) resTotal.textContent = data.total;
     if (resPercentLabel) resPercentLabel.textContent = data.percentage + '%';
+    const progressBar = document.getElementById('res-progress-bar');
+    if (progressBar) {
+        // Use a timeout to ensure the transition triggers after the screen switch
+        setTimeout(() => {
+            progressBar.style.width = data.percentage + '%';
+        }, 100);
+    }
     if (resultMeta) resultMeta.textContent = `${data.company_name} • ${data.difficulty.toUpperCase()} Performance Report`;
     
     const emoji = document.getElementById('result-emoji');

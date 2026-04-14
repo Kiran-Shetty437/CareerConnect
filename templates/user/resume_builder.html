@@ -3,7 +3,7 @@
 {% block title %}Resumify | CareerConnect{% endblock %}
 
 {% block sidebar %}
-<aside class="cc-sidebar">
+<aside class="cc-sidebar cc-sidebar-narrow">
     <a href="{{ url_for('user.dashboard') }}" class="sidebar-nav-item" title="Dashboard">
         <i class="fas fa-th-large"></i>
     </a>
@@ -25,24 +25,27 @@
 {% block navbar %}
 <nav class="cc-nav">
     <div style="display: flex; align-items: center; gap: 1rem;">
-        <div style="width: 40px; height: 40px; background: var(--gradient-primary); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white;">
-            <i class="fas fa-file-lines"></i>
+        <button class="cc-mobile-menu-trigger">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="cc-logo" style="font-size: 1.25rem;">
+            <div class="cc-logo-icon" style="width: 2rem; height: 2rem; border-radius: 8px;">C</div>
+            <span class="d-none-mobile">Resumify</span>
         </div>
-        <h2 style="margin: 0; font-size: 1.25rem;">Resumify <span style="font-weight: 300; opacity: 0.6; margin-left: 0.5rem;">| Resume Builder</span></h2>
     </div>
 
-    <div style="display: flex; align-items: center; gap: 2rem;" class="stepper">
-        <div class="step active" id="step1-indicator" style="display: flex; align-items: center; gap: 0.75rem;">
-            <span class="cc-badge cc-badge-primary" style="width: 24px; height: 24px; padding: 0; display: flex; align-items: center; justify-content: center;">1</span>
-            <span style="font-size: 0.9rem; font-weight: 600;">Layout</span>
+    <div style="display: flex; align-items: center; gap: 1.5rem;" class="stepper">
+        <div class="step active" id="step1-indicator" style="display: flex; align-items: center; gap: 0.5rem;">
+            <span class="cc-badge cc-badge-primary" style="width: 20px; height: 20px; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 0.7rem;">1</span>
+            <span class="d-none-mobile" style="font-size: 0.85rem; font-weight: 600;">Blueprint</span>
         </div>
-        <div class="step" id="step2-indicator" style="display: flex; align-items: center; gap: 0.75rem; opacity: 0.4;">
-            <span class="cc-badge cc-badge-secondary" style="width: 24px; height: 24px; padding: 0; display: flex; align-items: center; justify-content: center;">2</span>
-            <span style="font-size: 0.9rem; font-weight: 600;">Content</span>
+        <div class="step" id="step2-indicator" style="display: flex; align-items: center; gap: 0.5rem; opacity: 0.4;">
+            <span class="cc-badge cc-badge-secondary" style="width: 20px; height: 20px; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 0.7rem;">2</span>
+            <span class="d-none-mobile" style="font-size: 0.85rem; font-weight: 600;">Content</span>
         </div>
-        <div class="step" id="step3-indicator" style="display: flex; align-items: center; gap: 0.75rem; opacity: 0.4;">
-            <span class="cc-badge cc-badge-secondary" style="width: 24px; height: 24px; padding: 0; display: flex; align-items: center; justify-content: center;">3</span>
-            <span style="font-size: 0.9rem; font-weight: 600;">Finalize</span>
+        <div class="step" id="step3-indicator" style="display: flex; align-items: center; gap: 0.5rem; opacity: 0.4;">
+            <span class="cc-badge cc-badge-secondary" style="width: 20px; height: 20px; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 0.7rem;">3</span>
+            <span class="d-none-mobile" style="font-size: 0.85rem; font-weight: 600;">Finalize</span>
         </div>
     </div>
 </nav>
@@ -55,21 +58,21 @@
     <main id="main-content">
         <!-- Screen 1: Template Selection -->
         <section id="template-selection" class="screen active">
-            <div style="margin-bottom: 3rem;">
-                <h1 style="font-size: 2rem; margin-bottom: 0.5rem;">Choose your blueprint</h1>
-                <p class="text-secondary">Select a foundation that matches your professional identity.</p>
+            <div style="margin-bottom: 2.5rem;">
+                <h1 style="font-size: clamp(1.75rem, 5vw, 2.25rem); margin-bottom: 0.5rem;">Blueprint Library</h1>
+                <p class="text-secondary">Select a foundational structure that best showcases your career path.</p>
             </div>
 
-            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 2rem;" id="dynamic-template-grid">
+            <div class="cc-grid" id="dynamic-template-grid">
                 {% for template in dynamic_templates %}
-                <div class="cc-card template-card" data-template="{{ template.templateId }}" style="padding: 0; cursor: pointer;">
-                    <div class="template-mini-preview" id="preview-{{ template.templateId }}">
+                <div class="cc-card template-card cc-card-hover" data-template="{{ template.templateId }}" style="padding: 0; cursor: pointer;">
+                    <div class="template-mini-preview" id="preview-{{ template.templateId }}" style="background: white; min-height: 400px;">
                         <!-- JS injects here -->
                     </div>
-                    <div style="padding: 1.5rem; background: var(--surface);">
-                        <h3 class="mb-2" style="font-size: 1.1rem;">{{ template.name }}</h3>
-                        <p class="text-secondary mb-4" style="font-size: 0.85rem;">Professional ATS-friendly layout</p>
-                        <button class="cc-btn cc-btn-primary w-full select-template" style="width: 100%;">Select This Template</button>
+                    <div style="padding: 1.25rem; background: var(--surface);">
+                        <h3 class="mb-1" style="font-size: 1.1rem;">{{ template.name }}</h3>
+                        <p class="text-secondary mb-4" style="font-size: 0.8rem;">Clean & ATS-friendly</p>
+                        <button class="cc-btn cc-btn-primary w-full select-template">SelectBlueprint</button>
                     </div>
                 </div>
                 {% endfor %}
@@ -86,34 +89,35 @@
 
         <!-- Screen 2: Content Input -->
         <section id="content-input" class="screen">
-            <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 2.5rem; align-items: start;">
-                <div class="cc-card" style="padding: 2.5rem;">
-                    <h2 class="mb-8" style="font-size: 1.5rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem;">Personal Information</h2>
+            <div id="editor-layout" style="display: grid; grid-template-columns: 1.3fr 1fr; gap: 2rem; align-items: start;">
+                <div class="cc-card" style="padding: 2rem;">
+                    <h2 class="mb-6" style="font-size: 1.25rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem;">Professional Profile</h2>
                     <form id="resume-form">
                         <!-- JS Dynamic Form -->
                     </form>
                     
-                    <div style="display: flex; gap: 1rem; margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--border);">
-                        <button class="cc-btn cc-btn-secondary" id="back-to-templates" style="flex: 1;">
-                            <i class="fas fa-chevron-left mr-2"></i> Change Template
+                    <div style="display: flex; flex-direction: column; gap: 1rem; margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border);">
+                        <button class="cc-btn cc-btn-primary w-full" id="go-to-preview" style="height: 55px;">
+                            Review & Finalize <i class="fas fa-arrow-right ml-2"></i>
                         </button>
-                        <button class="cc-btn cc-btn-primary" id="go-to-preview" style="flex: 2;">
-                            Review & Download <i class="fas fa-arrow-right ml-2"></i>
+                        <button class="cc-btn cc-btn-secondary w-full" id="back-to-templates">
+                             Back to blueprints
                         </button>
                     </div>
                 </div>
 
-                <div style="position: sticky; top: 6rem;">
+                <div class="d-none-tablet" style="position: sticky; top: 6rem;">
                     <div class="flex-between mb-4">
-                        <label class="cc-label" style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px;">Real-Time Preview</label>
-                        <div style="display: flex; align-items: center; gap: 0.5rem; color: var(--accent); font-size: 0.75rem; font-weight: 700;">
-                            <div style="width: 6px; height: 6px; background: var(--accent); border-radius: 50%; animation: pulse 2s infinite;"></div> SYNC ACTIVE
+                        <label class="cc-label" style="font-size: 0.75rem; text-transform: uppercase;">Real-Time Sync</label>
+                        <div style="color: var(--accent); font-size: 0.75rem; font-weight: 700;">
+                             ACTIVE <i class="fas fa-check-circle ml-1"></i>
                         </div>
                     </div>
-                    <div id="live-preview-container" class="cc-card cc-glass" style="height: 750px; padding: 0; box-shadow: var(--shadow-xl); border: 1px solid var(--border);"></div>
+                    <div id="live-preview-container" class="cc-card cc-glass" style="height: 750px; padding: 0; box-shadow: var(--shadow-xl);"></div>
                 </div>
             </div>
         </section>
+
 
         <!-- Screen 3: Download -->
         <section id="final-preview" class="screen">

@@ -19,10 +19,20 @@ Rules:
 User: {user_input}
 """
     try:
-        response = client.models.generate_content(
-            model="gemini-2.5-flash", 
-            contents=prompt
-        )
+        model_list = ["gemini-2.5-flash", "gemini-1.5-flash"]
+        response = None
+        for model in model_list:
+            try:
+                response = client.models.generate_content(model=model, contents=prompt)
+                if response: break
+            except Exception as e:
+                if "503" in str(e) or "high demand" in str(e).lower():
+                    continue
+                else: raise e
+        
+        if not response:
+            return "⚠️ All AI models are currently busy. Please try again in 60 seconds."
+            
         return response.text
     except Exception as e:
         error_msg = str(e).upper()

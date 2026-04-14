@@ -157,7 +157,20 @@ input[type="text"]:focus, input[type="email"]:focus, input[type="tel"]:focus, in
     margin: 0 auto;
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 1200px) {
+    #editor-layout { grid-template-columns: 1fr !important; }
     .input-row { grid-template-columns: 1fr; }
-    .resume-wrapper { width: 100%; height: auto; }
+}
+
+@media (max-width: 768px) {
+    .resume-wrapper { 
+        width: 100% !important; 
+        height: auto !important; 
+        transform: none !important; 
+        padding: 1rem;
+    }
+    
+    .template-mini-preview > .res-body, .template-mini-preview > div {
+        transform: scale(0.3) !important;
+    }
 }
