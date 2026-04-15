@@ -14,6 +14,11 @@
 </head>
 
 <body class="{% block body_class %}{% endblock %}" style="display: flex; min-height: 100vh;">
+    <!-- Page Transition Overlay -->
+    <div id="page-loader" style="position: fixed; inset: 0; background: var(--background); z-index: 100000; display: flex; align-items: center; justify-content: center; transition: opacity 0.5s ease-out, visibility 0.5s;">
+        <div class="cc-logo-icon animate-float" style="width: 80px; height: 80px; font-size: 2.5rem;">C</div>
+    </div>
+
     <!-- Mobile Sidebar Overlay -->
     <div id="sidebarOverlay" style="position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; display: none; backdrop-filter: blur(4px);"></div>
 
@@ -43,6 +48,21 @@
     
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            // Page Loader handling
+            const loader = document.getElementById('page-loader');
+            if (loader) {
+                window.addEventListener('load', () => {
+                    loader.style.opacity = '0';
+                    setTimeout(() => loader.style.visibility = 'hidden', 500);
+                });
+                // Fallback if load takes too long
+                setTimeout(() => {
+                    loader.style.opacity = '0';
+                    setTimeout(() => loader.style.visibility = 'hidden', 500);
+                }, 3000);
+            }
+
+
             // Mobile Menu Toggle
             const sidebar = document.querySelector('.cc-sidebar');
             const overlay = document.getElementById('sidebarOverlay');
@@ -59,16 +79,18 @@
                     overlay.style.display = 'none';
                 });
             }
-
-            // Heartbeat System for screen time tracking
-            {% if session.get('user_id') and session.get('role') == 'user' %}
-            setInterval(() => {
-                fetch('/heartbeat', { method: 'POST', headers: { 'Content-Type': 'application/json' } })
-                    .catch(err => console.debug('Heartbeat failed', err));
-            }, 60000); 
-            {% endif %}
         });
     </script>
+
+    <!-- Background Analytics / Heartbeat -->
+    {% if session.get('user_id') and session.get('role') == 'user' %}
+    <script>
+        setInterval(() => {
+            fetch('/heartbeat', { method: 'POST', headers: { 'Content-Type': 'application/json' } })
+                .catch(err => console.debug('Heartbeat failed', err));
+        }, 60000); 
+    </script>
+    {% endif %}
 
     <!-- Custom Popup Alerts JS -->
     <script src="{{ url_for('static', filename='alerts.js') }}"></script>

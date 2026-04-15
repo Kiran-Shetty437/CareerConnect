@@ -16,11 +16,13 @@
         display: flex;
         flex-direction: column;
         justify-content: center;
-        background: var(--surface);
+        background: rgba(17, 24, 39, 0.95);
+        backdrop-filter: blur(20px);
         position: relative;
         z-index: 10;
-        box-shadow: 20px 0 50px rgba(0,0,0,0.1);
+        box-shadow: 20px 0 80px rgba(0,0,0,0.5);
         overflow-y: auto;
+        border-right: 1px solid var(--border-glass);
     }
 
     .login-hero-side {
@@ -49,13 +51,24 @@
     .hero-overlay {
         position: absolute;
         inset: 0;
-        background: linear-gradient(to top, rgba(15, 23, 42, 0.9), transparent);
+        background: radial-gradient(circle at center, transparent 0%, rgba(15, 23, 42, 0.4) 100%),
+                    linear-gradient(to top, rgba(15, 23, 42, 0.95), transparent 70%);
         display: flex;
         flex-direction: column;
         justify-content: flex-end;
         padding: 4rem;
         color: white;
         z-index: 5;
+    }
+
+    .hero-overlay::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3%3Ffilter id='noiseFilter'%3E%3FfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3F/filter%3E%3Frect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3F/svg%3E");
+        opacity: 0.05;
+        mix-blend-mode: overlay;
+        pointer-events: none;
     }
 
     .hero-text h2 {
@@ -100,11 +113,11 @@
                 <div class="cc-logo-icon">C</div>
                 <span style="font-size: 1.75rem; letter-spacing: -1px;">CareerConnect</span>
             </div>
-            <h1 id="form-title" style="font-size: 2.25rem; margin-bottom: 0.5rem;">Welcome Back</h1>
-            <p id="form-subtitle" class="text-secondary">Sign in to access your professional dashboard.</p>
+            <h1 id="form-title" class="text-shimmer" style="font-size: 3rem; margin-bottom: 0.5rem; font-weight: 800;">Welcome Back</h1>
+            <p id="form-subtitle" class="text-secondary" style="font-size: 1.1rem; opacity: 0.8;">Sign in to access your professional dashboard.</p>
         </div>
 
-        <form action="/" method="POST" id="auth-form" class="w-full">
+        <form action="/" method="POST" id="auth-form" class="w-full animate-stagger">
             <input type="hidden" name="action" id="form-action" value="login">
 
             <div id="login-signup-fields">

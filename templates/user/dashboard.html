@@ -56,48 +56,46 @@
 {% block content %}
 <div class="cc-container mt-6 animate-fade-in">
     <!-- Welcome Section -->
-    <div class="cc-card" style="background: var(--gradient-hero); color: white; border: none; padding: 2rem; position: relative; overflow: hidden; border-radius: 1.5rem; margin-bottom: 2rem;">
-        <div style="position: absolute; top: -20%; right: -5%; width: 250px; height: 250px; background: rgba(99, 102, 241, 0.2); border-radius: 50%; filter: blur(50px);"></div>
-        
+    <div class="cc-card cc-glass" style="background: var(--gradient-hero); color: white; border: none; padding: 3rem; position: relative; overflow: hidden; border-radius: 2rem; margin-bottom: 3rem; box-shadow: 0 20px 50px rgba(0,0,0,0.3);">
         <div style="max-width: 600px; position: relative; z-index: 1;">
-            <span class="cc-badge" style="background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); margin-bottom: 1rem;">✨ Career Hub</span>
-            <h1 style="color: white; font-size: clamp(1.5rem, 5vw, 2.5rem); margin-bottom: 0.5rem;">Hello, {{ username }}!</h1>
-            <p style="opacity: 0.9; font-size: 1rem; font-weight: 300;">Ready for your next big move? Discover curated roles just for you.</p>
+            <span class="cc-badge" style="background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); margin-bottom: 1.5rem; padding: 0.5rem 1rem;">✨ Career Hub</span>
+            <h1 class="text-glow" style="color: white; font-size: clamp(2rem, 6vw, 3.5rem); margin-bottom: 1rem; font-weight: 800; letter-spacing: -1.5px;">Hello, {{ username }}!</h1>
+            <p style="opacity: 0.8; font-size: 1.2rem; font-weight: 400; line-height: 1.6;">Your professional journey continues here. Explore personalized opportunities and track your growth.</p>
         </div>
     </div>
 
     <!-- Smart Actions Grid -->
-    <div class="cc-grid" style="margin-bottom: 3rem;">
-        <a href="{{ url_for('user.resume_builder') }}" class="cc-card cc-card-hover group" style="background: var(--surface); border: 1px solid var(--border);">
-            <div style="width: 50px; height: 50px; background: rgba(99, 102, 241, 0.1); color: var(--primary); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 1.25rem;">
+    <div class="cc-grid animate-stagger" style="margin-bottom: 4rem;">
+        <a href="{{ url_for('user.resume_builder') }}" class="cc-card cc-glass cc-card-hover animate-glare group">
+            <div style="width: 60px; height: 60px; background: rgba(99, 102, 241, 0.15); color: var(--primary); border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 1.75rem; margin-bottom: 1.5rem; transition: var(--transition);">
                 <i class="fas fa-wand-magic-sparkles"></i>
             </div>
-            <h3 style="margin-bottom: 0.5rem; font-size: 1.15rem;">Resume Builder</h3>
-            <p class="text-secondary" style="font-size: 0.95rem;">Craft an ATS-optimized professional resume in minutes.</p>
+            <h3 style="margin-bottom: 0.75rem; font-size: 1.25rem; font-weight: 700;">Resume Builder</h3>
+            <p class="text-secondary" style="font-size: 1rem; line-height: 1.5;">Craft an ATS-optimized professional resume in minutes.</p>
         </a>
         
-        <a href="{{ url_for('user.aptitude') }}" class="cc-card cc-card-hover" style="background: var(--surface); border: 1px solid var(--border);">
-            <div style="width: 50px; height: 50px; background: rgba(16, 185, 129, 0.1); color: var(--accent); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 1.25rem;">
+        <a href="{{ url_for('user.aptitude') }}" class="cc-card cc-glass cc-card-hover animate-glare group">
+            <div style="width: 60px; height: 60px; background: rgba(16, 185, 129, 0.15); color: var(--accent); border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 1.75rem; margin-bottom: 1.5rem; transition: var(--transition);">
                 <i class="fas fa-brain"></i>
             </div>
-            <h3 style="margin-bottom: 0.5rem; font-size: 1.15rem;">Aptitude Portal</h3>
-            <p class="text-secondary" style="font-size: 0.95rem;">Practice with AI-generated test patterns from top companies.</p>
+            <h3 style="margin-bottom: 0.75rem; font-size: 1.25rem; font-weight: 700;">Aptitude Portal</h3>
+            <p class="text-secondary" style="font-size: 1rem; line-height: 1.5;">Practice with AI-generated test patterns from top companies.</p>
         </a>
 
-        <div id="resumeTrigger" class="cc-card cc-card-hover" style="background: var(--surface); border: 1px solid var(--border); cursor: pointer;">
-            <div style="width: 50px; height: 50px; background: rgba(236, 72, 153, 0.1); color: var(--secondary); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 1.25rem;">
+        <div id="resumeTrigger" class="cc-card cc-glass cc-card-hover animate-glare group" style="cursor: pointer;">
+            <div style="width: 60px; height: 60px; background: rgba(236, 72, 153, 0.15); color: var(--secondary); border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 1.75rem; margin-bottom: 1.5rem; transition: var(--transition);">
                 <i class="fas fa-magnifying-glass-chart"></i>
             </div>
-            <h3 style="margin-bottom: 0.5rem; font-size: 1.15rem;">Resume Analysis</h3>
-            <p class="text-secondary" style="font-size: 0.95rem;">Compare your resume against any job role to find gaps.</p>
+            <h3 style="margin-bottom: 0.75rem; font-size: 1.25rem; font-weight: 700;">Resume Analysis</h3>
+            <p class="text-secondary" style="font-size: 1rem; line-height: 1.5;">Compare your resume against any job role to find gaps.</p>
         </div>
 
-        <div id="chatTrigger" class="cc-card cc-card-hover" style="background: var(--surface); border: 1px solid var(--border); cursor: pointer;">
-            <div style="width: 50px; height: 50px; background: rgba(124, 58, 237, 0.1); color: #7c3aed; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 1.25rem;">
+        <div id="chatTrigger" class="cc-card cc-glass cc-card-hover animate-glare group" style="cursor: pointer;">
+            <div style="width: 60px; height: 60px; background: rgba(124, 58, 237, 0.15); color: #7c3aed; border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 1.75rem; margin-bottom: 1.5rem; transition: var(--transition);">
                 <i class="fas fa-robot"></i>
             </div>
-            <h3 style="margin-bottom: 0.5rem; font-size: 1.15rem;">AI Mentor</h3>
-            <p class="text-secondary" style="font-size: 0.95rem;">Get instant career advice and preparation tips from Gemini.</p>
+            <h3 style="margin-bottom: 0.75rem; font-size: 1.25rem; font-weight: 700;">AI Mentor</h3>
+            <p class="text-secondary" style="font-size: 1rem; line-height: 1.5;">Get instant career advice and preparation tips from Gemini.</p>
         </div>
     </div>
 
@@ -113,7 +111,7 @@
             </div>
         </div>
 
-        <div id="jobGrid" class="cc-grid">
+        <div id="jobGrid" class="cc-grid animate-stagger">
             {% if companies %}
                 {% for company in companies %}
                     {% for job in company['jobs'] %}
