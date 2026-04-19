@@ -39,7 +39,7 @@
     <div class="main-wrapper">
         {% block navbar %}{% endblock %}
         
-        <div class="content-wrapper" style="flex: 1; padding-bottom: 3rem;">
+        <div class="content-wrapper {% block content_wrapper_class %}{% endblock %}">
             {% block content %}{% endblock %}
         </div>
     </div>
