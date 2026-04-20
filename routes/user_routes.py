@@ -54,6 +54,7 @@ def dashboard():
                 "location": row["location"],
                 "level": row["job_level"],
                 "experience": row["experience_required"],
+                "apply_link": row["apply_link"],
                 "is_active": row["is_active"]
             })
     

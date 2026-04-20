@@ -115,7 +115,7 @@
             {% if companies %}
                 {% for company in companies %}
                     {% for job in company['jobs'] %}
-                    <a href="{{ job['apply_link'] }}" target="_blank" 
+                    <a href="{{ company['official_page_link'] }}" target="_blank" 
                        class="cc-card cc-card-hover job-block animate-fade-in" 
                        data-level="{{ job['level'] | lower }}"
                        data-location="{{ job['location'] | lower }}"

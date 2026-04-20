@@ -320,14 +320,35 @@
         // Reset all sections
         [loginSignupFields, forgotFields, verifyFields, resetFields].forEach(el => el.style.display = 'none');
         
+        // Disable all inputs first and remove required
+        form.querySelectorAll('input').forEach(input => {
+            if (input.type !== 'hidden') {
+                input.required = false;
+                input.disabled = true;
+            }
+        });
+
+        const enableFields = (containerId) => {
+            const container = document.getElementById(containerId);
+            if (container) {
+                container.style.display = 'block';
+                container.querySelectorAll('input').forEach(input => {
+                    input.disabled = false;
+                });
+            }
+        };
+
         if (tab === 'signup') {
             form.action = "{{ url_for('auth.login') }}";
             formAction.value = 'signup';
             submitBtn.textContent = 'Create Account';
             title.textContent = 'Create Account';
             subtitle.textContent = 'Join our community of professionals';
-            loginSignupFields.style.display = 'block';
-            emailGroup.style.display = 'block';
+            
+            enableFields('login-signup-fields');
+            document.getElementById('email-group').style.display = 'block';
+            document.getElementById('email').disabled = false;
+            
             backToLogin.style.display = 'none';
             forgotPasswordLink.style.display = 'none';
             passwordRequirements.style.display = 'block';
@@ -335,41 +356,68 @@
             toggleText.textContent = 'Already have an account?';
             toggleAction.textContent = 'Sign In';
             toggleAction.setAttribute('onclick', "switchTab('login'); return false;");
+            
+            // Set required
+            document.getElementById('username').required = true;
+            document.getElementById('email').required = true;
+            document.getElementById('password').required = true;
+
         } else if (tab === 'forgot') {
             form.action = "{{ url_for('auth.forgot_password') }}";
             formAction.value = 'forgot';
             submitBtn.textContent = 'Send OTP';
             title.textContent = 'Forgot Password';
             subtitle.textContent = 'Enter your email to receive a verification code';
-            forgotFields.style.display = 'block';
+            
+            enableFields('forgot-fields');
+            
             backToLogin.style.display = 'block';
             toggleLink.style.display = 'none';
+            
+            // Set required
+            document.getElementById('forgot-email').required = true;
+
         } else if (tab === 'verify') {
             form.action = "{{ url_for('auth.verify_otp') }}";
             formAction.value = 'verify';
             submitBtn.textContent = 'Verify OTP';
             title.textContent = 'Verify Identity';
             subtitle.textContent = 'A code was sent to your email';
-            verifyFields.style.display = 'block';
+            
+            enableFields('verify-fields');
+            
             backToLogin.style.display = 'block';
             toggleLink.style.display = 'none';
+            
+            // Set required
+            document.getElementById('otp').required = true;
+
         } else if (tab === 'reset') {
             form.action = "{{ url_for('auth.reset_password') }}";
             formAction.value = 'reset';
             submitBtn.textContent = 'Update Password';
             title.textContent = 'Reset Password';
             subtitle.textContent = 'Set your new secure password';
-            resetFields.style.display = 'block';
+            
+            enableFields('reset-fields');
+            
             backToLogin.style.display = 'block';
             toggleLink.style.display = 'none';
+            
+            // Set required
+            document.getElementById('new-password').required = true;
+
         } else {
             form.action = "{{ url_for('auth.login') }}";
             formAction.value = 'login';
             submitBtn.textContent = 'Sign In';
             title.textContent = 'Welcome Back';
             subtitle.textContent = 'Sign in to continue your journey';
-            loginSignupFields.style.display = 'block';
-            emailGroup.style.display = 'none';
+            
+            enableFields('login-signup-fields');
+            document.getElementById('email-group').style.display = 'none';
+            document.getElementById('email').disabled = true;
+            
             backToLogin.style.display = 'none';
             forgotPasswordLink.style.display = 'block';
             passwordRequirements.style.display = 'none';
@@ -377,6 +425,10 @@
             toggleText.textContent = "Don't have an account?";
             toggleAction.textContent = 'Sign Up';
             toggleAction.setAttribute('onclick', "switchTab('signup'); return false;");
+            
+            // Set required
+            document.getElementById('username').required = true;
+            document.getElementById('password').required = true;
         }
     }
 

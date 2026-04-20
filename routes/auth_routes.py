@@ -111,7 +111,7 @@ def signup():
 @auth.route("/forgot-password", methods=["GET", "POST"])
 def forgot_password():
     if request.method == "POST":
-        email_input = request.form.get("email", "").strip().lower()
+        email_input = request.form.get("forgot_email", "").strip().lower()
         if not email_input:
             flash("Please enter an email address.", "error")
             return redirect(url_for("auth.login"))
