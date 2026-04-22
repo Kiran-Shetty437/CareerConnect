@@ -24,6 +24,44 @@ def validate_password(password):
         return False, "Password must contain at least one special character (@$!%*?&#)."
     return True, ""
 
+@user.route("/user-details", methods=["GET", "POST"])
+def user_details():
+    if not session.get("user_id"):
+        return redirect(url_for("auth.login"))
+        
+    user_id = session["user_id"]
+    conn = get_connection()
+    
+    if request.method == "POST":
+        # Handle Resume Upload
+        file = request.files.get("resume")
+        filename = None
+        if file and file.filename:
+            filename = secure_filename(f"resume_{user_id}_{file.filename}")
+            # Ensure UPLOAD_FOLDER exists
+            os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+            file.save(os.path.join(UPLOAD_FOLDER, filename))
+        
+        # Handle Applied Job(s)
+        job_roles = request.form.getlist("applied_job")
+        applied_job = ",".join([j.strip() for j in job_roles if j.strip()])
+        
+        # Update User Table
+        if filename:
+            conn.execute("UPDATE user SET resume_filename = ?, applied_job = ? WHERE id = ?", (filename, applied_job, user_id))
+        else:
+            conn.execute("UPDATE user SET applied_job = ? WHERE id = ?", (applied_job, user_id))
+            
+        conn.commit()
+        conn.close()
+        flash("Profile completed! Welcome to your dashboard.", "success")
+        return redirect(url_for("user.dashboard"))
+    
+    user_row = conn.execute("SELECT username, email FROM user WHERE id = ?", (user_id,)).fetchone()
+    conn.close()
+    
+    return render_template("user/details.html", username=user_row["username"], email=user_row["email"])
+
 @user.route("/user")
 @user.route("/user/dashboard")
 def dashboard():

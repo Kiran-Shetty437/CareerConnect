@@ -57,11 +57,7 @@ def login():
                 session["role"] = "user"
                 session["login_time"] = time.time()
                 
-                # Check if profile is complete
-                if not user["email"] or not user["resume_filename"]:
-                    conn.close()
-                    return redirect(url_for("user.user_details"))
-                
+                # Redirect to dashboard directly
                 conn.close()
                 return redirect(url_for("user.dashboard"))
             else:

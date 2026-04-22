@@ -12,8 +12,8 @@
     <div class="sidebar-nav-item nav-link" title="User Management" onclick="switchView('users', this)">
         <i class="fas fa-users"></i>
     </div>
-    <div class="sidebar-nav-item nav-link" title="Job Scraping" onclick="switchView('company', this)">
-        <i class="fas fa-building"></i>
+    <div class="sidebar-nav-item nav-link" title="Job Management" onclick="switchView('company', this)">
+        <i class="fas fa-sync"></i>
     </div>
     <div class="sidebar-nav-item nav-link" title="Resume Templates" onclick="switchView('templates', this)">
         <i class="fas fa-file-invoice"></i>
@@ -39,6 +39,8 @@
             <span class="d-none-mobile">Admin Console</span>
         </div>
     </div>
+
+
 
     <div class="d-none-tablet" style="flex: 1; max-width: 400px; position: relative;">
         <i class="fas fa-search"
@@ -175,7 +177,14 @@
         <!-- Job Scraping View -->
         <div id="company-view" class="view-section" style="display: none;">
             <div class="cc-card">
-                <h3 class="mb-4">Job Sync Engine</h3>
+                <div class="flex-between mb-4">
+                    <h3 class="mb-0">Job Synchronization Console</h3>
+                    <form action="{{ url_for('admin.sync_all_jobs') }}" method="POST">
+                        <button type="submit" class="cc-btn cc-btn-primary" id="globalSyncBtn" style="background: var(--primary);" onclick="this.innerHTML='<i class=\'fas fa-spinner fa-spin mr-2\'></i> Syncing All...'; this.disabled=true; this.form.submit();">
+                            <i class="fas fa-sync-alt mr-2"></i> Sync All Available Jobs
+                        </button>
+                    </form>
+                </div>
                 <form action="{{ url_for('admin.add_company') }}" method="POST" class="mb-6"
                     style="display: flex; gap: 1rem;">
                     <input type="text" name="company_name" class="cc-input"
@@ -192,7 +201,7 @@
                                 <th>Company</th>
                                 <th>Roles Found</th>
                                 <th>Last Sync</th>
-                                <th>Actions</th>
+                                <th style="text-align: right;">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -214,13 +223,23 @@
                                 <td>{{ company['jobs']|length }}</td>
                                 <td>{{ company['last_sync'].split(' ')[0] if company['last_sync'] else 'Never' }}</td>
                                 <td>
-                                    <form
-                                        action="{{ url_for('admin.delete_entire_company', company_name=company['company_name']) }}"
-                                        method="POST">
-                                        <button type="submit" class="cc-btn cc-btn-secondary"
-                                            style="padding: 0.4rem; color: var(--secondary);"><i
-                                                class="fas fa-trash"></i></button>
-                                    </form>
+                                    <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+                                        <form action="{{ url_for('admin.add_company') }}" method="POST">
+                                            <input type="hidden" name="company_name" value="{{ company['company_name'] }}">
+                                            <input type="hidden" name="official_page_link" value="{{ company['official_page_link'] }}">
+                                            <button type="submit" class="cc-btn cc-btn-secondary" style="padding: 0.4rem 0.8rem; color: var(--primary); display: flex; align-items: center; gap: 0.4rem;" title="Sync Company">
+                                                <i class="fas fa-sync-alt"></i> <span>Sync</span>
+                                            </button>
+                                        </form>
+                                        <form
+                                            action="{{ url_for('admin.delete_entire_company', company_name=company['company_name']) }}"
+                                            method="POST" onsubmit="return confirm('Delete all data for {{ company['company_name'] }}?')">
+                                            <button type="submit" class="cc-btn cc-btn-secondary"
+                                                style="padding: 0.4rem; color: #ef4444;" title="Delete Company">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
                             {% endfor %}
