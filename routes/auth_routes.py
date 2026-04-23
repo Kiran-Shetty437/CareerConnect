@@ -26,8 +26,28 @@ ADMIN_USERNAME = "admin"
 ADMIN_PASSWORD = "admin123"
 
 
+@auth.route("/")
+def index():
+    if session.get("user_id"):
+        if session.get("role") == "admin":
+            return redirect(url_for("admin.dashboard"))
+        return redirect(url_for("user.dashboard"))
+    
+    conn = get_connection()
+    try:
+        user_count = conn.execute("SELECT COUNT(*) FROM user").fetchone()[0]
+        company_count = conn.execute("SELECT COUNT(DISTINCT company_name) FROM company").fetchone()[0]
+    except Exception as e:
+        print(f"Error fetching landing stats: {e}")
+        user_count = 0
+        company_count = 0
+    finally:
+        conn.close()
+        
+    return render_template("index.html", user_count=user_count, company_count=company_count)
+
+
 @auth.route("/login", methods=["GET", "POST"])
-@auth.route("/", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
         action = request.form.get("action", "login")
@@ -69,31 +89,44 @@ def login():
             email = request.form.get("email").strip().lower()
             conn = get_connection()
             
-            # 🛡️ DUPLICATE EMAIL CHECK (During Signup)
+            # 🛡️ DUPLICATE EMAIL CHECK
             existing_email = conn.execute("SELECT * FROM user WHERE LOWER(email)=?", (email,)).fetchone()
             if existing_email:
                 conn.close()
-                flash("Signup failed: This email is already registered with another account.", "error")
+                flash("Signup failed: This email is already registered.", "error")
                 return render_template("login.html", state="signup")
 
-            try:
-                is_valid, msg = validate_password(password)
-                if not is_valid:
-                    conn.close()
-                    flash(msg, "error")
-                    return render_template("login.html", state="signup")
-
-                conn.execute(
-                    "INSERT INTO user (username, password, role, email) VALUES (?, ?, ?, ?)",
-                    (username, password, "user", email)
-                )
-                conn.commit()
-                flash("Signup successful! Please login.", "success")
-            except Exception as e:
-                flash("Username already exists", "error")
-            finally:
+            # DUPLICATE USERNAME CHECK
+            existing_user = conn.execute("SELECT * FROM user WHERE username=?", (username,)).fetchone()
+            if existing_user:
                 conn.close()
-            return render_template("login.html", state="login")
+                flash("Signup failed: Username already exists.", "error")
+                return render_template("login.html", state="signup")
+
+            is_valid, msg = validate_password(password)
+            if not is_valid:
+                conn.close()
+                flash(msg, "error")
+                return render_template("login.html", state="signup")
+
+            # Instead of inserting, send OTP
+            otp = random.randint(100000, 999999)
+            session["otp"] = str(otp)
+            session["otp_purpose"] = "signup"
+            session["signup_data"] = {
+                "username": username,
+                "password": password,
+                "email": email
+            }
+            
+            if send_otp_email(email, otp, purpose="Account Verification"):
+                flash("Verification code sent to your email.", "success")
+                conn.close()
+                return render_template("login.html", state="verify")
+            else:
+                conn.close()
+                flash("Failed to send verification email. Please try again.", "error")
+                return render_template("login.html", state="signup")
 
     return render_template("login.html", state="login")
 
@@ -120,7 +153,8 @@ def forgot_password():
             otp = random.randint(100000, 999999)
             session["otp"] = str(otp)
             session["reset_email"] = email_input
-            if send_otp_email(email_input, otp):
+            session["otp_purpose"] = "forgot"
+            if send_otp_email(email_input, otp, purpose="Password Reset"):
                 flash("OTP sent to your email.", "success")
                 return render_template("login.html", state="verify")
             else:
@@ -137,10 +171,54 @@ def forgot_password():
 def verify_otp():
     user_otp = request.form["otp"]
     saved_otp = session.get("otp")
+    purpose = session.get("otp_purpose")
 
     if user_otp == saved_otp:
-        # User is "allowed" to reset their password
-        return render_template("login.html", state="reset")
+        if purpose == "signup":
+            signup_data = session.get("signup_data")
+            if signup_data:
+                conn = get_connection()
+                try:
+                    cursor = conn.execute(
+                        "INSERT INTO user (username, password, role, email) VALUES (?, ?, ?, ?)",
+                        (signup_data["username"], signup_data["password"], "user", signup_data["email"])
+                    )
+                    conn.commit()
+                    user_id = cursor.lastrowid
+                    
+                    # Auto-login
+                    session["user_id"] = user_id
+                    session["username"] = signup_data["username"]
+                    session["role"] = "user"
+                    session["login_time"] = time.time()
+                    
+                    # Update last activity
+                    conn.execute("UPDATE user SET last_activity = CURRENT_TIMESTAMP WHERE id = ?", (user_id,))
+                    conn.commit()
+                    
+                    # Clear verification data
+                    session.pop("otp", None)
+                    session.pop("otp_purpose", None)
+                    session.pop("signup_data", None)
+                    
+                    flash("Account verified! Welcome to CareerConnect.", "success")
+                    return redirect(url_for("user.dashboard"))
+                except Exception as e:
+                    flash("Error creating account. Please try again.", "error")
+                    return redirect(url_for("auth.login"))
+                finally:
+                    conn.close()
+            else:
+                flash("Session expired. Please sign up again.", "error")
+                return redirect(url_for("auth.login"))
+        
+        elif purpose == "forgot":
+            # User is "allowed" to reset their password
+            return render_template("login.html", state="reset")
+            
+        else:
+            flash("Invalid session.", "error")
+            return redirect(url_for("auth.login"))
     else:
         flash("Invalid OTP. Please try again.", "error")
         return render_template("login.html", state="verify")

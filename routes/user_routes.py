@@ -24,43 +24,11 @@ def validate_password(password):
         return False, "Password must contain at least one special character (@$!%*?&#)."
     return True, ""
 
-@user.route("/user-details", methods=["GET", "POST"])
-def user_details():
-    if not session.get("user_id"):
-        return redirect(url_for("auth.login"))
-        
-    user_id = session["user_id"]
-    conn = get_connection()
-    
-    if request.method == "POST":
-        # Handle Resume Upload
-        file = request.files.get("resume")
-        filename = None
-        if file and file.filename:
-            filename = secure_filename(f"resume_{user_id}_{file.filename}")
-            # Ensure UPLOAD_FOLDER exists
-            os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-            file.save(os.path.join(UPLOAD_FOLDER, filename))
-        
-        # Handle Applied Job(s)
-        job_roles = request.form.getlist("applied_job")
-        applied_job = ",".join([j.strip() for j in job_roles if j.strip()])
-        
-        # Update User Table
-        if filename:
-            conn.execute("UPDATE user SET resume_filename = ?, applied_job = ? WHERE id = ?", (filename, applied_job, user_id))
-        else:
-            conn.execute("UPDATE user SET applied_job = ? WHERE id = ?", (applied_job, user_id))
-            
-        conn.commit()
-        conn.close()
-        flash("Profile completed! Welcome to your dashboard.", "success")
-        return redirect(url_for("user.dashboard"))
-    
-    user_row = conn.execute("SELECT username, email FROM user WHERE id = ?", (user_id,)).fetchone()
-    conn.close()
-    
-    return render_template("user/details.html", username=user_row["username"], email=user_row["email"])
+def allowed_file(filename, allowed_extensions):
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in allowed_extensions
+
+RESUME_EXTENSIONS = {"pdf", "doc", "docx"}
+IMAGE_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}
 
 @user.route("/user")
 @user.route("/user/dashboard")
@@ -110,11 +78,27 @@ def update_profile():
     if 'profile_pic' in request.files:
         file = request.files['profile_pic']
         if file and file.filename:
-            filename = secure_filename(f"profile_{user_id}_{file.filename}")
-            file.save(os.path.join(UPLOAD_FOLDER, filename))
-            conn.execute("UPDATE user SET profile_pic = ? WHERE id = ?", (filename, user_id))
+            if not allowed_file(file.filename, IMAGE_EXTENSIONS):
+                flash("Invalid image format for profile picture. Use PNG, JPG, or GIF.", "error")
+            else:
+                filename = secure_filename(f"profile_{user_id}_{file.filename}")
+                os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+                file.save(os.path.join(UPLOAD_FOLDER, filename))
+                conn.execute("UPDATE user SET profile_pic = ? WHERE id = ?", (filename, user_id))
+
+    # Handle Resume Upload
+    if 'resume' in request.files:
+        file = request.files['resume']
+        if file and file.filename:
+            if not allowed_file(file.filename, RESUME_EXTENSIONS):
+                flash("Invalid resume format. Please use PDF or DOC/DOCX.", "error")
+            else:
+                filename = secure_filename(f"resume_{user_id}_{file.filename}")
+                os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+                file.save(os.path.join(UPLOAD_FOLDER, filename))
+                conn.execute("UPDATE user SET resume_filename = ? WHERE id = ?", (filename, user_id))
     
-    # Handle other fields (Directly from form for better reliability)
+    # Handle other fields
     job_roles = request.form.getlist("job_role_item")
     applied_job = ",".join([j.strip() for j in job_roles if j.strip()])
     
@@ -134,6 +118,32 @@ def update_profile():
     conn.close()
     
     flash("Profile updated successfully!", "success")
+    return redirect(url_for("user.profile"))
+
+@user.route("/profile/resume/delete")
+def delete_resume():
+    if not session.get("user_id"):
+        return redirect(url_for("auth.login"))
+    
+    user_id = session["user_id"]
+    conn = get_connection()
+    user_row = conn.execute("SELECT resume_filename FROM user WHERE id = ?", (user_id,)).fetchone()
+    
+    if user_row and user_row['resume_filename']:
+        try:
+            file_path = os.path.join(UPLOAD_FOLDER, user_row['resume_filename'])
+            if os.path.exists(file_path):
+                os.remove(file_path)
+        except Exception as e:
+            print(f"Error deleting resume file: {e}")
+            
+        conn.execute("UPDATE user SET resume_filename = NULL WHERE id = ?", (user_id,))
+        conn.commit()
+        flash("Resume deleted successfully.", "success")
+    else:
+        flash("No resume found to delete.", "error")
+        
+    conn.close()
     return redirect(url_for("user.profile"))
 
 @user.route("/profile")
@@ -223,15 +233,16 @@ def resume_analysis():
         if not file:
             flash("No file uploaded", "error")
         else:
+            if not allowed_file(file.filename, RESUME_EXTENSIONS):
+                flash("Unsupported file format. Please upload PDF or DOC/DOCX only.", "error")
+                return redirect(url_for("user.resume_analysis"))
+            
             file_ext = os.path.splitext(file.filename)[1].lower()
             text = ""
             if file_ext == ".pdf":
                 text = extract_pdf_text(file)
             elif file_ext in [".doc", ".docx"]:
                 text = extract_docx_text(file)
-            else:
-                flash("Unsupported file format", "error")
-                return redirect(url_for("user.resume_analysis"))
 
             if text:
                 analysis_result = analyze_resume(text)
@@ -281,14 +292,15 @@ def api_analyze_resume():
         return jsonify({"error": "No file uploaded"}), 400
 
     file_ext = os.path.splitext(file.filename)[1].lower()
+    if not allowed_file(file.filename, RESUME_EXTENSIONS):
+        return jsonify({"error": "Unsupported format. Please upload PDF or DOC/DOCX only."}), 400
+        
     text = ""
     try:
         if file_ext == ".pdf":
             text = extract_pdf_text(file)
         elif file_ext in [".doc", ".docx"]:
             text = extract_docx_text(file)
-        else:
-            return jsonify({"error": "Unsupported format. Use PDF or DOCX."}), 400
     except Exception as e:
         return jsonify({"error": f"Failed to extract document text: {str(e)}"}), 500
 

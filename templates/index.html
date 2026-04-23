@@ -1,0 +1,371 @@
+{% extends "layout.html" %}
+{% block title %}CareerConnect - Accelerate Your Career Journey{% endblock %}
+{% block body_class %}auth-page{% endblock %}
+{% block content_wrapper_class %}auth-wrapper{% endblock %}
+
+{% block content %}
+<style>
+    .landing-hero {
+        padding: 8rem 2rem 10rem;
+        position: relative;
+        overflow: hidden;
+        background: radial-gradient(circle at 50% -20%, rgba(99, 102, 241, 0.2) 0%, transparent 70%);
+        text-align: center;
+    }
+
+    .hero-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 100px;
+        color: var(--primary-light);
+        font-weight: 600;
+        font-size: 0.9rem;
+        margin-bottom: 2.5rem;
+        backdrop-filter: blur(10px);
+    }
+
+    .hero-title {
+        font-size: clamp(2.5rem, 8vw, 5rem);
+        line-height: 1;
+        font-weight: 800;
+        letter-spacing: -3px;
+        margin-bottom: 1.5rem;
+    }
+
+    .hero-subtitle {
+        font-size: 1.25rem;
+        color: var(--text-secondary);
+        max-width: 700px;
+        margin: 0 auto 3.5rem;
+        line-height: 1.5;
+    }
+
+    .feature-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 2rem;
+        padding: 5rem 2rem;
+    }
+
+    .feature-card {
+        padding: 3rem;
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 2.5rem;
+        transition: var(--transition-slow);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .feature-card:hover {
+        background: rgba(255, 255, 255, 0.04);
+        transform: translateY(-10px);
+        border-color: var(--primary);
+    }
+
+    .feature-icon {
+        width: 64px;
+        height: 64px;
+        background: var(--gradient-primary);
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.75rem;
+        color: white;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 25px rgba(99, 102, 241, 0.3);
+    }
+
+    .cta-section {
+        padding: 6rem 2rem;
+        text-align: center;
+        position: relative;
+    }
+
+    .cta-card {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 5rem 3rem;
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #d946ef 100%);
+        border-radius: 4rem;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 40px 120px rgba(99, 102, 241, 0.5);
+    }
+
+    .cta-card h2 {
+        font-size: 3.25rem;
+        color: white;
+        margin-bottom: 1.5rem;
+        letter-spacing: -2px;
+        font-weight: 800;
+        line-height: 1.1;
+    }
+
+    .cta-card p {
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 1.15rem;
+        margin-bottom: 3rem;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+        font-weight: 400;
+    }
+
+    .cta-btn {
+        background: white;
+        color: #6366f1;
+        padding: 1.25rem 3rem;
+        font-size: 1.25rem;
+        border-radius: 1.5rem;
+        font-weight: 700;
+        display: inline-block;
+        transition: var(--transition);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+
+    .cta-btn:hover {
+        transform: scale(1.05);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+    }
+
+    .floating-shape {
+        position: absolute;
+        filter: blur(100px);
+        opacity: 0.2;
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    .shape-1 { top: 10%; left: 5%; width: 400px; height: 400px; background: var(--primary); }
+    .shape-2 { bottom: 10%; right: 5%; width: 500px; height: 500px; background: var(--secondary); }
+
+    nav.landing-nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 2rem 4rem;
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 100;
+    }
+
+    .nav-links {
+        display: flex;
+        gap: 3rem;
+        align-items: center;
+    }
+
+    .nav-link {
+        color: var(--text-secondary);
+        font-weight: 600;
+        font-size: 1rem;
+        transition: var(--transition);
+    }
+
+    .nav-link:hover {
+        color: white;
+    }
+
+    @media (max-width: 768px) {
+        nav.landing-nav { padding: 2rem; }
+        .nav-links { display: none; }
+        .hero-title { font-size: 4rem; letter-spacing: -2px; }
+        .cta-card { padding: 4rem 2rem; border-radius: 2.5rem; }
+        .cta-card h2 { font-size: 2.5rem; }
+    }
+</style>
+
+<div class="landing-page">
+    <div class="floating-shape shape-1"></div>
+    <div class="floating-shape shape-2"></div>
+
+    <nav class="landing-nav">
+        <div class="cc-logo">
+            <div class="cc-logo-icon">C</div>
+            <span style="font-size: 1.75rem;">CareerConnect</span>
+        </div>
+        <div class="nav-links">
+            <a href="#features" class="nav-link">Features</a>
+            <a href="#about" class="nav-link">About</a>
+            <div class="flex gap-4">
+                <a href="{{ url_for('auth.login') }}" class="cc-btn cc-btn-secondary">Sign In</a>
+                <a href="{{ url_for('auth.signup') }}" class="cc-btn cc-btn-primary">Get Started</a>
+            </div>
+        </div>
+    </nav>
+
+    <header class="landing-hero animate-stagger">
+        <div class="cc-container">
+            <div class="hero-badge">
+                <i class="fas fa-sparkles"></i>
+                <span>The Future of Professional Growth is Here</span>
+            </div>
+            <h1 class="hero-title text-shimmer">Bridge The Gap <br>To Your Dream Career</h1>
+            <p class="hero-subtitle">An intelligence-driven ecosystem connecting ambitious talent with industry leaders. Automated syncing, AI matching, and skill verification—all in one place.</p>
+            
+            <div class="flex justify-center gap-6 mt-8">
+                <a href="{{ url_for('auth.signup') }}" class="cc-btn cc-btn-primary" style="padding: 1.25rem 3rem; font-size: 1.15rem; border-radius: 20px;">
+                    Join Now <i class="fas fa-arrow-right ml-2"></i>
+                </a>
+                <a href="{{ url_for('auth.login') }}" class="cc-btn cc-btn-secondary" style="padding: 1.25rem 3rem; font-size: 1.15rem; border-radius: 20px;">
+                    Sign In
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <section id="features" class="cc-container">
+        <div class="text-center mb-12">
+            <h2 style="font-size: 3.5rem; margin-bottom: 1rem;">Engineered for Success</h2>
+            <p style="color: var(--text-secondary); font-size: 1.25rem;">Modern tools for the modern professional.</p>
+        </div>
+
+        <div class="feature-grid">
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-sync"></i></div>
+                <h3>Real-time Job Sync</h3>
+                <p>Never miss an opportunity. Our automated engine syncs directly with top company career portals every 24 hours.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-brain"></i></div>
+                <h3>AI Resume Analysis</h3>
+                <p>Get instant feedback on your resume. Our AI analyzes your skills and matches you with roles where you'll thrive.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-file-invoice"></i></div>
+                <h3>Dynamic Resume Builder</h3>
+                <p>Create stunning, ATS-friendly resumes in minutes using our library of premium, customizable templates.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-terminal"></i></div>
+                <h3>Aptitude Portal</h3>
+                <p>Practice with company-specific testing environments. Get scored instantly and master the recruitment process.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-robot"></i></div>
+                <h3>Career Chatbot</h3>
+                <p>Your 24/7 career companion. Ask questions about jobs, companies, or professional growth anytime.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-bell"></i></div>
+                <h3>Smart Notifications</h3>
+                <p>Stay ahead with instant email alerts. We'll notify you the second a job matching your skillset goes live.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="how-it-works" style="padding: 10rem 2rem; background: rgba(255,255,255,0.01);">
+        <div class="cc-container">
+            <div class="text-center mb-12">
+                <h2 style="font-size: 3.5rem; margin-bottom: 1rem;">How It Works</h2>
+                <p style="color: var(--text-secondary); font-size: 1.25rem;">Your journey to a better career in three simple steps.</p>
+            </div>
+            
+            <div class="cc-grid" style="grid-template-columns: repeat(3, 1fr); gap: 4rem;">
+                <div class="text-center">
+                    <div style="font-size: 4rem; color: var(--primary); margin-bottom: 1.5rem; font-weight: 800; opacity: 0.3;">01</div>
+                    <h3 style="font-size: 1.75rem; margin-bottom: 1rem;">Create Your Profile</h3>
+                    <p style="color: var(--text-secondary);">Sign up and upload your current resume. Our AI will instantly map your skills and experiences.</p>
+                </div>
+                <div class="text-center">
+                    <div style="font-size: 4rem; color: var(--primary); margin-bottom: 1.5rem; font-weight: 800; opacity: 0.3;">02</div>
+                    <h3 style="font-size: 1.75rem; margin-bottom: 1rem;">Get Matched</h3>
+                    <p style="color: var(--text-secondary);">Browse curated job openings that match your profile. Use our chatbot to get advice on specific roles.</p>
+                </div>
+                <div class="text-center">
+                    <div style="font-size: 4rem; color: var(--primary); margin-bottom: 1.5rem; font-weight: 800; opacity: 0.3;">03</div>
+                    <h3 style="font-size: 1.75rem; margin-bottom: 1rem;">Practice & Apply</h3>
+                    <p style="color: var(--text-secondary);">Take aptitude tests designed by experts, refine your resume, and apply with confidence.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="about" class="cc-container" style="padding: 10rem 2rem;">
+        <div class="cc-grid" style="grid-template-columns: 1fr 1fr; align-items: center; gap: 6rem;">
+            <div>
+                <h2 style="font-size: 3.5rem; margin-bottom: 2rem; line-height: 1.1;">Designed for the <br><span class="text-shimmer">Modern Workforce</span></h2>
+                <p style="color: var(--text-secondary); font-size: 1.2rem; margin-bottom: 2rem;">CareerConnect was born from a simple observation: the gap between talent and opportunity isn't a lack of skill, but a lack of visibility and preparation.</p>
+                <p style="color: var(--text-secondary); font-size: 1.2rem; margin-bottom: 2rem;">We've built a platform that doesn't just show you jobs—it helps you prepare for them. From AI-driven analysis to real-world aptitude testing, we give you the edge you need to stand out.</p>
+                <div class="flex gap-8 mt-8">
+                    <div>
+                        <div style="font-size: 2.5rem; font-weight: 800; color: white;">{{ user_count or '0' }}+</div>
+                        <div style="color: var(--text-muted);">Active Users</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 2.5rem; font-weight: 800; color: white;">{{ company_count or '0' }}+</div>
+                        <div style="color: var(--text-muted);">Top Companies</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 2.5rem; font-weight: 800; color: white;">95%</div>
+                        <div style="color: var(--text-muted);">Success Rate</div>
+                    </div>
+                </div>
+            </div>
+            <div style="position: relative;">
+                <div style="width: 100%; aspect-ratio: 1; background: var(--gradient-primary); border-radius: 3rem; transform: rotate(-3deg); opacity: 0.1; position: absolute; inset: 0;"></div>
+                <div class="cc-glass" style="width: 100%; aspect-ratio: 1; border-radius: 3rem; display: flex; align-items: center; justify-content: center; position: relative; z-index: 1; border: 1px solid rgba(255,255,255,0.1);">
+                    <div class="cc-logo-icon" style="width: 120px; height: 120px; font-size: 4rem;">C</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="cta-section">
+        <div class="cc-container">
+            <div class="cta-card">
+                <h2>Ready to Transform <br>Your Professional Life?</h2>
+                <p>Join thousands of professionals who are finding their next big opportunity on CareerConnect.</p>
+                <a href="{{ url_for('auth.signup') }}" class="cta-btn">
+                    Get Started For Free
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <footer class="cc-container" style="padding: 5rem 0; border-top: 1px solid var(--border); margin-top: 5rem;">
+        <div class="flex-between">
+            <div class="cc-logo">
+                <div class="cc-logo-icon">C</div>
+                <span>CareerConnect</span>
+            </div>
+            <div class="flex gap-8">
+                <a href="#" class="text-muted">Terms</a>
+                <a href="#" class="text-muted">Privacy</a>
+                <a href="#" class="text-muted">Contact</a>
+            </div>
+            <p class="text-muted">&copy; 2024 CareerConnect. All rights reserved.</p>
+        </div>
+    </footer>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Simple parallax or scroll reveal
+        const observerOptions = { threshold: 0.1 };
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.feature-card').forEach(card => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(30px)';
+            card.style.transition = 'all 0.8s cubic-bezier(0.4, 0, 0.2, 1)';
+            observer.observe(card);
+        });
+    });
+</script>
+{% endblock %}

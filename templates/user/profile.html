@@ -77,7 +77,7 @@
                 </div>
                 <!-- Hidden file input for profile pic -->
                 <form id="profile-pic-form" action="{{ url_for('user.update_profile') }}" method="POST" enctype="multipart/form-data" style="display: none;">
-                    <input type="file" id="profile-pic-input" name="profile_pic" onchange="document.getElementById('profile-pic-form').submit()">
+                    <input type="file" id="profile-pic-input" name="profile_pic" accept="image/*" onchange="document.getElementById('profile-pic-form').submit()">
                 </form>
             </div>
 
@@ -170,6 +170,44 @@
                             <span class="text-muted" style="font-size: 0.9rem;">Skills not indexed</span>
                         {% endif %}
                     </div>
+                </div>
+
+                <!-- Resume Asset Management -->
+                <div class="info-item" style="grid-column: span 2; margin-top: 1rem; padding: 1.5rem; background: rgba(255,255,255,0.02); border-radius: var(--radius); border: 1px solid var(--border);">
+                    <div class="flex-between">
+                        <div>
+                            <span class="cc-label" style="display: block; margin-bottom: 0.25rem;">Professional Assets</span>
+                            {% if user['resume_filename'] %}
+                                <div style="display: flex; align-items: center; gap: 0.75rem; color: white; font-weight: 600;">
+                                    <i class="fas fa-file-pdf text-error" style="font-size: 1.5rem;"></i>
+                                    <span>Verified Resume Document</span>
+                                </div>
+                            {% else %}
+                                <p class="text-muted" style="font-size: 0.85rem;">No resume document associated with this profile.</p>
+                            {% endif %}
+                        </div>
+                        <div class="flex gap-2">
+                            {% if user['resume_filename'] %}
+                                <a href="{{ url_for('static', filename='uploads/' + user['resume_filename']) }}" target="_blank" class="cc-btn cc-btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.85rem;">
+                                    <i class="fas fa-eye mr-2"></i> View
+                                </a>
+                                <button onclick="document.getElementById('resume-update-input').click()" class="cc-btn cc-btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.85rem;">
+                                    <i class="fas fa-sync-alt mr-2"></i> Update
+                                </button>
+                                <a href="{{ url_for('user.delete_resume') }}" class="cc-btn cc-btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.85rem; color: #ef4444; border-color: rgba(239, 68, 68, 0.2);" onclick="return confirm('Archive this document permanently?')">
+                                    <i class="fas fa-trash-alt mr-2"></i> Delete
+                                </a>
+                            {% else %}
+                                <button onclick="document.getElementById('resume-update-input').click()" class="cc-btn cc-btn-primary" style="padding: 0.5rem 1rem; font-size: 0.85rem;">
+                                    <i class="fas fa-upload mr-2"></i> Upload Resume
+                                </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <!-- Hidden form for resume upload/update -->
+                    <form id="resume-update-form" action="{{ url_for('user.update_profile') }}" method="POST" enctype="multipart/form-data" style="display: none;">
+                        <input type="file" id="resume-update-input" name="resume" accept=".pdf,.doc,.docx" onchange="document.getElementById('resume-update-form').submit()">
+                    </form>
                 </div>
                 
                 <div class="info-item" style="grid-column: span 2; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border);">

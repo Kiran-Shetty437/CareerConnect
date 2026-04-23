@@ -42,18 +42,18 @@ Apply here:
         return False
 
 
-def send_otp_email(user_email, otp):
+def send_otp_email(user_email, otp, purpose="Password Reset"):
     msg = MIMEMultipart()
     msg["From"] = f"CareerConnect <{SENDER_EMAIL}>"
     msg["To"] = user_email
-    msg["Subject"] = "Password Reset OTP"
+    msg["Subject"] = f"{purpose} OTP - CareerConnect"
 
     body = f"""
 Hi,
 
-Your OTP for password reset is: {otp}
+Your OTP for {purpose.lower()} is: {otp}
 
-Please enter this OTP to reset your password.
+Please enter this OTP to complete the process.
 """
     msg.attach(MIMEText(body, "plain"))
 
