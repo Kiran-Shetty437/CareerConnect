@@ -23,7 +23,9 @@ def init_db():
         applied_job TEXT,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         total_screen_time INTEGER DEFAULT 0,
-        notifications_enabled INTEGER DEFAULT 1
+        notifications_enabled INTEGER DEFAULT 1,
+        google_id TEXT,
+        linkedin_id TEXT
     )''')
 
     try:
@@ -45,7 +47,12 @@ def init_db():
         pass
 
     try:
-        c.execute("ALTER TABLE user ADD COLUMN notifications_enabled INTEGER DEFAULT 1")
+        c.execute("ALTER TABLE user ADD COLUMN google_id TEXT")
+    except sqlite3.OperationalError:
+        pass
+
+    try:
+        c.execute("ALTER TABLE user ADD COLUMN linkedin_id TEXT")
     except sqlite3.OperationalError:
         pass
 

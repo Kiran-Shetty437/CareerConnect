@@ -4,8 +4,40 @@ import random
 import time
 from services.email_service import send_otp_email
 import re
+from authlib.integrations.flask_client import OAuth
+import config
 
 auth = Blueprint("auth", __name__)
+
+oauth = OAuth()
+
+# Google OAuth Configuration
+oauth.register(
+    name='google',
+    client_id=config.GOOGLE_CLIENT_ID,
+    client_secret=config.GOOGLE_CLIENT_SECRET,
+    server_metadata_url=config.GOOGLE_DISCOVERY_URL,
+    client_kwargs={
+        'scope': 'openid email profile',
+        'verify': False  # ⚠️ DEBUG ONLY: Skip SSL verification to bypass local firewall/AV issues
+    }
+)
+
+# LinkedIn OAuth Configuration
+oauth.register(
+    name='linkedin',
+    client_id=config.LINKEDIN_CLIENT_ID,
+    client_secret=config.LINKEDIN_CLIENT_SECRET,
+    access_token_url='https://www.linkedin.com/oauth/v2/accessToken',
+    authorize_url='https://www.linkedin.com/oauth/v2/authorization',
+    api_base_url='https://api.linkedin.com/v2/',
+    client_kwargs={
+        'scope': 'openid email profile',
+        'token_endpoint_auth_method': 'client_secret_post',
+        'verify': False  # ⚠️ DEBUG ONLY: Skip SSL verification
+    },
+    userinfo_endpoint='https://api.linkedin.com/v2/userinfo'
+)
 
 def validate_password(password):
     if not (8 <= len(password) <= 12):
@@ -129,6 +161,115 @@ def login():
                 return render_template("login.html", state="signup")
 
     return render_template("login.html", state="login")
+
+
+@auth.route("/login/google")
+def google_login():
+    redirect_uri = url_for('auth.google_auth', _external=True)
+    print(f"DEBUG: Google Redirect URI sent: {redirect_uri}") # Help user find the exact URI for console
+    return oauth.google.authorize_redirect(redirect_uri)
+
+
+@auth.route("/auth/google")
+def google_auth():
+    token = oauth.google.authorize_access_token()
+    user_info = token.get('userinfo')
+    if user_info:
+        google_id = user_info['sub']
+        email = user_info['email']
+        username = user_info.get('name', email.split('@')[0])
+        profile_pic = user_info.get('picture')
+
+        conn = get_connection()
+        # Check if user already exists by google_id
+        user = conn.execute("SELECT * FROM user WHERE google_id = ?", (google_id,)).fetchone()
+        
+        if not user:
+            # Check if user exists by email
+            user = conn.execute("SELECT * FROM user WHERE LOWER(email) = ?", (email.lower(),)).fetchone()
+            if user:
+                # Link account
+                conn.execute("UPDATE user SET google_id = ?, profile_pic = COALESCE(profile_pic, ?) WHERE id = ?", (google_id, profile_pic, user['id']))
+                conn.commit()
+            else:
+                # Create new user
+                cursor = conn.execute(
+                    "INSERT INTO user (username, email, google_id, profile_pic, role) VALUES (?, ?, ?, ?, ?)",
+                    (username, email, google_id, profile_pic, "user")
+                )
+                conn.commit()
+                user = conn.execute("SELECT * FROM user WHERE id = ?", (cursor.lastrowid,)).fetchone()
+
+        session["user_id"] = user["id"]
+        session["username"] = user["username"]
+        session["role"] = user["role"]
+        session["login_time"] = time.time()
+        
+        conn.execute("UPDATE user SET last_activity = CURRENT_TIMESTAMP WHERE id = ?", (user["id"],))
+        conn.commit()
+        conn.close()
+        
+        flash(f"Welcome {user['username']}!", "success")
+        return redirect(url_for("user.dashboard"))
+    
+    flash("Google authentication failed.", "error")
+    return redirect(url_for("auth.login"))
+
+
+@auth.route("/login/linkedin")
+def linkedin_login():
+    redirect_uri = url_for('auth.linkedin_auth', _external=True)
+    print(f"DEBUG: LinkedIn Redirect URI sent: {redirect_uri}") # Help user find the exact URI for console
+    return oauth.linkedin.authorize_redirect(redirect_uri)
+
+
+@auth.route("/auth/linkedin")
+def linkedin_auth():
+    token = oauth.linkedin.authorize_access_token()
+    # LinkedIn V2 userinfo endpoint
+    resp = oauth.linkedin.get('userinfo')
+    user_info = resp.json()
+    
+    if user_info:
+        linkedin_id = user_info.get('sub') # OpenID Connect 'sub' is the unique ID
+        email = user_info.get('email')
+        username = user_info.get('name', email.split('@')[0])
+        profile_pic = user_info.get('picture')
+
+        conn = get_connection()
+        # Check if user already exists by linkedin_id
+        user = conn.execute("SELECT * FROM user WHERE linkedin_id = ?", (linkedin_id,)).fetchone()
+        
+        if not user:
+            # Check if user exists by email
+            user = conn.execute("SELECT * FROM user WHERE LOWER(email) = ?", (email.lower(),)).fetchone()
+            if user:
+                # Link account
+                conn.execute("UPDATE user SET linkedin_id = ?, profile_pic = COALESCE(profile_pic, ?) WHERE id = ?", (linkedin_id, profile_pic, user['id']))
+                conn.commit()
+            else:
+                # Create new user
+                cursor = conn.execute(
+                    "INSERT INTO user (username, email, linkedin_id, profile_pic, role) VALUES (?, ?, ?, ?, ?)",
+                    (username, email, linkedin_id, profile_pic, "user")
+                )
+                conn.commit()
+                user = conn.execute("SELECT * FROM user WHERE id = ?", (cursor.lastrowid,)).fetchone()
+
+        session["user_id"] = user["id"]
+        session["username"] = user["username"]
+        session["role"] = user["role"]
+        session["login_time"] = time.time()
+        
+        conn.execute("UPDATE user SET last_activity = CURRENT_TIMESTAMP WHERE id = ?", (user["id"],))
+        conn.commit()
+        conn.close()
+        
+        flash(f"Welcome {user['username']}!", "success")
+        return redirect(url_for("user.dashboard"))
+    
+    flash("LinkedIn authentication failed.", "error")
+    return redirect(url_for("auth.login"))
 
 
 @auth.route("/signup")

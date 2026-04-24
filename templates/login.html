@@ -297,14 +297,14 @@
 
         <div id="social-auth-section">
             <div class="social-login-grid">
-                <button type="button" class="social-btn">
+                <a href="{{ url_for('auth.google_login') }}" class="social-btn" style="text-decoration: none;">
                     <img src="https://www.svgrepo.com/show/475656/google-color.svg" width="20" alt="Google">
                     <span>Google</span>
-                </button>
-                <button type="button" class="social-btn">
+                </a>
+                <a href="{{ url_for('auth.linkedin_login') }}" class="social-btn" style="text-decoration: none;">
                     <img src="https://www.svgrepo.com/show/448234/linkedin.svg" width="20" alt="LinkedIn">
                     <span>LinkedIn</span>
-                </button>
+                </a>
             </div>
             <div class="separator">Or continue with</div>
         </div>

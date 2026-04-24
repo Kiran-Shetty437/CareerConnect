@@ -19,12 +19,21 @@ def role_match(job_title, role_keywords):
     return all(word in job_title for word in words)
 
 
+# Use a session for better performance and connection reuse
+session = requests.Session()
+adapter = requests.adapters.HTTPAdapter(pool_connections=10, pool_maxsize=20)
+session.mount('http://', adapter)
+session.mount('https://', adapter)
+
 # ✅ NEW: check if job link active
 def is_job_active(link):
     try:
-        r = requests.head(link, allow_redirects=True, timeout=5)
+        r = session.head(link, allow_redirects=True, timeout=5)
         return r.status_code == 200
-    except:
+    except (requests.exceptions.ConnectionError, requests.exceptions.Timeout) as e:
+        print(f"Connection error checking link {link}: {e}")
+        return False
+    except Exception:
         return False
 
 
@@ -80,8 +89,8 @@ def fetch_filtered_jobs(companies, roles, days_limit=30, fetch_all=False):
     seen_links = set()
     today = datetime.now(timezone.utc)
 
-    # Use a thread pool to check link status in parallel
-    with concurrent.futures.ThreadPoolExecutor(max_workers=20) as check_executor:
+    # Use a thread pool to check link status in parallel - reduced workers to avoid 10053 error
+    with concurrent.futures.ThreadPoolExecutor(max_workers=5) as check_executor:
         
         for company in companies:
             # Reduced page limit from 10 to 5 for speed (~250 possible jobs per organization)
@@ -94,7 +103,7 @@ def fetch_filtered_jobs(companies, roles, days_limit=30, fetch_all=False):
                 }
 
                 try:
-                    response = requests.get(BASE_URL + str(page), params=params, timeout=10)
+                    response = session.get(BASE_URL + str(page), params=params, timeout=10)
                     if response.status_code != 200: break
                     
                     data = response.json()

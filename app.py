@@ -1,10 +1,13 @@
 from flask import Flask
 import os
 
+# ✅ Set environment variable for local OAuth development (HTTP instead of HTTPS)
+os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
+
 from config import SECRET_KEY, UPLOAD_FOLDER
 from database import init_db
 
-from routes.auth_routes import auth
+from routes.auth_routes import auth, oauth
 from routes.admin_routes import admin
 from routes.user_routes import user
 
@@ -12,6 +15,7 @@ from routes.user_routes import user
 app = Flask(__name__)
 
 app.secret_key = SECRET_KEY
+oauth.init_app(app)
 
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
