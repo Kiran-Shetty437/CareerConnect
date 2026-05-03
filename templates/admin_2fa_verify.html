@@ -1,0 +1,28 @@
+{% extends "layout.html" %}
+{% block title %}CareerConnect - Admin 2FA Verification{% endblock %}
+{% block body_class %}auth-page{% endblock %}
+
+{% block content %}
+<div style="display: flex; min-height: 100vh; width: 100vw; background-color: var(--background); justify-content: center; align-items: center; padding: 2rem;">
+    <div class="cc-card animate-stagger" style="max-width: 450px; width: 100%; padding: 3rem; text-align: center;">
+        <div class="cc-logo-icon mx-auto mb-6" style="width: 72px; height: 72px; display: flex; align-items: center; justify-content: center; border-radius: 20px; margin: 0 auto 2rem auto;">
+            <i class="fas fa-shield-alt text-white" style="font-size: 2.2rem;"></i>
+        </div>
+
+        <h2 class="mb-4 text-glow" style="font-size: 2.2rem;">Admin Verification</h2>
+        <p class="text-secondary mb-4" style="font-size: 1.1rem;">Enter the 6-digit code from your authenticator app to access the dashboard.</p>
+        
+
+        
+        <form action="{{ url_for('auth.admin_2fa_verify') }}" method="POST">
+            <div class="cc-form-group">
+                <input type="text" name="otp" class="cc-input text-center" placeholder="000000" maxlength="6" required style="font-size: 2.5rem; letter-spacing: 0.75rem; font-weight: 800; padding: 1.5rem; margin-bottom: 2rem; height: auto;">
+            </div>
+            <button type="submit" class="cc-btn cc-btn-primary w-full animate-glare" style="height: 56px; font-size: 1.15rem; border-radius: 16px;">Verify Access</button>
+            <div class="mt-6">
+                <a href="{{ url_for('auth.login') }}" class="text-secondary" style="font-size: 0.95rem; font-weight: 600;"><i class="fas fa-arrow-left mr-2"></i> Back to Login</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -23,8 +23,11 @@ BASE_URL = os.getenv("BASE_URL", "http://localhost:5000")
 # Google OAuth Credentials
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
-GOOGLE_DISCOVERY_URL = "https://accounts.google.com/.well-known/openid-configuration"
 
 # LinkedIn OAuth Credentials
 LINKEDIN_CLIENT_ID = os.getenv("LINKEDIN_CLIENT_ID")
-LINKEDIN_CLIENT_SECRET = os.getenv("LINKEDIN_CLIENT_SECRET")
+LINKEDIN_CLIENT_SECRET = os.getenv("LINKEDIN_CLIENT_SECRET")
+
+# SSL Verification (Set to False for local dev if getting SSLError)
+VERIFY_SSL = os.getenv("VERIFY_SSL", "True").lower() == "true"
+

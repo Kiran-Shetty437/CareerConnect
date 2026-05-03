@@ -1,0 +1,30 @@
+{% extends "layout.html" %}
+{% block title %}CareerConnect - Admin 2FA Setup{% endblock %}
+{% block body_class %}auth-page{% endblock %}
+
+{% block content %}
+<div style="display: flex; min-height: 100vh; width: 100vw; background-color: var(--background); justify-content: center; align-items: center; padding: 2rem;">
+    <div class="cc-card animate-stagger" style="max-width: 500px; width: 100%; padding: 3rem; text-align: center;">
+        <h2 class="mb-4 text-glow" style="font-size: 2.2rem;">2FA Setup</h2>
+        <p class="text-secondary mb-6">Scan the QR code below using your authenticator app (e.g. Google Authenticator, Authy).</p>
+        
+        <div style="background: white; padding: 1rem; border-radius: 12px; display: inline-block; margin-bottom: 2rem;">
+            <img src="data:image/png;base64,{{ qr_b64 }}" alt="QR Code" style="max-width: 200px; height: auto;">
+        </div>
+
+        <p class="text-muted mb-4" style="font-size: 0.9rem;">Or manually enter the secret key:<br><strong style="color: var(--text-primary); letter-spacing: 2px;">{{ secret }}</strong></p>
+        
+
+
+        <form action="{{ url_for('auth.admin_2fa_setup') }}" method="POST">
+            <div class="cc-form-group">
+                <input type="text" name="otp" class="cc-input text-center" placeholder="000000" maxlength="6" required style="font-size: 2.5rem; letter-spacing: 0.75rem; font-weight: 800; padding: 1.5rem; margin-bottom: 1.5rem; height: auto;">
+            </div>
+            <button type="submit" class="cc-btn cc-btn-primary w-full animate-glare" style="height: 56px; font-size: 1.15rem; border-radius: 16px;">Verify and Enable 2FA</button>
+            <div class="mt-4">
+                <a href="{{ url_for('auth.admin_2fa_setup', reset=1) }}" class="text-secondary" style="font-size: 0.85rem; text-decoration: underline;">Scan a different QR code (Regenerate Secret)</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

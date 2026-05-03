@@ -1,7 +1,7 @@
 import requests
 import re
 from datetime import datetime, timezone
-from config import ADZUNA_APP_ID, ADZUNA_APP_KEY
+from config import ADZUNA_APP_ID, ADZUNA_APP_KEY, VERIFY_SSL
 
 
 BASE_URL = "https://api.adzuna.com/v1/api/jobs/in/search/"
@@ -21,6 +21,7 @@ def role_match(job_title, role_keywords):
 
 # Use a session for better performance and connection reuse
 session = requests.Session()
+session.verify = VERIFY_SSL  # Apply global SSL verification setting
 adapter = requests.adapters.HTTPAdapter(pool_connections=10, pool_maxsize=20)
 session.mount('http://', adapter)
 session.mount('https://', adapter)
@@ -28,10 +29,9 @@ session.mount('https://', adapter)
 # ✅ NEW: check if job link active
 def is_job_active(link):
     try:
-        r = session.head(link, allow_redirects=True, timeout=5)
+        r = session.head(link, allow_redirects=True, timeout=5, verify=VERIFY_SSL)
         return r.status_code == 200
     except (requests.exceptions.ConnectionError, requests.exceptions.Timeout) as e:
-        print(f"Connection error checking link {link}: {e}")
         return False
     except Exception:
         return False

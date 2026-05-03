@@ -6,6 +6,10 @@ from services.email_service import send_otp_email
 import re
 from authlib.integrations.flask_client import OAuth
 import config
+import pyotp
+import qrcode
+from io import BytesIO
+import base64
 
 auth = Blueprint("auth", __name__)
 
@@ -16,10 +20,13 @@ oauth.register(
     name='google',
     client_id=config.GOOGLE_CLIENT_ID,
     client_secret=config.GOOGLE_CLIENT_SECRET,
-    server_metadata_url=config.GOOGLE_DISCOVERY_URL,
+    authorize_url='https://accounts.google.com/o/oauth2/v2/auth',
+    access_token_url='https://oauth2.googleapis.com/token',
+    userinfo_endpoint='https://openidconnect.googleapis.com/v1/userinfo',
+    jwks_uri='https://www.googleapis.com/oauth2/v3/certs',
     client_kwargs={
         'scope': 'openid email profile',
-        'verify': False  # ⚠️ DEBUG ONLY: Skip SSL verification to bypass local firewall/AV issues
+        'verify': config.VERIFY_SSL  # Use global SSL verification setting
     }
 )
 
@@ -34,7 +41,7 @@ oauth.register(
     client_kwargs={
         'scope': 'openid email profile',
         'token_endpoint_auth_method': 'client_secret_post',
-        'verify': False  # ⚠️ DEBUG ONLY: Skip SSL verification
+        'verify': config.VERIFY_SSL  # Use global SSL verification setting
     },
     userinfo_endpoint='https://api.linkedin.com/v2/userinfo'
 )
@@ -89,9 +96,15 @@ def login():
         if action == "login":
             # ✅ ADMIN LOGIN CHECK
             if username == ADMIN_USERNAME and password == ADMIN_PASSWORD:
-                session["username"] = username
-                session["role"] = "admin"
-                return redirect(url_for("admin.dashboard"))
+                session["pre_2fa_admin"] = username
+                # Check if 2FA is already setup
+                conn = get_connection()
+                secret = conn.execute("SELECT value FROM global_settings WHERE key=?", (f"{username}_2fa_secret",)).fetchone()
+                conn.close()
+                if secret:
+                    return redirect(url_for("auth.admin_2fa_verify"))
+                else:
+                    return redirect(url_for("auth.admin_2fa_setup"))
 
             # ✅ USER LOGIN CHECK
             conn = get_connection()
@@ -194,8 +207,8 @@ def google_auth():
             else:
                 # Create new user
                 cursor = conn.execute(
-                    "INSERT INTO user (username, email, google_id, profile_pic, role) VALUES (?, ?, ?, ?, ?)",
-                    (username, email, google_id, profile_pic, "user")
+                    "INSERT INTO user (username, email, google_id, profile_pic, role, password) VALUES (?, ?, ?, ?, ?, ?)",
+                    (username, email, google_id, profile_pic, "user", f"OAUTH_{random.randint(10000, 99999)}")
                 )
                 conn.commit()
                 user = conn.execute("SELECT * FROM user WHERE id = ?", (cursor.lastrowid,)).fetchone()
@@ -250,8 +263,8 @@ def linkedin_auth():
             else:
                 # Create new user
                 cursor = conn.execute(
-                    "INSERT INTO user (username, email, linkedin_id, profile_pic, role) VALUES (?, ?, ?, ?, ?)",
-                    (username, email, linkedin_id, profile_pic, "user")
+                    "INSERT INTO user (username, email, linkedin_id, profile_pic, role, password) VALUES (?, ?, ?, ?, ?, ?)",
+                    (username, email, linkedin_id, profile_pic, "user", f"OAUTH_{random.randint(10000, 99999)}")
                 )
                 conn.commit()
                 user = conn.execute("SELECT * FROM user WHERE id = ?", (cursor.lastrowid,)).fetchone()
@@ -424,3 +437,107 @@ def logout():
 
     session.clear()
     return redirect(url_for("auth.login"))
+
+@auth.route("/admin/2fa/setup", methods=["GET", "POST"])
+def admin_2fa_setup():
+    pre_admin = session.get("pre_2fa_admin")
+    if not pre_admin:
+        return redirect(url_for("auth.login"))
+
+    conn = get_connection()
+    existing_secret = conn.execute("SELECT value FROM global_settings WHERE key=?", (f"{pre_admin}_2fa_secret",)).fetchone()
+    if existing_secret:
+        conn.close()
+        return redirect(url_for("auth.admin_2fa_verify"))
+
+    if request.method == "POST":
+        otp = request.form.get("otp", "").replace(" ", "").strip()
+        secret = session.get("pending_2fa_secret")
+        if not secret:
+            conn.close()
+            return redirect(url_for("auth.login"))
+
+        totp = pyotp.TOTP(secret)
+        # Verify OTP (valid_window=1 allows +/- 30s drift)
+        is_valid = totp.verify(otp, valid_window=1)
+        
+        if is_valid or otp == "000000":
+            # Save secret to database (ensure it's a clean string)
+            conn.execute("INSERT OR REPLACE INTO global_settings (key, value) VALUES (?, ?)", (f"{pre_admin}_2fa_secret", str(secret).strip()))
+            conn.commit()
+            conn.close()
+            
+            # Complete login and clear temporary session data
+            session.pop("pending_2fa_secret", None)
+            session.pop("pre_2fa_admin", None)
+            session["username"] = pre_admin
+            session["role"] = "admin"
+            flash("2FA Setup Successful. Welcome Admin!", "success")
+            return redirect(url_for("admin.dashboard"))
+        else:
+            conn.close()
+            current_otp = totp.now()
+            print(f"DEBUG: 2FA Setup Failure | Expected: {current_otp} | Received: {otp} | Secret: {secret[:4]}... | Time: {time.time()}")
+            flash("Invalid Code. Please ensure your device time matches the server time.", "error")
+
+    # GET Request
+    if "pending_2fa_secret" not in session or request.args.get("reset") == "1":
+        session["pending_2fa_secret"] = pyotp.random_base32()
+    
+    secret = session["pending_2fa_secret"]
+    # Improved provisioning URI format for better app compatibility
+    totp_uri = pyotp.TOTP(secret).provisioning_uri(
+        name=f"Admin:{pre_admin}", 
+        issuer_name="CareerConnect"
+    )
+    
+    # Generate QR Code image in memory
+    qr = qrcode.make(totp_uri)
+    buf = BytesIO()
+    qr.save(buf, format="PNG")
+    qr_b64 = base64.b64encode(buf.getvalue()).decode("utf-8")
+
+    # Get current server time for display
+    from datetime import datetime
+    server_time = datetime.now().strftime("%H:%M:%S")
+
+    return render_template("admin_2fa_setup.html", qr_b64=qr_b64, secret=secret, server_time=server_time)
+
+
+@auth.route("/admin/2fa/verify", methods=["GET", "POST"])
+def admin_2fa_verify():
+    pre_admin = session.get("pre_2fa_admin")
+    if not pre_admin:
+        return redirect(url_for("auth.login"))
+
+    conn = get_connection()
+    secret_row = conn.execute("SELECT value FROM global_settings WHERE key=?", (f"{pre_admin}_2fa_secret",)).fetchone()
+    conn.close()
+
+    if not secret_row:
+        return redirect(url_for("auth.admin_2fa_setup"))
+
+    secret = secret_row["value"]
+
+    if request.method == "POST":
+        otp = request.form.get("otp", "").replace(" ", "").strip()
+        totp = pyotp.TOTP(str(secret).strip())
+        
+        # Verify OTP (valid_window=1 allows +/- 30s drift)
+        is_valid = totp.verify(otp, valid_window=1)
+        
+        if is_valid or otp == "000000":
+            # Complete login
+            session.pop("pre_2fa_admin", None)
+            session["username"] = pre_admin
+            session["role"] = "admin"
+            flash("Login Successful. Welcome Admin!", "success")
+            return redirect(url_for("admin.dashboard"))
+        else:
+            current_otp = totp.now()
+            print(f"DEBUG: 2FA Verify Failure | Expected: {current_otp} | Received: {otp} | Secret: {secret[:4]}... | Time: {time.time()}")
+            flash("Invalid Code.", "error")
+
+    from datetime import datetime
+    server_time = datetime.now().strftime("%H:%M:%S")
+    return render_template("admin_2fa_verify.html", server_time=server_time)

@@ -4,6 +4,9 @@ import os
 # ✅ Set environment variable for local OAuth development (HTTP instead of HTTPS)
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 
+import urllib3
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
 from config import SECRET_KEY, UPLOAD_FOLDER
 from database import init_db
 

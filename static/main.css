@@ -438,10 +438,16 @@ img {
 
 /* Utilities */
 .w-full { width: 100%; }
+.mt-4 { margin-top: 1rem; }
 .mt-6 { margin-top: 1.5rem; }
+.mb-2 { margin-bottom: 0.5rem; }
+.mb-4 { margin-bottom: 1rem; }
+.mb-6 { margin-bottom: 1.5rem; }
 .mb-8 { margin-bottom: 2rem; }
-.flex-between { display: flex; justify-content: space-between; align-items: center; }
+.flex { display: flex; flex-wrap: wrap; }
+.flex-between { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
 .gap-2 { gap: 0.5rem; }
+.gap-4 { gap: 1rem; }
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(20px); }
     to { opacity: 1; transform: translateY(0); }
