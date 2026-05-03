@@ -18,7 +18,15 @@
 
         <form action="{{ url_for('auth.admin_2fa_setup') }}" method="POST">
             <div class="cc-form-group">
-                <input type="text" name="otp" class="cc-input text-center" placeholder="000000" maxlength="6" required style="font-size: 2.5rem; letter-spacing: 0.75rem; font-weight: 800; padding: 1.5rem; margin-bottom: 1.5rem; height: auto;">
+                <div class="otp-container">
+                    <input type="text" maxlength="1" class="otp-box" oninput="handleOtpInput(this, 0)" onkeydown="handleOtpKeydown(this, 0, event)" onpaste="handleOtpPaste(event)">
+                    <input type="text" maxlength="1" class="otp-box" oninput="handleOtpInput(this, 1)" onkeydown="handleOtpKeydown(this, 1, event)" onpaste="handleOtpPaste(event)">
+                    <input type="text" maxlength="1" class="otp-box" oninput="handleOtpInput(this, 2)" onkeydown="handleOtpKeydown(this, 2, event)" onpaste="handleOtpPaste(event)">
+                    <input type="text" maxlength="1" class="otp-box" oninput="handleOtpInput(this, 3)" onkeydown="handleOtpKeydown(this, 3, event)" onpaste="handleOtpPaste(event)">
+                    <input type="text" maxlength="1" class="otp-box" oninput="handleOtpInput(this, 4)" onkeydown="handleOtpKeydown(this, 4, event)" onpaste="handleOtpPaste(event)">
+                    <input type="text" maxlength="1" class="otp-box" oninput="handleOtpInput(this, 5)" onkeydown="handleOtpKeydown(this, 5, event)" onpaste="handleOtpPaste(event)">
+                </div>
+                <input type="hidden" id="otp" name="otp">
             </div>
             <button type="submit" class="cc-btn cc-btn-primary w-full animate-glare" style="height: 56px; font-size: 1.15rem; border-radius: 16px;">Verify and Enable 2FA</button>
             <div class="mt-4">
@@ -27,4 +35,41 @@
         </form>
     </div>
 </div>
+
+<script>
+    function handleOtpInput(input, index) {
+        if (input.value.length === 1 && index < 5) {
+            document.querySelectorAll('.otp-box')[index + 1].focus();
+        }
+        updateOtpHiddenValue();
+    }
+
+    function handleOtpKeydown(input, index, e) {
+        if (e.key === "Backspace" && input.value === "" && index > 0) {
+            document.querySelectorAll('.otp-box')[index - 1].focus();
+        }
+    }
+
+    function handleOtpPaste(e) {
+        e.preventDefault();
+        const data = e.clipboardData.getData('text').slice(0, 6);
+        const boxes = document.querySelectorAll('.otp-box');
+        for (let i = 0; i < data.length; i++) {
+            if (boxes[i]) {
+                boxes[i].value = data[i];
+            }
+        }
+        updateOtpHiddenValue();
+        if (data.length > 0) {
+            boxes[Math.min(data.length, 5)].focus();
+        }
+    }
+
+    function updateOtpHiddenValue() {
+        const boxes = document.querySelectorAll('.otp-box');
+        let otp = "";
+        boxes.forEach(box => otp += box.value);
+        document.getElementById('otp').value = otp;
+    }
+</script>
 {% endblock %}

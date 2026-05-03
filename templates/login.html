@@ -33,9 +33,9 @@
         -webkit-backdrop-filter: blur(40px) saturate(180%);
         position: relative;
         z-index: 20;
-        box-shadow: 20px 0 80px rgba(0,0,0,0.5);
+        box-shadow: 20px 0 80px rgba(0, 0, 0, 0.5);
         overflow-y: auto;
-        border-right: 1px solid rgba(255,255,255,0.08);
+        border-right: 1px solid rgba(255, 255, 255, 0.08);
         transition: var(--transition-slow);
     }
 
@@ -49,7 +49,10 @@
 
     .hero-slide {
         position: absolute;
-        top: 0; left: 0; width: 100%; height: 100%;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
         background-size: cover;
         background-position: center;
         opacity: 0;
@@ -66,8 +69,8 @@
         position: absolute;
         inset: 0;
         background: radial-gradient(circle at 70% 30%, transparent 0%, rgba(15, 23, 42, 0.4) 100%),
-                    linear-gradient(to right, rgba(15, 23, 42, 0.9) 0%, transparent 60%),
-                    linear-gradient(to top, rgba(15, 23, 42, 0.8), transparent 50%);
+            linear-gradient(to right, rgba(15, 23, 42, 0.9) 0%, transparent 60%),
+            linear-gradient(to top, rgba(15, 23, 42, 0.8), transparent 50%);
         display: flex;
         flex-direction: column;
         justify-content: center;
@@ -109,14 +112,36 @@
     }
 
     @keyframes float-slow {
-        0% { transform: translate(0, 0) scale(1); }
-        50% { transform: translate(100px, 50px) scale(1.1); }
-        100% { transform: translate(-50px, 120px) scale(0.9); }
+        0% {
+            transform: translate(0, 0) scale(1);
+        }
+
+        50% {
+            transform: translate(100px, 50px) scale(1.1);
+        }
+
+        100% {
+            transform: translate(-50px, 120px) scale(0.9);
+        }
     }
 
-    .accent-1 { top: -200px; left: -100px; background: var(--primary); }
-    .accent-2 { bottom: -150px; right: 10%; background: var(--secondary); }
-    .accent-3 { top: 30%; right: -150px; background: var(--accent); }
+    .accent-1 {
+        top: -200px;
+        left: -100px;
+        background: var(--primary);
+    }
+
+    .accent-2 {
+        bottom: -150px;
+        right: 10%;
+        background: var(--secondary);
+    }
+
+    .accent-3 {
+        top: 30%;
+        right: -150px;
+        background: var(--accent);
+    }
 
     /* Login Form Enhancements */
     .cc-logo-large {
@@ -150,8 +175,8 @@
     }
 
     .cc-input {
-        background: rgba(255,255,255,0.04);
-        border: 1px solid rgba(255,255,255,0.1);
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.1);
         padding: 1.25rem 1.5rem;
         font-size: 1.15rem;
         border-radius: 16px;
@@ -160,7 +185,7 @@
     }
 
     .cc-input:focus {
-        background: rgba(255,255,255,0.08);
+        background: rgba(255, 255, 255, 0.08);
         border-color: var(--primary);
         box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
     }
@@ -187,8 +212,8 @@
         justify-content: center;
         gap: 0.75rem;
         padding: 1rem;
-        background: rgba(255,255,255,0.03);
-        border: 1px solid rgba(255,255,255,0.08);
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.08);
         border-radius: 14px;
         color: var(--text-primary);
         font-weight: 600;
@@ -197,8 +222,8 @@
     }
 
     .social-btn:hover {
-        background: rgba(255,255,255,0.08);
-        border-color: rgba(255,255,255,0.2);
+        background: rgba(255, 255, 255, 0.08);
+        border-color: rgba(255, 255, 255, 0.2);
         transform: translateY(-2px);
     }
 
@@ -214,59 +239,112 @@
         letter-spacing: 1px;
     }
 
-    .separator::before, .separator::after {
+    .separator::before,
+    .separator::after {
         content: '';
         flex: 1;
         height: 1px;
-        background: rgba(255,255,255,0.08);
+        background: rgba(255, 255, 255, 0.08);
     }
 
     /* Custom Scrollbar for form side */
     .login-form-side::-webkit-scrollbar {
         width: 4px;
     }
+
     .login-form-side::-webkit-scrollbar-thumb {
-        background: rgba(255,255,255,0.1);
+        background: rgba(255, 255, 255, 0.1);
         border-radius: 10px;
     }
 
     /* RESPONSIVE */
     @media (max-width: 1440px) {
-        .login-form-side { width: 480px; min-width: 480px; padding: 3.5rem 4rem; }
+        .login-form-side {
+            width: 480px;
+            min-width: 480px;
+            padding: 3.5rem 4rem;
+        }
     }
 
     @media (max-width: 1200px) {
-        .login-form-side { width: 420px; min-width: 420px; padding: 3rem 2.5rem; }
-        .hero-overlay { padding: 4rem; }
-        .login-form-side h1 { font-size: 3rem; }
+        .login-form-side {
+            width: 420px;
+            min-width: 420px;
+            padding: 3rem 2.5rem;
+        }
+
+        .hero-overlay {
+            padding: 4rem;
+        }
+
+        .login-form-side h1 {
+            font-size: 3rem;
+        }
     }
 
     @media (max-width: 1024px) {
-        .login-container { justify-content: center; align-items: center; padding: 2rem; background: var(--background); }
-        .login-form-side { 
-            width: 100%; 
-            max-width: 540px; 
+        .login-container {
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            background: var(--background);
+        }
+
+        .login-form-side {
+            width: 100%;
+            max-width: 540px;
             min-width: 0;
             height: auto;
             max-height: 90vh;
             border-radius: 2.5rem;
-            border: 1px solid rgba(255,255,255,0.1);
-            background: rgba(11, 17, 32, 0.85); 
-            box-shadow: 0 40px 100px rgba(0,0,0,0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(11, 17, 32, 0.85);
+            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.6);
             padding: 4rem 3.5rem;
         }
-        .login-hero-side { position: fixed; inset: 0; width: 100%; height: 100vh; z-index: 1; }
-        .hero-overlay { display: none; }
-        .floating-accent { opacity: 0.2; }
+
+        .login-hero-side {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100vh;
+            z-index: 1;
+        }
+
+        .hero-overlay {
+            display: none;
+        }
+
+        .floating-accent {
+            opacity: 0.2;
+        }
     }
 
     @media (max-width: 640px) {
-        .login-container { padding: 1rem; }
-        .login-form-side { padding: 3rem 2rem; border-radius: 2rem; }
-        .login-form-side h1 { font-size: 2.5rem; }
-        .cc-logo-large { margin-bottom: 2.5rem; }
-        .form-subtitle { margin-bottom: 2.5rem; }
-        .social-login-grid { grid-template-columns: 1fr; }
+        .login-container {
+            padding: 1rem;
+        }
+
+        .login-form-side {
+            padding: 3rem 2rem;
+            border-radius: 2rem;
+        }
+
+        .login-form-side h1 {
+            font-size: 2.5rem;
+        }
+
+        .cc-logo-large {
+            margin-bottom: 2.5rem;
+        }
+
+        .form-subtitle {
+            margin-bottom: 2.5rem;
+        }
+
+        .social-login-grid {
+            grid-template-columns: 1fr;
+        }
     }
 
     /* Input Focus Effects */
@@ -284,12 +362,13 @@
 <div class="login-container">
     <div class="floating-accent accent-1"></div>
     <div class="floating-accent accent-2"></div>
-    
+
     <div class="login-form-side">
         <div class="header">
             <div class="cc-logo-large">
                 <div class="cc-logo-icon">C</div>
-                <span style="font-size: 2.25rem; font-weight: 800; letter-spacing: -2px; color: white;">CareerConnect</span>
+                <span
+                    style="font-size: 2.25rem; font-weight: 800; letter-spacing: -2px; color: white;">CareerConnect</span>
             </div>
             <h1 id="form-title" class="text-shimmer">Welcome Back</h1>
             <p id="form-subtitle" class="form-subtitle">Access your intelligence-driven professional dashboard.</p>
@@ -315,7 +394,8 @@
             <div id="login-signup-fields">
                 <div class="cc-form-group">
                     <label class="cc-label" for="username">Username</label>
-                    <input type="text" id="username" name="username" class="cc-input" placeholder="Enter your username" required>
+                    <input type="text" id="username" name="username" class="cc-input" placeholder="Enter your username"
+                        required>
                 </div>
 
                 <div class="cc-form-group" id="email-group" style="display: none;">
@@ -326,15 +406,19 @@
                 <div class="cc-form-group" id="password-group">
                     <div class="flex-between mb-2">
                         <label class="cc-label mb-0" for="password">Password</label>
-                        <a href="javascript:void(0)" onclick="switchTab('forgot')" class="text-primary" style="font-size: 0.95rem; font-weight: 600;" id="forgot-password-link">Forgot?</a>
+                        <a href="javascript:void(0)" onclick="switchTab('forgot')" class="text-primary"
+                            style="font-size: 0.95rem; font-weight: 600;" id="forgot-password-link">Forgot?</a>
                     </div>
                     <div style="position: relative;">
-                        <input type="password" id="password" name="password" class="cc-input w-full" placeholder="••••••••" required style="padding-right: 3.5rem;">
-                        <button type="button" onclick="togglePassword('password')" style="position: absolute; right: 1.25rem; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.25rem; z-index: 10;">
+                        <input type="password" id="password" name="password" class="cc-input w-full"
+                            placeholder="••••••••" required style="padding-right: 3.5rem;">
+                        <button type="button" onclick="togglePassword('password')"
+                            style="position: absolute; right: 1.25rem; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.25rem; z-index: 10;">
                             <i class="fas fa-eye" id="eye-password"></i>
                         </button>
                     </div>
-                    <div id="password-requirements" class="text-secondary mt-3" style="font-size: 0.9rem; display: none;">
+                    <div id="password-requirements" class="text-secondary mt-3"
+                        style="font-size: 0.9rem; display: none;">
                         <div class="font-weight-bold mb-1 text-white">Security Requirements:</div>
                         <ul class="pl-4 mt-1 mb-0" style="list-style-type: disc; opacity: 0.8; line-height: 1.5;">
                             <li>8-12 characters long</li>
@@ -348,15 +432,29 @@
             <div id="forgot-fields" style="display: none;">
                 <div class="cc-form-group">
                     <label class="cc-label" for="forgot-email">Email Address</label>
-                    <input type="email" id="forgot-email" name="forgot_email" class="cc-input" placeholder="your@email.com">
+                    <input type="email" id="forgot-email" name="forgot_email" class="cc-input"
+                        placeholder="your@email.com">
                 </div>
             </div>
 
             <div id="verify-fields" style="display: none;">
                 <div class="cc-form-group">
                     <label class="cc-label text-center" for="otp">Verification Code</label>
-                    <input type="text" id="otp" name="otp" class="cc-input text-center" placeholder="000000" maxlength="6"
-                        style="font-size: 2.5rem; letter-spacing: 0.75rem; font-weight: 800; padding: 1.5rem; height: auto;">
+                    <div class="otp-container">
+                        <input type="text" maxlength="1" class="otp-box" oninput="handleOtpInput(this, 0)"
+                            onkeydown="handleOtpKeydown(this, 0, event)" onpaste="handleOtpPaste(event)">
+                        <input type="text" maxlength="1" class="otp-box" oninput="handleOtpInput(this, 1)"
+                            onkeydown="handleOtpKeydown(this, 1, event)" onpaste="handleOtpPaste(event)">
+                        <input type="text" maxlength="1" class="otp-box" oninput="handleOtpInput(this, 2)"
+                            onkeydown="handleOtpKeydown(this, 2, event)" onpaste="handleOtpPaste(event)">
+                        <input type="text" maxlength="1" class="otp-box" oninput="handleOtpInput(this, 3)"
+                            onkeydown="handleOtpKeydown(this, 3, event)" onpaste="handleOtpPaste(event)">
+                        <input type="text" maxlength="1" class="otp-box" oninput="handleOtpInput(this, 4)"
+                            onkeydown="handleOtpKeydown(this, 4, event)" onpaste="handleOtpPaste(event)">
+                        <input type="text" maxlength="1" class="otp-box" oninput="handleOtpInput(this, 5)"
+                            onkeydown="handleOtpKeydown(this, 5, event)" onpaste="handleOtpPaste(event)">
+                    </div>
+                    <input type="hidden" id="otp" name="otp">
                 </div>
             </div>
 
@@ -364,28 +462,34 @@
                 <div class="cc-form-group">
                     <label class="cc-label" for="new-password">New Secure Password</label>
                     <div style="position: relative;">
-                        <input type="password" id="new-password" name="new_password" class="cc-input w-full" placeholder="Create new password" style="padding-right: 3.5rem;">
-                        <button type="button" onclick="togglePassword('new-password')" style="position: absolute; right: 1.25rem; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.25rem; z-index: 10;">
+                        <input type="password" id="new-password" name="new_password" class="cc-input w-full"
+                            placeholder="Create new password" style="padding-right: 3.5rem;">
+                        <button type="button" onclick="togglePassword('new-password')"
+                            style="position: absolute; right: 1.25rem; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.25rem; z-index: 10;">
                             <i class="fas fa-eye" id="eye-new-password"></i>
                         </button>
                     </div>
                 </div>
             </div>
 
-            <button type="submit" class="cc-btn cc-btn-primary w-full mt-6 animate-glare" id="submit-btn" style="height: 64px; font-size: 1.25rem; border-radius: 18px;">Sign In</button>
+            <button type="submit" class="cc-btn cc-btn-primary w-full mt-6 animate-glare" id="submit-btn"
+                style="height: 64px; font-size: 1.25rem; border-radius: 18px;">Sign In</button>
 
             <div id="auth-toggle-link" class="text-center mt-8 text-secondary" style="font-size: 1.05rem;">
                 <span id="toggle-text">New to CareerConnect?</span>
-                <a href="{{ url_for('auth.signup') }}" id="toggle-action" onclick="switchTab('signup'); return false;" class="font-weight-bold ml-1 text-primary">Create Account</a>
+                <a href="{{ url_for('auth.signup') }}" id="toggle-action" onclick="switchTab('signup'); return false;"
+                    class="font-weight-bold ml-1 text-primary">Create Account</a>
             </div>
 
             <div id="back-to-login" style="display: none;" class="text-center mt-8">
-                <a href="{{ url_for('auth.login') }}" onclick="switchTab('login'); return false;" class="text-secondary" style="font-weight: 600;"><i class="fas fa-arrow-left mr-2"></i> Back to Login</a>
+                <a href="{{ url_for('auth.login') }}" onclick="switchTab('login'); return false;" class="text-secondary"
+                    style="font-weight: 600;"><i class="fas fa-arrow-left mr-2"></i> Back to Login</a>
             </div>
         </form>
 
-        <div class="mt-auto pt-8 flex-between text-muted" style="font-size: 0.85rem; border-top: 1px solid var(--border);">
-            <span>&copy; 2024 CareerConnect</span>
+        <div class="mt-auto pt-8 flex-between text-muted"
+            style="font-size: 0.85rem; border-top: 1px solid var(--border);">
+            <span>&copy; 2026 CareerConnect</span>
             <div class="gap-2 flex">
                 <a href="#" class="text-muted">Privacy</a>
                 <span>•</span>
@@ -401,7 +505,7 @@
         <div class="hero-slide" data-bg="{{ url_for('static', filename='hero_login_4.png') }}"></div>
         <div class="hero-slide" data-bg="{{ url_for('static', filename='hero_login_5.png') }}"></div>
         <div class="hero-slide" data-bg="{{ url_for('static', filename='hero_login_6.png') }}"></div>
-        
+
         <script>
             // Set backgrounds from data attributes to avoid IDE validation issues with Jinja in style tags
             document.querySelectorAll('.hero-slide').forEach(slide => {
@@ -409,11 +513,12 @@
                 if (bg) slide.style.backgroundImage = `url('${bg}')`;
             });
         </script>
-        
+
         <div class="hero-overlay">
             <div class="hero-text animate-fade-in">
                 <h2 class="text-glow">Fast-Track Your <br>Career Goals.</h2>
-                <p>An intelligence-driven platform designed to connect ambitious professionals with industry-leading opportunities.</p>
+                <p>An intelligence-driven platform designed to connect ambitious professionals with industry-leading
+                    opportunities.</p>
             </div>
         </div>
     </div>
@@ -427,14 +532,14 @@
         const title = document.getElementById('form-title');
         const subtitle = document.getElementById('form-subtitle');
         const socialSection = document.getElementById('social-auth-section');
-        
+
         const loginSignupFields = document.getElementById('login-signup-fields');
         const forgotFields = document.getElementById('forgot-fields');
         const verifyFields = document.getElementById('verify-fields');
         const resetFields = document.getElementById('reset-fields');
         const emailGroup = document.getElementById('email-group');
         const backToLogin = document.getElementById('back-to-login');
-        
+
         const toggleLink = document.getElementById('auth-toggle-link');
         const toggleText = document.getElementById('toggle-text');
         const toggleAction = document.getElementById('toggle-action');
@@ -446,7 +551,7 @@
         [loginSignupFields, forgotFields, verifyFields, resetFields].forEach(el => {
             el.style.display = 'none';
         });
-        
+
         // Disable all inputs first and remove required
         form.querySelectorAll('input').forEach(input => {
             if (input.type !== 'hidden') {
@@ -474,11 +579,11 @@
             submitBtn.textContent = 'Create Account';
             title.textContent = 'Create Account';
             subtitle.textContent = 'Join our community of professionals';
-            
+
             enableFields('login-signup-fields');
             document.getElementById('email-group').style.display = 'block';
             document.getElementById('email').disabled = false;
-            
+
             backToLogin.style.display = 'none';
             forgotPasswordLink.style.display = 'none';
             passwordRequirements.style.display = 'block';
@@ -486,7 +591,7 @@
             toggleText.textContent = 'Already have an account?';
             toggleAction.textContent = 'Sign In';
             toggleAction.setAttribute('onclick', "switchTab('login'); return false;");
-            
+
             // Set required
             document.getElementById('username').required = true;
             document.getElementById('email').required = true;
@@ -499,12 +604,12 @@
             submitBtn.textContent = 'Send OTP';
             title.textContent = 'Forgot Password';
             subtitle.textContent = 'Enter your email to receive a verification code';
-            
+
             enableFields('forgot-fields');
-            
+
             backToLogin.style.display = 'block';
             toggleLink.style.display = 'none';
-            
+
             // Set required
             document.getElementById('forgot-email').required = true;
 
@@ -515,12 +620,12 @@
             submitBtn.textContent = 'Verify OTP';
             title.textContent = 'Verify Identity';
             subtitle.textContent = 'A code was sent to your email';
-            
+
             enableFields('verify-fields');
-            
+
             backToLogin.style.display = 'block';
             toggleLink.style.display = 'none';
-            
+
             // Set required
             document.getElementById('otp').required = true;
 
@@ -531,12 +636,12 @@
             submitBtn.textContent = 'Update Password';
             title.textContent = 'Reset Password';
             subtitle.textContent = 'Set your new secure password';
-            
+
             enableFields('reset-fields');
-            
+
             backToLogin.style.display = 'block';
             toggleLink.style.display = 'none';
-            
+
             // Set required
             document.getElementById('new-password').required = true;
 
@@ -546,11 +651,11 @@
             submitBtn.textContent = 'Sign In';
             title.textContent = 'Welcome Back';
             subtitle.textContent = 'Sign in to continue your journey';
-            
+
             enableFields('login-signup-fields');
             document.getElementById('email-group').style.display = 'none';
             document.getElementById('email').disabled = true;
-            
+
             backToLogin.style.display = 'none';
             forgotPasswordLink.style.display = 'block';
             passwordRequirements.style.display = 'none';
@@ -558,7 +663,7 @@
             toggleText.textContent = "Don't have an account?";
             toggleAction.textContent = 'Sign Up';
             toggleAction.setAttribute('onclick', "switchTab('signup'); return false;");
-            
+
             // Set required
             document.getElementById('username').required = true;
             document.getElementById('password').required = true;
@@ -592,7 +697,7 @@
     document.addEventListener('DOMContentLoaded', () => {
         const slides = document.querySelectorAll('.hero-slide');
         let currentSlide = 0;
-        
+
         setInterval(() => {
             slides[currentSlide].classList.remove('active');
             currentSlide = (currentSlide + 1) % slides.length;
@@ -604,12 +709,12 @@
 
         // Form submission loading state
         const authForm = document.getElementById('auth-form');
-        authForm.addEventListener('submit', function() {
+        authForm.addEventListener('submit', function () {
             const btn = document.getElementById('submit-btn');
             const originalText = btn.textContent;
             btn.disabled = true;
             btn.innerHTML = `<i class="fas fa-circle-notch fa-spin mr-2"></i> Processing...`;
-            
+
             // Re-enable if it takes too long (fallback)
             setTimeout(() => {
                 if (btn.disabled) {
@@ -619,5 +724,40 @@
             }, 5000);
         });
     });
+
+    function handleOtpInput(input, index) {
+        if (input.value.length === 1 && index < 5) {
+            document.querySelectorAll('.otp-box')[index + 1].focus();
+        }
+        updateOtpHiddenValue();
+    }
+
+    function handleOtpKeydown(input, index, e) {
+        if (e.key === "Backspace" && input.value === "" && index > 0) {
+            document.querySelectorAll('.otp-box')[index - 1].focus();
+        }
+    }
+
+    function handleOtpPaste(e) {
+        e.preventDefault();
+        const data = e.clipboardData.getData('text').slice(0, 6);
+        const boxes = document.querySelectorAll('.otp-box');
+        for (let i = 0; i < data.length; i++) {
+            if (boxes[i]) {
+                boxes[i].value = data[i];
+            }
+        }
+        updateOtpHiddenValue();
+        if (data.length > 0) {
+            boxes[Math.min(data.length, 5)].focus();
+        }
+    }
+
+    function updateOtpHiddenValue() {
+        const boxes = document.querySelectorAll('.otp-box');
+        let otp = "";
+        boxes.forEach(box => otp += box.value);
+        document.getElementById('otp').value = otp;
+    }
 </script>
-{% endblock %}
+{% endblock %}
