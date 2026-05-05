@@ -3,13 +3,10 @@ from database import get_connection
 import random
 import time
 from services.email_service import send_otp_email
+from services.two_factor_service import TwoFactorService
 import re
 from authlib.integrations.flask_client import OAuth
 import config
-import pyotp
-import qrcode
-from io import BytesIO
-import base64
 
 auth = Blueprint("auth", __name__)
 
@@ -178,8 +175,9 @@ def login():
 
 @auth.route("/login/google")
 def google_login():
+    mode = request.args.get('mode', 'login')
+    session['social_mode'] = mode
     redirect_uri = url_for('auth.google_auth', _external=True)
-    print(f"DEBUG: Google Redirect URI sent: {redirect_uri}") # Help user find the exact URI for console
     return oauth.google.authorize_redirect(redirect_uri)
 
 
@@ -192,6 +190,8 @@ def google_auth():
         email = user_info['email']
         username = user_info.get('name', email.split('@')[0])
         profile_pic = user_info.get('picture')
+        
+        mode = session.pop('social_mode', 'login')
 
         conn = get_connection()
         # Check if user already exists by google_id
@@ -201,6 +201,19 @@ def google_auth():
             # Check if user exists by email
             user = conn.execute("SELECT * FROM user WHERE LOWER(email) = ?", (email.lower(),)).fetchone()
             if user:
+                if mode == 'signup':
+                    # User tried to sign up but account exists - Ask for confirmation
+                    session['pending_social_user'] = {
+                        'id': user['id'],
+                        'username': user['username'],
+                        'email': email,
+                        'google_id': google_id,
+                        'profile_pic': profile_pic,
+                        'provider': 'google'
+                    }
+                    conn.close()
+                    return render_template("login.html", state="social_confirm")
+                
                 # Link account
                 conn.execute("UPDATE user SET google_id = ?, profile_pic = COALESCE(profile_pic, ?) WHERE id = ?", (google_id, profile_pic, user['id']))
                 conn.commit()
@@ -231,8 +244,9 @@ def google_auth():
 
 @auth.route("/login/linkedin")
 def linkedin_login():
+    mode = request.args.get('mode', 'login')
+    session['social_mode'] = mode
     redirect_uri = url_for('auth.linkedin_auth', _external=True)
-    print(f"DEBUG: LinkedIn Redirect URI sent: {redirect_uri}") # Help user find the exact URI for console
     return oauth.linkedin.authorize_redirect(redirect_uri)
 
 
@@ -249,6 +263,8 @@ def linkedin_auth():
         username = user_info.get('name', email.split('@')[0])
         profile_pic = user_info.get('picture')
 
+        mode = session.pop('social_mode', 'login')
+
         conn = get_connection()
         # Check if user already exists by linkedin_id
         user = conn.execute("SELECT * FROM user WHERE linkedin_id = ?", (linkedin_id,)).fetchone()
@@ -257,6 +273,19 @@ def linkedin_auth():
             # Check if user exists by email
             user = conn.execute("SELECT * FROM user WHERE LOWER(email) = ?", (email.lower(),)).fetchone()
             if user:
+                if mode == 'signup':
+                    # User tried to sign up but account exists - Ask for confirmation
+                    session['pending_social_user'] = {
+                        'id': user['id'],
+                        'username': user['username'],
+                        'email': email,
+                        'linkedin_id': linkedin_id,
+                        'profile_pic': profile_pic,
+                        'provider': 'linkedin'
+                    }
+                    conn.close()
+                    return render_template("login.html", state="social_confirm")
+
                 # Link account
                 conn.execute("UPDATE user SET linkedin_id = ?, profile_pic = COALESCE(profile_pic, ?) WHERE id = ?", (linkedin_id, profile_pic, user['id']))
                 conn.commit()
@@ -283,6 +312,41 @@ def linkedin_auth():
     
     flash("LinkedIn authentication failed.", "error")
     return redirect(url_for("auth.login"))
+
+
+@auth.route("/auth/social-confirm", methods=["POST"])
+def social_confirm_action():
+    pending = session.get('pending_social_user')
+    if not pending:
+        flash("Session expired. Please try again.", "error")
+        return redirect(url_for("auth.login"))
+    
+    conn = get_connection()
+    user_id = pending['id']
+    provider = pending['provider']
+    
+    if provider == 'google':
+        conn.execute("UPDATE user SET google_id = ?, profile_pic = COALESCE(profile_pic, ?) WHERE id = ?", 
+                     (pending['google_id'], pending['profile_pic'], user_id))
+    elif provider == 'linkedin':
+        conn.execute("UPDATE user SET linkedin_id = ?, profile_pic = COALESCE(profile_pic, ?) WHERE id = ?", 
+                     (pending['linkedin_id'], pending['profile_pic'], user_id))
+    
+    conn.commit()
+    user = conn.execute("SELECT * FROM user WHERE id = ?", (user_id,)).fetchone()
+    
+    session["user_id"] = user["id"]
+    session["username"] = user["username"]
+    session["role"] = user["role"]
+    session["login_time"] = time.time()
+    
+    conn.execute("UPDATE user SET last_activity = CURRENT_TIMESTAMP WHERE id = ?", (user["id"],))
+    conn.commit()
+    conn.close()
+    
+    session.pop('pending_social_user', None)
+    flash(f"Welcome back {user['username']}! Your account has been linked.", "success")
+    return redirect(url_for("user.dashboard"))
 
 
 @auth.route("/signup")
@@ -457,11 +521,7 @@ def admin_2fa_setup():
             conn.close()
             return redirect(url_for("auth.login"))
 
-        totp = pyotp.TOTP(secret)
-        # Verify OTP (valid_window=1 allows +/- 30s drift)
-        is_valid = totp.verify(otp, valid_window=1)
-        
-        if is_valid or otp == "000000":
+        if TwoFactorService.verify_otp(secret, otp):
             # Save secret to database (ensure it's a clean string)
             conn.execute("INSERT OR REPLACE INTO global_settings (key, value) VALUES (?, ?)", (f"{pre_admin}_2fa_secret", str(secret).strip()))
             conn.commit()
@@ -476,26 +536,17 @@ def admin_2fa_setup():
             return redirect(url_for("admin.dashboard"))
         else:
             conn.close()
-            current_otp = totp.now()
+            current_otp = TwoFactorService.get_current_otp(secret)
             print(f"DEBUG: 2FA Setup Failure | Expected: {current_otp} | Received: {otp} | Secret: {secret[:4]}... | Time: {time.time()}")
             flash("Invalid Code. Please ensure your device time matches the server time.", "error")
 
     # GET Request
     if "pending_2fa_secret" not in session or request.args.get("reset") == "1":
-        session["pending_2fa_secret"] = pyotp.random_base32()
+        session["pending_2fa_secret"] = TwoFactorService.generate_secret()
     
     secret = session["pending_2fa_secret"]
-    # Improved provisioning URI format for better app compatibility
-    totp_uri = pyotp.TOTP(secret).provisioning_uri(
-        name=f"Admin:{pre_admin}", 
-        issuer_name="CareerConnect"
-    )
-    
-    # Generate QR Code image in memory
-    qr = qrcode.make(totp_uri)
-    buf = BytesIO()
-    qr.save(buf, format="PNG")
-    qr_b64 = base64.b64encode(buf.getvalue()).decode("utf-8")
+    totp_uri = TwoFactorService.get_provisioning_uri(secret, pre_admin)
+    qr_b64 = TwoFactorService.generate_qr_code_base64(totp_uri)
 
     # Get current server time for display
     from datetime import datetime
@@ -521,12 +572,8 @@ def admin_2fa_verify():
 
     if request.method == "POST":
         otp = request.form.get("otp", "").replace(" ", "").strip()
-        totp = pyotp.TOTP(str(secret).strip())
         
-        # Verify OTP (valid_window=1 allows +/- 30s drift)
-        is_valid = totp.verify(otp, valid_window=1)
-        
-        if is_valid or otp == "000000":
+        if TwoFactorService.verify_otp(secret, otp):
             # Complete login
             session.pop("pre_2fa_admin", None)
             session["username"] = pre_admin
@@ -534,7 +581,7 @@ def admin_2fa_verify():
             flash("Login Successful. Welcome Admin!", "success")
             return redirect(url_for("admin.dashboard"))
         else:
-            current_otp = totp.now()
+            current_otp = TwoFactorService.get_current_otp(secret)
             print(f"DEBUG: 2FA Verify Failure | Expected: {current_otp} | Received: {otp} | Secret: {secret[:4]}... | Time: {time.time()}")
             flash("Invalid Code.", "error")
 
