@@ -79,3 +79,11 @@
 1. **Environment**: Install dependencies from `requirements.txt` (including `flask`, `python-dotenv`, `requests`, etc.).
 2. **Configuration**: Set up `.env` with `SECRET_KEY`, `MAIL_SERVER`, `MAIL_USERNAME`, and `MAIL_PASSWORD`.
 3. **Initialization**: Run `app.py`; the database and default templates will initialize automatically via `database.py`.
+
+---
+
+## 7. Testing & Quality Assurance
+The platform undergoes systematic functional, security, and integration testing. A comprehensive testing suite including detailed steps, inputs, pre-conditions, and SQL database assertions has been compiled for QA review:
+- Refer to the dedicated [Test Case Specification Document (TEST_CASES.md)](file:///c:/D/CareerConnect/TEST_CASES.md) in the project root directory.
+- This includes verification protocols for all security modules (Password boundary checks, Admin 2FA Setup, OAuth linking), automated job crawlers, AI resume matching engine, aptitude evaluator, and real-time screen-time tracking analytics.
+

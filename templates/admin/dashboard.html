@@ -233,7 +233,7 @@
                                         </form>
                                         <form
                                             action="{{ url_for('admin.delete_entire_company', company_name=company['company_name']) }}"
-                                            method="POST" onsubmit="return confirm('Delete all data for {{ company['company_name'] }}?')">
+                                            method="POST" onsubmit="return confirm('Delete all data for {{ company.company_name }}?')">
                                             <button type="submit" class="cc-btn cc-btn-secondary"
                                                 style="padding: 0.4rem; color: #ef4444;" title="Delete Company">
                                                 <i class="fas fa-trash"></i>

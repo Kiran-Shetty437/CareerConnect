@@ -336,3 +336,4 @@ def sync_all_companies():
     conn.close()
     
     return total_sync
+

@@ -22,7 +22,7 @@ class TwoFactorService:
         """Generates a Base64 encoded QR code image from a URI."""
         qr = qrcode.make(uri)
         buf = BytesIO()
-        qr.save(buf, format="PNG")
+        qr.save(buf)
         return base64.b64encode(buf.getvalue()).decode("utf-8")
 
     @staticmethod
